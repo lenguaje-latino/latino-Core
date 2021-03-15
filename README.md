@@ -6,3 +6,7 @@ Este núcleo contiene todos los archivos que definen la sintaxis de Latino, sus 
 
 ## Para mayor documentación, y para reportar errores
 Mire la siguientes section en [lenguaje-latino/latino](https://github.com/lenguaje-latino/latino).
+
+## Licencia
+Licenciado bajo la licencia [MIT](https://github.com/lenguaje-latino/latino-core/blob/main/LICENSE)<br/>
+Cualquier aportación o sugerencia es bienvenida.
