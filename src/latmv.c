@@ -284,7 +284,7 @@ static void no_logico(lat_mv *mv) {
 
 static lat_objeto *obtener_contexto(lat_mv *mv) { return mv->contexto_actual; }
 
-static lat_objeto *obtener_contexto_global(lat_mv *mv) {
+lat_objeto *obtener_contexto_global(lat_mv *mv) {
     return mv->contexto[0];
 }
 
@@ -366,6 +366,7 @@ LATINO_API lat_mv *latC_crear_mv() {
     mv->numejec = 0;
     memset(mv->contexto, 0, 256);
     mv->contexto[0] = latO_contexto_crear(mv);
+    mv->label_ctx = latO_contexto_crear(mv);
     mv->contexto[0]->marca = 0;
     mv->ptrctx = 0;
     mv->contexto_actual = mv->contexto[mv->ptrctx];
@@ -556,7 +557,7 @@ lat_bytecode latMV_bytecode_crear(int i, int a, int b, void *meta,
     return ret;
 }
 
-static lat_objeto *latMV_get_symbol(lat_mv *mv, lat_objeto *name) {
+lat_objeto *latMV_get_symbol(lat_mv *mv, lat_objeto *name) {
     lat_objeto *ctx = obtener_contexto(mv);
     lat_objeto *val = (lat_objeto *)latO_obtener_contexto(
         mv, ctx, latC_checar_cadena(mv, name));
@@ -574,7 +575,18 @@ static lat_objeto *latMV_get_symbol(lat_mv *mv, lat_objeto *name) {
     return val;
 }
 
-static void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
+lat_objeto* latMV_get_label(lat_mv* mv, lat_objeto* name) {
+  lat_objeto* ctx = mv->label_ctx;
+  lat_objeto* val = (lat_objeto*)latO_obtener_contexto(
+    mv, ctx, latC_checar_cadena(mv, name));
+  if (val == NULL) {
+    latC_error(mv, "Etiqueta '%s' indefinida",
+      latC_checar_cadena(mv, name));
+  }
+  return val;
+}
+
+void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
     char * str_name = latC_checar_cadena(mv, name);
     // printf("latMV_set_symbol.str_name: %s\n", str_name);
     // printf("latMV_set_symbol.val:");
@@ -591,6 +603,12 @@ static void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
         }
     }
     latO_asignar_ctx(mv, ctx, str_name, val);
+}
+
+void latMV_set_label(lat_mv* mv, lat_objeto* name, lat_objeto* val) {
+  char* str_name = latC_checar_cadena(mv, name);
+  lat_objeto* ctx = mv->label_ctx;
+  latO_asignar_ctx(mv, ctx, str_name, val);
 }
 
 static void latMV_call_function(lat_mv *mv, lat_objeto *func, lat_bytecode cur,
@@ -1045,7 +1063,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                 case STORE_LABEL: {
                     lat_objeto *name = (lat_objeto *)cur.meta;
                     lat_objeto *val = latO_clonar(mv, name);
-                    latMV_set_symbol(mv, name, val);
+                    latMV_set_label(mv, name, val);
 #if DEPURAR_MV
                     latO_imprimir(mv, name, false);
                     printf("\t");
@@ -1094,12 +1112,12 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                     latO_imprimir(mv, name, false);
                     printf("\t");
 #endif
-                    lat_objeto *val = latMV_get_symbol(mv, name);
-                    if(val->tipo != T_LABEL) {
-                        char *nombre = latC_checar_cadena(mv, name);
-                        latC_error(mv, "El identificador '%s' no es un tipo etiqueta", nombre);
-                    }
-                    pc = val->jump_label;  // saltamos hacia la instruccion de la etiqueta
+                    lat_objeto *val = latMV_get_label(mv, name);
+                    //if(val->tipo != T_LABEL) {
+                    //    char *nombre = latC_checar_cadena(mv, name);
+                    //    latC_error(mv, "El identificador '%s' no es un tipo etiqueta", nombre);
+                    //}
+                    pc = val->jump_label-1;  // saltamos hacia la instruccion de la etiqueta
                 } break;
                 case CALL_FUNCTION: {
 #if DEPURAR_MV
