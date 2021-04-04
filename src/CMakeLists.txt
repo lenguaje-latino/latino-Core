@@ -65,8 +65,8 @@ add_subdirectory(linenoise)
 
 if(WIN32)
     message(STATUS "CURRENT PATH WIN32.......... ${CMAKE_CURRENT_SOURCE_DIR}")
-    include_directories(regex-2.7-src/src)
-    add_subdirectory(regex-2.7-src)
+    include_directories(latino-regex/src)
+    add_subdirectory(latino-regex)
 endif()
 
 include_directories(linenoise)
@@ -86,11 +86,18 @@ add_executable(latino ${SRC_LATINO} ${SRC_LIB})
 target_link_libraries(latino LINK_PUBLIC ${CMAKE_DL_LIBS})
 
 if(MSVC)
+    SET ( CMAKE_SHARED_LINKER_FLAGS /MANIFEST:NO )
+
     message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
-    link_directories("${CMAKE_CURRENT_BINARY_DIR}/regex-2.7-src/src/${CMAKE_BUILD_TYPE}")
+    link_directories("${CMAKE_CURRENT_BINARY_DIR}/../latino-regex/src/${CMAKE_BUILD_TYPE}")
     target_link_libraries(latino regex2)
     link_libraries(regex2)
     set(LATINO_DEF latino.def)
+
+    add_custom_command(TARGET latino POST_BUILD COMMAND
+        "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\latino_os_version.manifest\"
+        -outputresource:\"${CMAKE_CURRENT_BINARY_DIR}\\${CMAKE_BUILD_TYPE}\\latino.dll\"\;\#2
+        COMMENT "Adding custom manifest containing MSVCRT80 dependency...")
 endif(MSVC)
 
 # Create dynamic library

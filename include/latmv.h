@@ -136,6 +136,7 @@ typedef struct lat_mv {
     lat_objeto *actfun;
     lat_objeto *contexto[256];
     lat_objeto *contexto_actual;
+    lat_objeto *label_ctx;
     int ptrctx;
     int ptrpila;
     int ptrprevio;

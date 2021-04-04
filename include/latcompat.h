@@ -33,6 +33,7 @@ THE SOFTWARE.
 #define LAT_FUNC extern
 #include <limits.h>
 #include <windows.h>
+#include <winnt.h>
 // #include <WinInet.h>
 
 #include "regex.h"
@@ -123,15 +124,15 @@ THE SOFTWARE.
 #endif
 
 #include <time.h>
-#define TIME_THIS(X)                                                           \
-    {                                                                          \
-        struct timespec ts1, ts2;                                              \
-        clock_gettime(CLOCK_REALTIME, &ts1);                                   \
-        X;                                                                     \
-        clock_gettime(CLOCK_REALTIME, &ts2);                                   \
-        printf(#X " demora: %f\n",                                             \
-               (float)(1.0 * (1.0 * ts2.tv_nsec - ts1.tv_nsec * 1.0) * 1e-9 +  \
-                       1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec));                  \
+#define TIME_THIS(X)                                                          \
+    {                                                                         \
+        struct timespec ts1, ts2;                                             \
+        clock_gettime(CLOCK_REALTIME, &ts1);                                  \
+        X;                                                                    \
+        clock_gettime(CLOCK_REALTIME, &ts2);                                  \
+        printf(#X " demora: %f\n",                                            \
+               (float)(1.0 * (1.0 * ts2.tv_nsec - ts1.tv_nsec * 1.0) * 1e-9 + \
+                       1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec));                 \
     }
 
 #endif /*_LATINO_COMPAT_H_*/

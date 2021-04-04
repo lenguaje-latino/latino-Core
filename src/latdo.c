@@ -234,6 +234,9 @@ static bool encontrar_continuar(ast *nodo) {
     return rep;
 }
 
+void latMV_set_symbol(lat_mv* mv, lat_objeto* name, lat_objeto* val);
+lat_objeto* obtener_contexto_global(lat_mv* mv);
+
 // analiza los nodos para crear el bytecode
 static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
     int temp[4] = {0};
@@ -438,6 +441,9 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
         } break;
         case NODO_SI: {
             nodo_si *nIf = ((nodo_si *)nodo);
+            if (nIf->entonces->izq->tipo == NODO_ASIGNACION && nIf->entonces->izq->der == NULL) {
+              latC_error(mv, "Se esta haciendo una asignacion '=', en lugar de una comparacion '=='");
+            }
             pn(mv, nIf->cond);
             temp[0] = i;
             dbc(NOP, 0, 0, NULL, 0, 0, mv->nombre_archivo);
@@ -550,7 +556,16 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             o->nombre = nodo->izq->valor->val.cadena;
             o->tipo = T_LABEL;
             o->jump_label = i; // hacia qué instruccion vamos a saltar
-            dbc(STORE_LABEL, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
+            // dbc(STORE_LABEL, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
+            lat_objeto* val = latO_clonar(mv, o);
+            //latMV_set_symbol(mv, o, val);
+            lat_objeto* ctx = mv->label_ctx;
+            char* str_name = latC_checar_cadena(mv, o);
+            lat_objeto* oldVal = (lat_objeto*)latO_obtener_contexto(mv, ctx, str_name);
+            if (oldVal != NULL && oldVal->tipo == T_LABEL) {
+              latC_error(mv, "La etiqueta '%s' ya existe!", str_name);
+            }
+            latO_asignar_ctx(mv, ctx, str_name, val);
         } break;
         case NODO_IR: {
             // if (si no encuentra etiqueta) {}

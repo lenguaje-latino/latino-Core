@@ -38,7 +38,7 @@ THE SOFTWARE.
 #define LIB_SISTEMA_NAME "sis"
 
 struct OS_VERSION_LAT { // estructura variable OS.Major, OS.Minor, OS.Build
-    char osMayor, osMenor, osBuild;
+    unsigned long osMayor, osMenor, osBuild;
 };
 
 typedef struct OS_VERSION_LAT Struct;
@@ -57,6 +57,7 @@ Struct buscar_os_version() { // Busca y asigna el valor del Build del sistema op
         os_v.osMayor = osvi.dwMajorVersion;
         os_v.osMenor = osvi.dwMinorVersion;
         os_v.osBuild = osvi.dwBuildNumber;
+
     #elif __APPLE__
         char cmd[64];
         for (int i=0; i<=3; i++){
@@ -127,8 +128,8 @@ static void latSO_pipe(lat_mv *mv) {
     if (fp == NULL) {
         latC_error(mv, "Error! No se encontro el archivo");
     }
-    char *p = malloc(MAX_BUFFERSIZE);
-    fread(p, sizeof(char), MAX_BUFFERSIZE, fp);
+    char *p = latM_asignar(mv, MAX_STR_LENGTH);
+    fread(p, sizeof(char), MAX_STR_LENGTH, fp);
     int rlen = strlen(p);
     p[rlen - 1] = '\0'; // elimina el ultimo '\n'
     lat_objeto *tmp = latC_crear_cadena(mv, p);
@@ -263,7 +264,7 @@ static void latSO_operativo(lat_mv *mv) {
 }
 
 void latOS_veriones(lat_mv *mv, int i) {
-    char n;
+    unsigned long n;
     Struct os_version;
     os_version = buscar_os_version();
     switch (i) {
@@ -271,10 +272,7 @@ void latOS_veriones(lat_mv *mv, int i) {
         case 2: n = os_version.osMenor; break;
         case 3: n = os_version.osBuild; break;
     }
-    lat_objeto *tmp = latC_checar_cadena(mv, n);
-    // tmp->tam += sizeof(char);
-    // setCadena(tmp, n);
-    // setNumerico(tmp, n);
+    lat_objeto* tmp = latC_crear_numerico(mv, n);
     latC_apilar(mv, tmp);
 }
 
