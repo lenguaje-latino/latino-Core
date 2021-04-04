@@ -94,10 +94,10 @@ if(MSVC)
     link_libraries(regex2)
     set(LATINO_DEF latino.def)
 
-    add_custom_command(TARGET latino POST_BUILD COMMAND
-        "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\latino_os_version.manifest\"
-        -outputresource:\"${CMAKE_CURRENT_BINARY_DIR}\\${CMAKE_BUILD_TYPE}\\latino.dll\"\;\#2
-        COMMENT "Adding custom manifest containing MSVCRT80 dependency...")
+    # add_custom_command(TARGET latino POST_BUILD COMMAND
+    #     "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\latino_os_version.manifest\"
+    #     -outputresource:\"${CMAKE_CURRENT_BINARY_DIR}\\${CMAKE_BUILD_TYPE}\\latino.dll\"\;\#2
+    #     COMMENT "Adding custom manifest containing MSVCRT80 dependency...")
 endif(MSVC)
 
 # Create dynamic library
