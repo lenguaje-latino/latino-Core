@@ -83,13 +83,12 @@ linenoise/utf8.c linenoise/linenoise.c)
 
 set(SRC_LATINO ${SRC_LIB})
 
-if(WIN32)
-    if(MSVC)
-        add_executable(latino ${SRC_LATINO} ${SRC_LIB} ${VS_RESOURCES})
-    endif(MSVC)
+if(MSVC)
+    add_executable(latino ${SRC_LATINO} ${SRC_LIB} ${VS_RESOURCES})
 else()
     add_executable(latino ${SRC_LATINO} ${SRC_LIB})
-endif(WIN32)
+endif(MSVC)
+
 target_link_libraries(latino LINK_PUBLIC ${CMAKE_DL_LIBS})
 
 if(MSVC)
