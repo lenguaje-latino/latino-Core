@@ -67,7 +67,7 @@ if(WIN32)
     message(STATUS "CURRENT PATH WIN32.......... ${CMAKE_CURRENT_SOURCE_DIR}")
     include_directories(latino-regex/src)
     add_subdirectory(latino-regex)
-    set(VS_RESOURCES vs_resources/latino.rc vs_resources/latino.aps vs_resources/resource.h ../logo/latino.ico)
+    set(VS_RESOURCES vs_resources/latino.rc vs_resources/latino.aps vs_resources/resource.h ../logo/icon_build.ico)
 endif()
 
 include_directories(linenoise)
