@@ -67,6 +67,7 @@ if(WIN32)
     message(STATUS "CURRENT PATH WIN32.......... ${CMAKE_CURRENT_SOURCE_DIR}")
     include_directories(latino-regex/src)
     add_subdirectory(latino-regex)
+    set(VS_RESOURCES vs_resources/latino.rc vs_resources/latino.aps vs_resources/resource.h ../logo/latino.ico)
 endif()
 
 include_directories(linenoise)
@@ -82,7 +83,13 @@ linenoise/utf8.c linenoise/linenoise.c)
 
 set(SRC_LATINO ${SRC_LIB})
 
-add_executable(latino ${SRC_LATINO} ${SRC_LIB})
+if(WIN32)
+    if(MSVC)
+        add_executable(latino ${SRC_LATINO} ${SRC_LIB} ${VS_RESOURCES})
+    endif(MSVC)
+else()
+    add_executable(latino ${SRC_LATINO} ${SRC_LIB})
+endif(WIN32)
 target_link_libraries(latino LINK_PUBLIC ${CMAKE_DL_LIBS})
 
 if(MSVC)
