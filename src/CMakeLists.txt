@@ -17,6 +17,10 @@ set(INSTALL_INCLUDE                         ${CMAKE_INSTALL_PREFIX}/include )
 set(INSTALL_LIB                             ${CMAKE_INSTALL_PREFIX}/lib     )
 set(INSTALL_SHARE                           ${CMAKE_INSTALL_PREFIX}/share   )
 
+# Set the output folder where your program will be created
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 #
 # Sistemas Operativos

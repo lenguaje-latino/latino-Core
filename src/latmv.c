@@ -602,6 +602,15 @@ void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
                        str_name);
         }
     }
+    ctx = obtener_contexto_global(mv);
+    lat_objeto *oldVal = (lat_objeto *)latO_obtener_contexto(
+        mv, ctx, latC_checar_cadena(mv, name));
+    if (oldVal != NULL) {
+        if (oldVal->tipo == T_CFUN || oldVal->tipo == T_FUN) {
+            latC_error(mv, "Intento de reasignar valor a la funcion '%s'",
+                       str_name);
+        }
+    }
     latO_asignar_ctx(mv, ctx, str_name, val);
 }
 
