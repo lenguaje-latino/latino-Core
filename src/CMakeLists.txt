@@ -147,6 +147,7 @@ if(UNIX)
     install(FILES       ../include/latmv.h              DESTINATION     ${INSTALL_INCLUDE} COMPONENT Header )
     install(FILES       ../include/latparse.h           DESTINATION     ${INSTALL_INCLUDE} COMPONENT Header )
     install(FILES       ../include/latrepl.h            DESTINATION     ${INSTALL_INCLUDE} COMPONENT Header )
+    install(FILES       ../include/latobj.h             DESTINATION     ${INSTALL_INCLUDE} COMPONENT Header )
 #else()
 #https://stackoverflow.com/questions/13556885/how-to-change-the-executable-output-directory-for-win32-builds-in-cmake
 #  add_custom_command(target latino
