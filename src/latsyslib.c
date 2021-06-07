@@ -43,55 +43,58 @@ struct OS_VERSION_LAT { // estructura variable OS.Major, OS.Minor, OS.Build
 
 typedef struct OS_VERSION_LAT Struct;
 
-Struct buscar_os_version() { // Busca y asigna el valor del Build del sistema operativo
+Struct
+buscar_os_version() { // Busca y asigna el valor del Build del sistema operativo
     Struct os_v;
 
-    #ifdef WIN32
-        OSVERSIONINFO osvi;
+#ifdef WIN32
+    OSVERSIONINFO osvi;
 
-        ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
-        osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 
-        GetVersionEx(&osvi);
+    GetVersionEx(&osvi);
 
-        os_v.osMayor = osvi.dwMajorVersion;
-        os_v.osMenor = osvi.dwMinorVersion;
-        os_v.osBuild = osvi.dwBuildNumber;
+    os_v.osMayor = osvi.dwMajorVersion;
+    os_v.osMenor = osvi.dwMinorVersion;
+    os_v.osBuild = osvi.dwBuildNumber;
 
-    #elif __APPLE__
-        char cmd[64];
-        for (int i=0; i<=3; i++){
-            sprintf(cmd, "sw_vers -productVersion | awk -F '.' '{print $%d}'", i);
+#elif __APPLE__
+    char cmd[64];
+    for (int i = 0; i <= 3; i++) {
+        sprintf(cmd, "sw_vers -productVersion | awk -F '.' '{print $%d}'", i);
 
-            FILE* stdoutFile = popen(cmd, "r");
+        FILE *stdoutFile = popen(cmd, "r");
 
-            int resp = 0;
-            if (stdoutFile) {
-                char buff[16];
-                char *stdout = fgets(buff, sizeof(buff), stdoutFile);
-                pclose(stdoutFile);
-                sscanf(stdout, "%d", &resp);
-            }
-            switch(i) {
-                case 1:
-                    os_v.osMayor = resp;
-                case 2:
-                    os_v.osMenor = resp;
-                case 3:
-                    os_v.osBuild = resp;
-                    break;
-            }
+        int resp = 0;
+        if (stdoutFile) {
+            char buff[16];
+            char *stdout = fgets(buff, sizeof(buff), stdoutFile);
+            pclose(stdoutFile);
+            sscanf(stdout, "%d", &resp);
         }
-    #else
-        struct utsname buffer;
-
-        if (uname(&buffer) < 0) {
-            perror("Failed to uname");
+        switch (i) {
+            case 1:
+                os_v.osMayor = resp;
+            case 2:
+                os_v.osMenor = resp;
+            case 3:
+                os_v.osBuild = resp;
+                break;
         }
-        // os_v.osMayor = (int)strtol(buffer.version, (char **)NULL, 10);
-        // os_v.osMayor = atoi(buffer.version);
-        os_v.osMayor = buffer.release;
-    #endif
+    }
+#elif __CYGWIN__
+    // TODO: Implementar para MSYS2
+#else
+    struct utsname buffer;
+
+    if (uname(&buffer) < 0) {
+        perror("Failed to uname");
+    }
+    // os_v.osMayor = (int)strtol(buffer.version, (char **)NULL, 10);
+    // os_v.osMayor = atoi(buffer.version);
+    os_v.osMayor = buffer.release;
+#endif
 
     return os_v;
 }
@@ -268,11 +271,17 @@ void latOS_veriones(lat_mv *mv, int i) {
     Struct os_version;
     os_version = buscar_os_version();
     switch (i) {
-        case 1: n = os_version.osMayor; break;
-        case 2: n = os_version.osMenor; break;
-        case 3: n = os_version.osBuild; break;
+        case 1:
+            n = os_version.osMayor;
+            break;
+        case 2:
+            n = os_version.osMenor;
+            break;
+        case 3:
+            n = os_version.osBuild;
+            break;
     }
-    lat_objeto* tmp = latC_crear_numerico(mv, n);
+    lat_objeto *tmp = latC_crear_numerico(mv, n);
     latC_apilar(mv, tmp);
 }
 
