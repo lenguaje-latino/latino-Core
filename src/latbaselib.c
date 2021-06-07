@@ -166,13 +166,17 @@ static void base_incluir(lat_mv *mv) {
     // buscamos libreria dinamica
     char libpath[MAX_PATH_LENGTH] = {0};
     char funcname[MAX_ID_LENGTH] = {0};
-#ifdef _WIN32
+#if defined(_WIN32)
     strcat(libpath, "latino-");
+#elif defined(__MSYS__)
+    strcat(libpath, "msys-latino-");
 #else
     strcat(libpath, "liblatino-");
 #endif
+
     strcat(libpath, libname);
-#ifdef _WIN32
+
+#if defined(_WIN32) || defined(__MSYS__)
     strcat(libpath, ".dll");
 #elif __APPLE__
     strcat(libpath, ".dylib");
@@ -182,6 +186,7 @@ static void base_incluir(lat_mv *mv) {
     strcat(funcname, "latC_abrir_liblatino_");
     strcat(funcname, libname);
     int stat = latC_cargarlib(mv, libpath, funcname);
+    // int stat = latC_cargarlib(mv, "msys-latino-gtk.dll", funcname);
     if (stat != 0) {
         latC_error(mv, "Error al cargar libreria dinamica '%s'", libpath);
     }

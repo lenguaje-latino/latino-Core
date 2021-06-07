@@ -80,11 +80,11 @@ THE SOFTWARE.
 
 #ifdef __linux__
 #define SISTEMAOPERATIVO "LINUX"
-#include <sys/utsname.h>
 #include <dlfcn.h>
 #include <readline/history.h>
 #include <readline/readline.h>
 #include <regex.h>
+#include <sys/utsname.h>
 #include <time.h>
 #include <unistd.h>
 #define PATH_SEP "/"
@@ -99,6 +99,8 @@ THE SOFTWARE.
 #endif /* __linux__ */
 
 #ifdef __CYGWIN__
+#define SISTEMAOPERATIVO "CYGWIN"
+// #define LATINO_BUILD_AS_DLL
 #include <dlfcn.h>
 #include <regex.h>
 #include <time.h>
@@ -124,15 +126,15 @@ THE SOFTWARE.
 #endif
 
 #include <time.h>
-#define TIME_THIS(X)                                                          \
-    {                                                                         \
-        struct timespec ts1, ts2;                                             \
-        clock_gettime(CLOCK_REALTIME, &ts1);                                  \
-        X;                                                                    \
-        clock_gettime(CLOCK_REALTIME, &ts2);                                  \
-        printf(#X " demora: %f\n",                                            \
-               (float)(1.0 * (1.0 * ts2.tv_nsec - ts1.tv_nsec * 1.0) * 1e-9 + \
-                       1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec));                 \
+#define TIME_THIS(X)                                                           \
+    {                                                                          \
+        struct timespec ts1, ts2;                                              \
+        clock_gettime(CLOCK_REALTIME, &ts1);                                   \
+        X;                                                                     \
+        clock_gettime(CLOCK_REALTIME, &ts2);                                   \
+        printf(#X " demora: %f\n",                                             \
+               (float)(1.0 * (1.0 * ts2.tv_nsec - ts1.tv_nsec * 1.0) * 1e-9 +  \
+                       1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec));                  \
     }
 
 #endif /*_LATINO_COMPAT_H_*/
