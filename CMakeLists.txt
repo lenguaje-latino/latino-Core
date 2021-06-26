@@ -17,7 +17,7 @@ project(latino)
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build [Debug]" FORCE) # Default to a Debug build
 endif()
-set(CMAKE_BUILD_TYPE "Debug")
+# set(CMAKE_BUILD_TYPE "Release")
 
 # if(CMAKE_COMPILER_IS_GNUCXX)
 #     target_link_libraries(${PROJECT_TEST_NAME} gcov)

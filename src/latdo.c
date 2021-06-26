@@ -51,20 +51,27 @@ static bool jumpLoop_buscar_NODO_SI(ast *nodo, int NODO_JUMP);
 
 static ast *transformar_caso_casos(ast *cond_izq, ast *izq) {
     if (izq->tipo == NODO_VALOR) {
-        ast *igualdad_izq = latA_nodo(NODO_IGUALDAD, cond_izq, izq, cond_izq->nlin, cond_izq->ncol);
+        ast *igualdad_izq = latA_nodo(NODO_IGUALDAD, cond_izq, izq,
+                                      cond_izq->nlin, cond_izq->ncol);
         return igualdad_izq;
     }
     if (izq->der->tipo == NODO_VALOR) {
         // esto detiene la recursividad
-        ast *igualdad_izq = latA_nodo(NODO_IGUALDAD, cond_izq, izq->izq, cond_izq->nlin, cond_izq->ncol);
-        ast *igualdad_der = latA_nodo(NODO_IGUALDAD, cond_izq, izq->der, cond_izq->nlin, cond_izq->ncol);
-        return  latA_nodo(NODO_O, igualdad_izq, igualdad_der, cond_izq->nlin, cond_izq->ncol);
+        ast *igualdad_izq = latA_nodo(NODO_IGUALDAD, cond_izq, izq->izq,
+                                      cond_izq->nlin, cond_izq->ncol);
+        ast *igualdad_der = latA_nodo(NODO_IGUALDAD, cond_izq, izq->der,
+                                      cond_izq->nlin, cond_izq->ncol);
+        return latA_nodo(NODO_O, igualdad_izq, igualdad_der, cond_izq->nlin,
+                         cond_izq->ncol);
     }
     if (izq->tipo == NODO_CASOS) {
         // recursion
         // izq->der->tipo == NODO_CASOS
-        ast *primera_igualdad = latA_nodo(NODO_IGUALDAD, cond_izq, izq->izq, cond_izq->nlin, cond_izq->ncol);
-        ast *cond = latA_nodo(NODO_O, primera_igualdad, transformar_caso_casos(cond_izq, izq->der), cond_izq->nlin, cond_izq->ncol);
+        ast *primera_igualdad = latA_nodo(NODO_IGUALDAD, cond_izq, izq->izq,
+                                          cond_izq->nlin, cond_izq->ncol);
+        ast *cond = latA_nodo(NODO_O, primera_igualdad,
+                              transformar_caso_casos(cond_izq, izq->der),
+                              cond_izq->nlin, cond_izq->ncol);
         return cond;
     }
 }
@@ -73,8 +80,8 @@ static ast *transformar_casos(ast *casos, ast *cond_izq) {
     if (casos == NULL) {
         return NULL;
     }
-    ast *caso_izq = casos->izq;     // caso
-    ast *caso_der = casos->der;     // casos
+    ast *caso_izq = casos->izq; // caso
+    ast *caso_der = casos->der; // casos
     ast *cond = NULL;
 
     if (caso_izq->tipo == NODO_CASO) {
@@ -82,18 +89,28 @@ static ast *transformar_casos(ast *casos, ast *cond_izq) {
             // evalua multicasos
             ast *tmp = caso_izq->izq;
             ast *cond = NULL;
-            ast *primera_igualdad = latA_nodo(NODO_IGUALDAD, cond_izq, caso_izq->izq->izq, cond_izq->nlin, cond_izq->ncol);
-            cond = latA_nodo(NODO_O, primera_igualdad, transformar_caso_casos(cond_izq, caso_izq->izq->der), cond_izq->nlin, cond_izq->ncol);
-            ast *nSi = latA_si(cond, caso_izq->der, ((ast *)transformar_casos(casos->der, cond_izq)));
+            ast *primera_igualdad =
+                latA_nodo(NODO_IGUALDAD, cond_izq, caso_izq->izq->izq,
+                          cond_izq->nlin, cond_izq->ncol);
+            cond =
+                latA_nodo(NODO_O, primera_igualdad,
+                          transformar_caso_casos(cond_izq, caso_izq->izq->der),
+                          cond_izq->nlin, cond_izq->ncol);
+            ast *nSi =
+                latA_si(cond, caso_izq->der,
+                        ((ast *)transformar_casos(casos->der, cond_izq)));
             return nSi;
         }
         // un solo caso
-        cond = latA_nodo(NODO_IGUALDAD, cond_izq, caso_izq->izq, cond_izq->nlin, cond_izq->ncol);
+        cond = latA_nodo(NODO_IGUALDAD, cond_izq, caso_izq->izq, cond_izq->nlin,
+                         cond_izq->ncol);
     }
     if (caso_izq->tipo == NODO_DEFECTO) {
-        cond = latA_nodo(NODO_IGUALDAD, cond_izq, cond_izq, cond_izq->nlin, cond_izq->ncol);
+        cond = latA_nodo(NODO_IGUALDAD, cond_izq, cond_izq, cond_izq->nlin,
+                         cond_izq->ncol);
     }
-    ast *nSi = latA_si(cond, caso_izq->der, ((ast *)transformar_casos(casos->der, cond_izq)));
+    ast *nSi = latA_si(cond, caso_izq->der,
+                       ((ast *)transformar_casos(casos->der, cond_izq)));
     return nSi;
 }
 
@@ -170,27 +187,38 @@ static int encontrar_load_vararg(ast *nodo) {
 
 static bool jumpLoop_buscar_NODO_SI(ast *nodo, int NODO_JUMP) {
     ast *tmp = nodo;
-    if(tmp == NULL) {
+    if (tmp == NULL) {
         return false;
     }
     while (tmp != NULL && tmp->izq != NULL) {
         if (tmp->izq->tipo == NODO_SI) {
             nodo_si *nIf = ((nodo_si *)tmp->izq->der);
-            if(nIf->entonces->tipo == NODO_BLOQUE) {
-                if (nIf->entonces->izq->tipo == NODO_JUMP) { return true; }
-                if (nIf->entonces->der != NULL && nIf->entonces->der->tipo == NODO_JUMP) { return true; }
+            if (nIf->entonces->tipo == NODO_BLOQUE) {
+                if (nIf->entonces->izq->tipo == NODO_JUMP) {
+                    return true;
+                }
+                if (nIf->entonces->der != NULL &&
+                    nIf->entonces->der->tipo == NODO_JUMP) {
+                    return true;
+                }
             }
-            if(nIf->_sino && nIf->_sino->tipo == NODO_BLOQUE) {
-                if (nIf->_sino->izq->tipo == NODO_JUMP) { return true; }
-                if (nIf->_sino->der->tipo == NODO_JUMP) { return true; }
+            if (nIf->_sino && nIf->_sino->tipo == NODO_BLOQUE) {
+                if (nIf->_sino->izq->tipo == NODO_JUMP) {
+                    return true;
+                }
+                if (nIf->_sino->der->tipo == NODO_JUMP) {
+                    return true;
+                }
             }
         } else {
             if (NODO_JUMP == NODO_ROMPER) {
                 bool found = encontrar_romper(tmp->izq);
-                if(found) return found;
+                if (found)
+                    return found;
             } else {
                 bool found = encontrar_continuar(tmp->izq);
-                if(found) return found;
+                if (found)
+                    return found;
             }
         }
         tmp = tmp->der;
@@ -203,12 +231,23 @@ static bool encontrar_romper(ast *nodo) {
     bool rep = false;
     if (nodo) {
         ast *tmp = nodo;
-        if (tmp->izq->tipo == NODO_ROMPER) { rep = true; return rep; }
+        if (tmp->izq->tipo == NODO_ROMPER) {
+            rep = true;
+            return rep;
+        }
         while (tmp->izq != NULL) {
-            if (tmp->izq->tipo == NODO_ROMPER)  { rep = true; return rep; }
-            if (tmp->izq->tipo == NODO_SI)      { rep = jumpLoop_buscar_NODO_SI(tmp->izq, NODO_ROMPER); if (rep) { return rep; } };
-            if(tmp->der == NULL) {
-                break; 
+            if (tmp->izq->tipo == NODO_ROMPER) {
+                rep = true;
+                return rep;
+            }
+            if (tmp->izq->tipo == NODO_SI) {
+                rep = jumpLoop_buscar_NODO_SI(tmp->izq, NODO_ROMPER);
+                if (rep) {
+                    return rep;
+                }
+            };
+            if (tmp->der == NULL) {
+                break;
             }
             tmp = tmp->der;
         }
@@ -221,12 +260,23 @@ static bool encontrar_continuar(ast *nodo) {
     bool rep = false;
     if (nodo) {
         ast *tmp = nodo;
-        if (tmp->izq->tipo == NODO_CONTINUAR) { rep = true; return rep; }
+        if (tmp->izq->tipo == NODO_CONTINUAR) {
+            rep = true;
+            return rep;
+        }
         while (tmp->izq != NULL) {
-            if (tmp->izq->tipo == NODO_CONTINUAR)   { rep = true; return rep; }
-            if (tmp->izq->tipo == NODO_SI)          { rep = jumpLoop_buscar_NODO_SI(tmp->izq, NODO_CONTINUAR); if (rep) { return rep; } };
-            if(tmp->der == NULL) {
-                break; 
+            if (tmp->izq->tipo == NODO_CONTINUAR) {
+                rep = true;
+                return rep;
+            }
+            if (tmp->izq->tipo == NODO_SI) {
+                rep = jumpLoop_buscar_NODO_SI(tmp->izq, NODO_CONTINUAR);
+                if (rep) {
+                    return rep;
+                }
+            };
+            if (tmp->der == NULL) {
+                break;
             }
             tmp = tmp->der;
         }
@@ -234,8 +284,8 @@ static bool encontrar_continuar(ast *nodo) {
     return rep;
 }
 
-void latMV_set_symbol(lat_mv* mv, lat_objeto* name, lat_objeto* val);
-lat_objeto* obtener_contexto_global(lat_mv* mv);
+void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val);
+lat_objeto *obtener_contexto_global(lat_mv *mv);
 
 // analiza los nodos para crear el bytecode
 static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
@@ -441,8 +491,10 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
         } break;
         case NODO_SI: {
             nodo_si *nIf = ((nodo_si *)nodo);
-            if (nIf->entonces->izq->tipo == NODO_ASIGNACION && nIf->entonces->izq->der == NULL) {
-              latC_error(mv, "Se esta haciendo una asignacion '=', en lugar de una comparacion '=='");
+            if (nIf->entonces->izq->tipo == NODO_ASIGNACION &&
+                nIf->entonces->izq->der == NULL) {
+                latC_error(mv, "Se esta haciendo una asignacion '=', en lugar "
+                               "de una comparacion '=='");
             }
             pn(mv, nIf->cond);
             temp[0] = i;
@@ -470,23 +522,25 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
         case NODO_MIENTRAS: {
             mv->enBucle++;
             temp[0] = i;
-            pn(mv, nodo->izq);  // condicion
+            pn(mv, nodo->izq); // condicion
             temp[1] = i;
             dbc(NOP, 0, 0, NULL, nodo->izq->nlin, nodo->izq->ncol,
                 mv->nombre_archivo);
             if (encontrar_romper(nodo->der)) {
-                lat_bytecode *code_tmp = latM_asignar(mv, sizeof(lat_bytecode) * MAX_BYTECODE_FUNCTION);
-                int tmp_i = ast_analizar(mv, nodo->der, code_tmp, 0);  // stmts
-                mv->goto_break[mv->enBucle] = tmp_i + i; // 16
+                lat_bytecode *code_tmp = latM_asignar(
+                    mv, sizeof(lat_bytecode) * MAX_BYTECODE_FUNCTION);
+                int tmp_i = ast_analizar(mv, nodo->der, code_tmp, 0); // stmts
+                mv->goto_break[mv->enBucle] = tmp_i + i;              // 16
                 latM_liberar(mv, code_tmp);
             }
             // if (encontrar_continuar(nodo->der)) {
-            //     lat_bytecode *code_tmp = latM_asignar(mv, sizeof(lat_bytecode) * MAX_BYTECODE_FUNCTION);
-            //     int tmp_i = ast_analizar(mv, nodo->der, code_tmp, 0);  // stmts
+            //     lat_bytecode *code_tmp = latM_asignar(mv,
+            //     sizeof(lat_bytecode) * MAX_BYTECODE_FUNCTION); int tmp_i =
+            //     ast_analizar(mv, nodo->der, code_tmp, 0);  // stmts
             //     mv->goto_continue[mv->enBucle] = tmp_i + i; // 16
             //     latM_liberar(mv, code_tmp);
             // }
-            pn(mv, nodo->der);  // stmts
+            pn(mv, nodo->der); // stmts
             dbc(JUMP_ABSOLUTE, (temp[0] - 1), 0, NULL, nodo->izq->nlin,
                 nodo->izq->ncol, mv->nombre_archivo);
             codigo[temp[1]] = latMV_bytecode_crear(
@@ -499,7 +553,8 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             temp[0] = i;
             pn(mv, nodo->izq);
             if (encontrar_romper(nodo->der)) {
-                lat_bytecode *code_tmp = latM_asignar(mv, sizeof(lat_bytecode) * MAX_BYTECODE_FUNCTION);
+                lat_bytecode *code_tmp = latM_asignar(
+                    mv, sizeof(lat_bytecode) * MAX_BYTECODE_FUNCTION);
                 int tmp_i = ast_analizar(mv, nodo->der, code_tmp, 0);
                 mv->goto_break[mv->enBucle] = tmp_i + i;
                 latM_liberar(mv, code_tmp);
@@ -534,21 +589,24 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
         case NODO_ROMPER: {
             if (mv->enBucle <= 0) {
                 char *info = malloc(MAX_INPUT_SIZE);
-                snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT, mv->nombre_archivo, mv->nlin,
-                mv->ncol, "Comando \"romper\" esta fuera de un bucle");
+                snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT,
+                         mv->nombre_archivo, mv->nlin, mv->ncol,
+                         "Comando \"romper\" esta fuera de un bucle");
                 fprintf(stderr, "%s\n", info);
             }
-            dbc(JUMP_ABSOLUTE, mv->goto_break[mv->enBucle], 0, NULL, mv->nlin, mv->ncol,
-                mv->nombre_archivo);
+            dbc(JUMP_ABSOLUTE, mv->goto_break[mv->enBucle], 0, NULL, mv->nlin,
+                mv->ncol, mv->nombre_archivo);
         } break;
         // case NODO_CONTINUAR: {
         //     if (mv->enBucle <= 0) {
         //         char *info = malloc(MAX_INPUT_SIZE);
-        //         snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT, mv->nombre_archivo, mv->nlin,
-        //         mv->ncol, "Comando \"continuar\" esta fuera de un bucle");
-        //         fprintf(stderr, "%s\n", info);
+        //         snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT,
+        //         mv->nombre_archivo, mv->nlin, mv->ncol, "Comando
+        //         \"continuar\" esta fuera de un bucle"); fprintf(stderr,
+        //         "%s\n", info);
         //     }
-        //     dbc(JUMP_ABSOLUTE, mv->goto_continue[mv->enBucle], 0, NULL, mv->nlin, mv->ncol,
+        //     dbc(JUMP_ABSOLUTE, mv->goto_continue[mv->enBucle], 0, NULL,
+        //     mv->nlin, mv->ncol,
         //         mv->nombre_archivo);
         // } break;
         case NODO_ETIQUETA: {
@@ -556,14 +614,16 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             o->nombre = nodo->izq->valor->val.cadena;
             o->tipo = T_LABEL;
             o->jump_label = i; // hacia qué instruccion vamos a saltar
-            // dbc(STORE_LABEL, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
-            lat_objeto* val = latO_clonar(mv, o);
-            //latMV_set_symbol(mv, o, val);
-            lat_objeto* ctx = mv->label_ctx;
-            char* str_name = latC_checar_cadena(mv, o);
-            lat_objeto* oldVal = (lat_objeto*)latO_obtener_contexto(mv, ctx, str_name);
+            // dbc(STORE_LABEL, 0, 0, o, nodo->nlin, nodo->ncol,
+            // mv->nombre_archivo);
+            lat_objeto *val = latO_clonar(mv, o);
+            // latMV_set_symbol(mv, o, val);
+            lat_objeto *ctx = mv->label_ctx;
+            char *str_name = latC_checar_cadena(mv, o);
+            lat_objeto *oldVal =
+                (lat_objeto *)latO_obtener_contexto(mv, ctx, str_name);
             if (oldVal != NULL && oldVal->tipo == T_LABEL) {
-              latC_error(mv, "La etiqueta '%s' ya existe!", str_name);
+                latC_error(mv, "La etiqueta '%s' ya existe!", str_name);
             }
             latO_asignar_ctx(mv, ctx, str_name, val);
         } break;
@@ -571,7 +631,8 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             // if (si no encuentra etiqueta) {}
             lat_objeto *o = latC_crear_cadena(mv, nodo->izq->valor->val.cadena);
             o->nombre = nodo->izq->valor->val.cadena;
-            dbc(JUMP_LABEL, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
+            dbc(JUMP_LABEL, 0, 0, o, nodo->nlin, nodo->ncol,
+                mv->nombre_archivo);
         } break;
         case NODO_FUNCION_ARGUMENTOS: {
             if (nodo->izq) {
@@ -896,17 +957,17 @@ LATINO_API void latC_error(lat_mv *mv, const char *fmt, ...) {
     vsprintf(buffer, fmt, args);
     va_end(args);
     char *info = malloc(MAX_INPUT_SIZE);
-    if(strstr(buffer, "%") != NULL) {
-        snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT, mv->nombre_archivo, mv->nlin,
-                mv->ncol);
+    if (strstr(buffer, "%") != NULL) {
+        snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT, mv->nombre_archivo,
+                 mv->nlin, mv->ncol);
         latC_apilar(mv, latC_crear_cadena(mv, info));
         latC_apilar(mv, latC_crear_cadena(mv, buffer));
         str_concatenar(mv);
         lat_objeto *err = latC_desapilar(mv);
         fprintf(stderr, "%s\n", latC_astring(mv, err));
     } else {
-        snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT, mv->nombre_archivo, mv->nlin,
-                mv->ncol, buffer);
+        snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT, mv->nombre_archivo,
+                 mv->nlin, mv->ncol, buffer);
         fprintf(stderr, "%s\n", info);
     }
     // FIXME: Si esta en REPL que no finalice
@@ -914,6 +975,7 @@ LATINO_API void latC_error(lat_mv *mv, const char *fmt, ...) {
 }
 
 LATINO_API int latC_llamar_funcion(lat_mv *mv, lat_objeto *func) {
+    // printf("latC_llamar_funcion\n");
     struct lat_longjmp lj;
     lj.status = 0;
     lj.previo = mv->error;
