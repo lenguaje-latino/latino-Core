@@ -105,6 +105,7 @@ typedef enum {
     NODO_CONTINUAR,
     NODO_IR,
     NODO_ETIQUETA,
+    NODO_CLASE /* 55 */
 } nodo_tipo;
 
 /** \brief Tipos de dato */
@@ -184,6 +185,16 @@ typedef struct {
     struct ast *stmts;
 } nodo_funcion;
 
+/** \brief Nodo para representar una clase.
+ *
+ * clase [nombre] stmts fin */
+typedef struct {
+    AST_COMUN
+    struct ast *nombre;
+    struct ast *base;
+    struct ast *stmts;
+} nodo_clase;
+
 /** \brief Nodo para el elemento de una lista */
 typedef struct {
     AST_COMUN
@@ -216,6 +227,8 @@ ast *latA_hacer(ast *cond, ast *stmts);
 ast *latA_desde(ast *dec, ast *cond, ast *inc, ast *stmts);
 ast *latA_para(ast *identificador, ast *inicio, ast *fin, ast *incremento, ast *sentencias);
 ast *latA_funcion(ast *nombre, ast *params, ast *stmts, int nlin, int ncol);
+ast *latA_clase(ast *nombre, ast *base, ast *stmts, int nlin, int ncol);
+
 ast *latA_analizar_exp(char *expr, int *status);
 ast *latA_analizar_arch(char *ruta, int *status);
 

@@ -38,70 +38,68 @@ THE SOFTWARE.
 #include "latobj.h"
 #include "latparse.h"
 
-static const char *const bycode_nombre[] = {
-    "NOP", /* 0 */
-    "HALT",
-    "UNARY_MINUS",
-    "BINARY_ADD",
-    "BINARY_SUB",
-    "BINARY_MUL", /* 5 */
-    "BINARY_DIV",
-    "BINARY_MOD",
-    "OP_GT",
-    "OP_GE",
-    "OP_LT", /*10*/
-    "OP_LE",
-    "OP_EQ",
-    "OP_NEQ",
-    "OP_AND",
-    "OP_OR", /*15*/
-    "OP_NOT",
-    "OP_INC",
-    "OP_DEC",
-    "CONCAT",
-    "LOAD_CONST", /*20*/
-    "LOAD_NAME",
-    "STORE_NAME",
-    "JUMP_ABSOLUTE",
-    "POP_JUMP_IF_FALSE",
-    "POP_JUMP_IF_TRUE", /*25*/
-    "PUSH_CTX",
-    "POP_CTX",
-    "CALL_FUNCTION",
-    "RETURN_VALUE",
-    "MAKE_FUNCTION", /*30*/
-    "LOAD_ATTR",
-    "BUILD_LIST",
-    "STORE_SUBSCR",
-    "BINARY_SUBSCR",
-    "BUILD_MAP", /*35*/
-    "STORE_MAP",
-    "STORE_ATTR",
-    "SET_GLOBAL",
-    "OP_REGEX",
-    "BINARY_POW", /*40*/
-    "OP_VAR_ARGS",
-    "OP_PUSH",
-    "OP_POP",
-    "ADJUST_STACK",
-    "LOAD_VAR_ARGS", /*45*/
-    "SET_LOCAL",
-    "POP_JUMP_IF_NEGATIVE",
-    "JUMP_LABEL",
-    "STORE_LABEL"
-};
+static const char *const bycode_nombre[] = {"NOP", /* 0 */
+                                            "HALT",
+                                            "UNARY_MINUS",
+                                            "BINARY_ADD",
+                                            "BINARY_SUB",
+                                            "BINARY_MUL", /* 5 */
+                                            "BINARY_DIV",
+                                            "BINARY_MOD",
+                                            "OP_GT",
+                                            "OP_GE",
+                                            "OP_LT", /*10*/
+                                            "OP_LE",
+                                            "OP_EQ",
+                                            "OP_NEQ",
+                                            "OP_AND",
+                                            "OP_OR", /*15*/
+                                            "OP_NOT",
+                                            "OP_INC",
+                                            "OP_DEC",
+                                            "CONCAT",
+                                            "LOAD_CONST", /*20*/
+                                            "LOAD_NAME",
+                                            "STORE_NAME",
+                                            "JUMP_ABSOLUTE",
+                                            "POP_JUMP_IF_FALSE",
+                                            "POP_JUMP_IF_TRUE", /*25*/
+                                            "PUSH_CTX",
+                                            "POP_CTX",
+                                            "CALL_FUNCTION",
+                                            "RETURN_VALUE",
+                                            "MAKE_FUNCTION", /*30*/
+                                            "LOAD_ATTR",
+                                            "BUILD_LIST",
+                                            "STORE_SUBSCR",
+                                            "BINARY_SUBSCR",
+                                            "BUILD_MAP", /*35*/
+                                            "STORE_MAP",
+                                            "STORE_ATTR",
+                                            "SET_GLOBAL",
+                                            "OP_REGEX",
+                                            "BINARY_POW", /*40*/
+                                            "OP_VAR_ARGS",
+                                            "OP_PUSH",
+                                            "OP_POP",
+                                            "ADJUST_STACK",
+                                            "LOAD_VAR_ARGS", /*45*/
+                                            "SET_LOCAL",
+                                            "POP_JUMP_IF_NEGATIVE",
+                                            "JUMP_LABEL",
+                                            "STORE_LABEL"};
 
 void str_concatenar(lat_mv *mv);
 
-void latC_abrir_liblatino_baselib   (lat_mv *mv);
-void latC_abrir_liblatino_listlib   (lat_mv *mv);
-void latC_abrir_liblatino_strlib    (lat_mv *mv);
-void latC_abrir_liblatino_diclib    (lat_mv *mv);
-void latC_abrir_liblatino_paqlib    (lat_mv *mv);
-void latC_abrir_liblatino_filelib   (lat_mv *mv);
-void latC_abrir_liblatino_mathlib   (lat_mv *mv);
-void latC_abrir_liblatino_syslib    (lat_mv *mv);
-void latC_abrir_liblatino_devlib    (lat_mv *mv);
+void latC_abrir_liblatino_baselib(lat_mv *mv);
+void latC_abrir_liblatino_listlib(lat_mv *mv);
+void latC_abrir_liblatino_strlib(lat_mv *mv);
+void latC_abrir_liblatino_diclib(lat_mv *mv);
+void latC_abrir_liblatino_paqlib(lat_mv *mv);
+void latC_abrir_liblatino_filelib(lat_mv *mv);
+void latC_abrir_liblatino_mathlib(lat_mv *mv);
+void latC_abrir_liblatino_syslib(lat_mv *mv);
+void latC_abrir_liblatino_devlib(lat_mv *mv);
 
 /*
 void latC_abrir_liblatino_uilib     (lat_mv *mv);
@@ -284,9 +282,7 @@ static void no_logico(lat_mv *mv) {
 
 static lat_objeto *obtener_contexto(lat_mv *mv) { return mv->contexto_actual; }
 
-lat_objeto *obtener_contexto_global(lat_mv *mv) {
-    return mv->contexto[0];
-}
+lat_objeto *obtener_contexto_global(lat_mv *mv) { return mv->contexto[0]; }
 
 static void apilar_contexto(lat_mv *mv, lat_objeto *ctx) {
     if (mv->ptrctx >= MAX_STACK_CONTEXT_SIZE) {
@@ -575,27 +571,26 @@ lat_objeto *latMV_get_symbol(lat_mv *mv, lat_objeto *name) {
     return val;
 }
 
-lat_objeto* latMV_get_label(lat_mv* mv, lat_objeto* name) {
-  lat_objeto* ctx = mv->label_ctx;
-  lat_objeto* val = (lat_objeto*)latO_obtener_contexto(
-    mv, ctx, latC_checar_cadena(mv, name));
-  if (val == NULL) {
-    latC_error(mv, "Etiqueta '%s' indefinida",
-      latC_checar_cadena(mv, name));
-  }
-  return val;
+lat_objeto *latMV_get_label(lat_mv *mv, lat_objeto *name) {
+    lat_objeto *ctx = mv->label_ctx;
+    lat_objeto *val = (lat_objeto *)latO_obtener_contexto(
+        mv, ctx, latC_checar_cadena(mv, name));
+    if (val == NULL) {
+        latC_error(mv, "Etiqueta '%s' indefinida",
+                   latC_checar_cadena(mv, name));
+    }
+    return val;
 }
 
 void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
-    char * str_name = latC_checar_cadena(mv, name);
+    char *str_name = latC_checar_cadena(mv, name);
     // printf("latMV_set_symbol.str_name: %s\n", str_name);
     // printf("latMV_set_symbol.val:");
     // latO_imprimir(mv, val, false);
     // printf("\n");
     lat_objeto *ctx = obtener_contexto(mv);
     // objeto anterior
-    lat_objeto *tmp =
-        latO_obtener_contexto(mv, ctx, str_name);
+    lat_objeto *tmp = latO_obtener_contexto(mv, ctx, str_name);
     if (name->esconst) {
         if (tmp != NULL) {
             latC_error(mv, "Intento de reasignar valor a constante '%s'",
@@ -605,24 +600,26 @@ void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
     ctx = obtener_contexto_global(mv);
     lat_objeto *oldVal = (lat_objeto *)latO_obtener_contexto(
         mv, ctx, latC_checar_cadena(mv, name));
+    /*
+    // FIXME: Error en clases
     if (oldVal != NULL) {
         if (oldVal->tipo == T_CFUN || oldVal->tipo == T_FUN) {
             latC_error(mv, "Intento de reasignar valor a la funcion '%s'",
                        str_name);
         }
     }
+    */
     latO_asignar_ctx(mv, ctx, str_name, val);
 }
 
-void latMV_set_label(lat_mv* mv, lat_objeto* name, lat_objeto* val) {
-  char* str_name = latC_checar_cadena(mv, name);
-  lat_objeto* ctx = mv->label_ctx;
-  latO_asignar_ctx(mv, ctx, str_name, val);
+void latMV_set_label(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
+    char *str_name = latC_checar_cadena(mv, name);
+    lat_objeto *ctx = mv->label_ctx;
+    latO_asignar_ctx(mv, ctx, str_name, val);
 }
 
 static void latMV_call_function(lat_mv *mv, lat_objeto *func, lat_bytecode cur,
                                 lat_bytecode next) {
-    int num_args = cur.a;
     lat_objeto *fun = latM_asignar(mv, sizeof(lat_objeto));
 #if DEPURAR_MEM
     printf("latMV_call_function.fun: %p\n", fun);
@@ -631,6 +628,30 @@ static void latMV_call_function(lat_mv *mv, lat_objeto *func, lat_bytecode cur,
     if (!(fun->tipo == T_CFUN || fun->tipo == T_FUN)) {
         latC_error(mv, "El objeto no es una funcion");
     }
+    int num_args = cur.a;
+    // valida si la funcion es una clase
+    if (fun->es_clase) {
+        mv->enClase = true;
+        latMV_funcion_correr(mv, fun);
+        mv->enClase = false;
+        lat_objeto *name = latC_crear_cadena(mv, "mi");
+        lat_objeto *mi = latMV_get_symbol(mv, name);
+        lat_objeto *ctor =
+            (lat_objeto *)latH_obtener(latC_checar_dic(mv, mi), "constructor");
+        if (ctor) {
+            if(ctor->nparams == num_args) {
+                latMV_funcion_correr(mv, ctor);
+            } else {
+                latC_error(mv, "No existe un constructor con %i argumentos.", num_args);    
+            }
+        } else {
+            // TODO: Pintar tambien el nombre de la clase donde da el error
+            latC_error(mv, "No existe un constructor con %i argumentos.", num_args);
+        }
+        
+        num_args = 0;
+    }
+
     int nparams = fun->nparams;
     while (mv->ptrpila < nparams) {
         latC_apilar(mv, latO_nulo);
@@ -663,9 +684,11 @@ static void latMV_call_function(lat_mv *mv, lat_objeto *func, lat_bytecode cur,
                        fun->nombre);
         }
     } else {
-        if (mv->prev_args > 1) {
-            while (mv->ptrpila > (mv->ptrprevio + nparams)) {
-                latC_desapilar(mv);
+        if (!mv->enClase) {
+            if (mv->prev_args > 1) {
+                while (mv->ptrpila > (mv->ptrprevio + nparams)) {
+                    latC_desapilar(mv);
+                }
             }
         }
     }
@@ -1122,11 +1145,13 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                     printf("\t");
 #endif
                     lat_objeto *val = latMV_get_label(mv, name);
-                    //if(val->tipo != T_LABEL) {
+                    // if(val->tipo != T_LABEL) {
                     //    char *nombre = latC_checar_cadena(mv, name);
-                    //    latC_error(mv, "El identificador '%s' no es un tipo etiqueta", nombre);
+                    //    latC_error(mv, "El identificador '%s' no es un tipo
+                    //    etiqueta", nombre);
                     //}
-                    pc = val->jump_label-1;  // saltamos hacia la instruccion de la etiqueta
+                    pc = val->jump_label -
+                         1; // saltamos hacia la instruccion de la etiqueta
                 } break;
                 case CALL_FUNCTION: {
 #if DEPURAR_MV
@@ -1141,6 +1166,10 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                     return cur.a;
                 } break;
                 case MAKE_FUNCTION: {
+                    lat_objeto *fun = (lat_objeto *)cur.meta;
+                    latC_apilar(mv, fun);
+                } break;
+                case MAKE_CLASS: {
                     lat_objeto *fun = (lat_objeto *)cur.meta;
                     latC_apilar(mv, fun);
                 } break;
@@ -1211,7 +1240,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
 #if HABILITAR_GC
         gc_recolectar(mv);
 #endif
-    }     // fin if (T_FUN)
+    } // fin if (T_FUN)
     else if (func->tipo == T_CFUN) {
         lat_CFuncion f = getCfun(func);
         (f)(mv);

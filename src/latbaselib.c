@@ -69,6 +69,9 @@ char *tipo(int tipo) {
         case T_CFUN:
             return "cfun";
             break;
+        case T_CPTR:
+            return "(void *)";
+            break;
         default:
             return "indefinido";
             break;

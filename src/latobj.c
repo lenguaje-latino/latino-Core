@@ -605,7 +605,7 @@ LATINO_API bool latC_checar_logico(lat_mv *mv, lat_objeto *o) {
 }
 
 LATINO_API double latC_checar_numerico(lat_mv *mv, lat_objeto *o) {
-    if (o->tipo == T_NUMERIC) {
+    if (o->tipo == T_NUMERIC || o->tipo == T_INTEGER) {
         return getNumerico(o);
     }
     latC_error(mv, "El parametro debe de ser un decimal");
