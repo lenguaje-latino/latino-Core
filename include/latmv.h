@@ -93,6 +93,7 @@ typedef void (*lat_CFuncion)(lat_mv *mv);
 #define POP_JUMP_IF_NEGATIVE 47
 #define JUMP_LABEL 48
 #define STORE_LABEL 49
+#define MAKE_CLASS 50
 
 union lat_gcobjeto {
     lat_gcheader gch;
@@ -100,6 +101,7 @@ union lat_gcobjeto {
     struct lista lista;
     struct hash_map dic;
     struct lat_funcion fun;
+    struct lat_class class;
     lat_CFuncion *cfun;
     void *ptr;
 };
@@ -150,6 +152,7 @@ typedef struct lat_mv {
     int status;
     struct lat_longjmp *error;
     int enBucle;
+    bool enClase;
     int goto_break[256];    // FIXME: Validar memoria utilizada
     int goto_continue[256]; // FIXME: Validar memoria utilizada
     int goto_goto[256];

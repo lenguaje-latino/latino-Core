@@ -112,6 +112,10 @@ int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
     REGEX
     GLOBAL
 
+/* Soporte para clases */
+%token
+    CLASE
+
 %type <node> expression relational_expression
 %type <node> logical_not_expression logical_and_expression logical_or_expression equality_expression
 %type <node> multiplicative_expression additive_expression concat_expression
@@ -124,6 +128,9 @@ int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 %type <node> labeled_statements labeled_statement_case labeled_statement_case_case labeled_statement_default
 %type <node> variable_access field_designator
 %type <node> osi_statements osi_statement global_declaration goto_etiqueta
+
+/* Soporte para clases */
+%type <node> clase_propiedad clase_propiedades clase_funcion clase_funciones clase_sentencia clase_sentencias clase_declaracion
 
 /*
  * precedencia de operadores
@@ -291,6 +298,7 @@ statement
     | incdec_statement
     | jump_loop
     | goto_etiqueta
+    | clase_declaracion
     ;
 
 incdec_statement
@@ -505,25 +513,76 @@ dict_item
     | expression ':' expression { $$ = latA_nodo(NODO_DICC_ELEMENTO, $1, $3, @1.first_line, @1.first_column); }
     ;
 
+clase_propiedad
+    : IDENTIFICADOR '=' expression { $$ = latA_asign($3, $1); }
+    ;
+
+clase_propiedades
+    : clase_propiedad clase_propiedades {
+        if($2){
+            $$ = latA_nodo(NODO_BLOQUE, $1, $2, @1.first_line, @1.first_column);
+        }
+    }
+    | clase_propiedad {
+        if($1){
+          $$ = latA_nodo(NODO_BLOQUE, $1, NULL, @1.first_line, @1.first_column);
+        }
+    }
+    | error statement_list { yyerrok; yyclearin;}
+    ;
+
+clase_funcion
+    : FUNCION IDENTIFICADOR '(' parameter_list ')' statement_list FIN {
+        $$ = latA_funcion($2, $4, $6, @2.first_line, @2.first_column);
+    }
+    ;
+
+clase_funciones
+    : clase_funcion clase_funciones {
+        if($2){
+            $$ = latA_nodo(NODO_BLOQUE, $1, $2, @1.first_line, @1.first_column);
+        }
+    }
+    | clase_funcion {
+        if($1){
+          $$ = latA_nodo(NODO_BLOQUE, $1, NULL, @1.first_line, @1.first_column);
+        }
+    }
+    | error statement_list { yyerrok; yyclearin;}
+    ;
+
+clase_sentencia
+    : clase_propiedades
+    | clase_funciones
+    | RETORNO expression { $$ = latA_nodo(NODO_RETORNO, $2, NULL, @1.first_line, @1.first_column); }
+    | RETORNO argument_expression_list { $$ = latA_nodo(NODO_RETORNO, $2, NULL, @1.first_line, @1.first_column); }
+    ;
+
+clase_sentencias
+    : clase_sentencia clase_sentencias {
+        if($2){
+            $$ = latA_nodo(NODO_BLOQUE, $1, $2, @1.first_line, @1.first_column);
+        }
+    }
+    | clase_sentencia {
+        if($1){
+          $$ = latA_nodo(NODO_BLOQUE, $1, NULL, @1.first_line, @1.first_column);
+        }
+    }
+    | error statement_list { yyerrok; yyclearin;}
+    ;
+
+clase_declaracion
+    : CLASE IDENTIFICADOR clase_sentencias FIN {
+        $$ = latA_clase($2, NULL, $3, @2.first_line, @2.first_column); }
+    ;
 
 %%
 
-/*
-class_statement
-    : class_definition
-    | class_definition class_statement
-    ;
-
-class_definition
-    : CLASS IDENTIFICADOR valores FIN {
-        $$ = latA_class(NODO_, $2, $3);
-    }
-    ;
-*/
 //se define para analisis sintactico (bison)
 int yyerror(struct YYLTYPE *yylloc_param, void *scanner, struct ast **root,
 const char *s) {
-  if(!parse_silent){
+  if(!parse_silent) {
       fprintf(stderr, LAT_ERROR_FMT, yylloc_param->file_name,
         yylloc_param->first_line, yylloc_param->first_column,  s);
   }

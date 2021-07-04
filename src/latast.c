@@ -229,6 +229,17 @@ ast *latA_funcion(ast *nombre, ast *params, ast *stmts, int nlin, int ncol) {
     return (ast *)a;
 }
 
+ast *latA_clase(ast *nombre, ast *base, ast *stmts, int nlin, int ncol) {
+    // printf("inicia latA_clase\n");
+    nodo_clase *a = (nodo_clase *)malloc(sizeof(ast));
+    a->tipo = NODO_CLASE;
+    a->nombre = nombre;
+    a->base = base;
+    a->stmts = stmts;
+    // printf("finaliza latA_clase\n");
+    return (ast *)a;
+}
+
 void latA_destruir(ast *a) {
     if (a) {
         if(a->tipo < 51) { // a->tipo <= 50

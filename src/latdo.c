@@ -642,6 +642,17 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             f->nombre = strdup(fun->nombre->valor->val.cadena);
             dbc(STORE_NAME, 0, 0, o, nodo->nlin, nodo->ncol,
                 mv->nombre_archivo);
+            if(mv->enClase) {
+                dbc(LOAD_NAME, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
+                    mv->nombre_archivo);
+                lat_objeto *mi = latC_crear_cadena(mv, "mi");
+                mi->marca = 0;
+                mi->esconst = false;
+                dbc(LOAD_NAME, 0, 0, mi, nodo->der->nlin, nodo->der->ncol,
+                mv->nombre_archivo);
+                dbc(STORE_ATTR, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
+                mv->nombre_archivo);
+            }
             if (!strcmp(f->nombre, "anonima")) {
                 lat_objeto *anon = latO_clonar(mv, o);
                 anon->marca = 0;
@@ -732,6 +743,58 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
         case NODO_LOAD_VAR_ARGS: {
             dbc(LOAD_VAR_ARGS, 0, 0, NULL, mv->nlin, mv->ncol,
                 mv->nombre_archivo);
+        } break;
+        case NODO_CLASE: {
+            mv->enClase = true;
+            nodo_clase *fun = (nodo_clase *)nodo;
+            funcion_codigo = (lat_bytecode *)latM_asignar(
+                mv, sizeof(lat_bytecode) * MAX_BYTECODE_FUNCTION);
+#if DEPURAR_MEM
+            printf("NODO_CLASE.funcion_codigo: %p\n", funcion_codigo);
+#endif
+            fi = 0;
+            // procesar lista de params
+            bool es_vararg = false;
+            
+            // procesar instrucciones
+            fpn(mv, fun->stmts);
+
+            // crear diccionario vacio            
+            dbc(BUILD_MAP, 0, 0, NULL, mv->nlin, mv->ncol,
+                mv->nombre_archivo);
+            lat_objeto *mi = latC_crear_cadena(mv, "mi");
+                mi->marca = 0;
+                mi->esconst = false;
+            dbc(STORE_NAME, 0, 0, mi, nodo->der->nlin, nodo->der->ncol,
+                    mv->nombre_archivo);
+            
+            dbc(LOAD_NAME, 0, 0, mi, nodo->nlin, nodo->ncol, mv->nombre_archivo);
+            fdbc(RETURN_VALUE, 1, 0, mi, fun->nombre->nlin,
+                 fun->nombre->ncol, mv->nombre_archivo);
+            lat_objeto *f = latC_crear_funcion(mv, funcion_codigo, fi + 1);
+            f->marca = 0;
+            f->es_vararg = es_vararg;
+            dbc(MAKE_CLASS, fi + 1, 0, f, fun->nombre->nlin,
+                fun->nombre->ncol, mv->nombre_archivo);
+            funcion_codigo = NULL;
+            fi = 0;
+            lat_objeto *o =
+                latC_crear_cadena(mv, fun->nombre->valor->val.cadena);
+            o->marca = 0;
+            f->es_clase = true;
+            f->nombre = strdup(fun->nombre->valor->val.cadena);
+            dbc(STORE_NAME, 0, 0, o, nodo->nlin, nodo->ncol,
+                mv->nombre_archivo);
+            // if (!strcmp(f->nombre, "anonima")) {
+            //     lat_objeto *anon = latO_clonar(mv, o);
+            //     anon->marca = 0;
+            //     dbc(LOAD_NAME, 0, 0, anon, nodo->nlin, nodo->ncol,
+            //         mv->nombre_archivo);
+            // }
+            // if (!strcmp(getstr(getCadena(o)), "menu")) {
+            //     mv->global->menu = true;
+            // }
+            mv->enClase = false;
         } break;
         default:
             printf("ERROR nodo->tipo:%i\n", nodo->tipo);
@@ -869,6 +932,14 @@ void mostrar_bytecode(lat_mv *mv, lat_bytecode *codigo) {
                 buffer = latC_astring(mv, o);
                 printf("OP_PUSH\t(%s)\n", buffer);
                 free(buffer);
+            } break;
+            case MAKE_CLASS: {
+                printf("\n-------------------------------------------\n");
+                printf("MAKE_CLASS\n");
+                printf("-------------------------------------------\n");
+                o = (lat_objeto *)cur.meta;
+                lat_class *fun = getClass(o);
+                mostrar_bytecode(mv, fun->codigo);
             } break;
             case ADJUST_STACK: {
                 printf("ADJUST_STACK\t%i\n", cur.a);

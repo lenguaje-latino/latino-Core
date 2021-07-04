@@ -136,6 +136,7 @@ typedef struct _lat_objeto {
     size_t tam;
     bool es_vararg;
     int jump_label;
+    bool es_clase;
 } lat_objeto;
 
 /**\brief Define una fun de usuario */
@@ -145,6 +146,14 @@ typedef struct lat_funcion {
     char *nombre;
     lat_bytecode *codigo;
 } lat_funcion;
+
+/**\brief Define una clase de usuario */
+typedef struct lat_class {
+    // int nparams;
+    int ninst;
+    char *nombre;
+    lat_bytecode *codigo;
+} lat_class;
 
 #ifdef WIN32
 __declspec(dllexport) lat_objeto latO_nulo_;
@@ -238,6 +247,7 @@ extern lat_objeto latO_falso_;
         o1->es_vararg = o2->es_vararg;                                         \
         o1->esconst = o2->esconst;                                             \
         o1->jump_label = o2->jump_label;                                       \
+        o1->es_clase = o2->es_clase;                                           \
     }
 
 #define setobj2s setobj
@@ -299,6 +309,7 @@ extern lat_objeto latO_falso_;
 #define getDic(o) ((hash_map *)(o)->val.gc)
 #define getCtx(o) ((hash_map *)(o)->val.gc)
 #define getFun(o) ((lat_funcion *)(o)->val.gc)
+#define getClass(o) ((lat_class *)(o)->val.gc)
 #define getCfun(o) ((lat_CFuncion)(o)->val.gc)
 #define getPtr(o) ((void *)(o)->val.gc)
 

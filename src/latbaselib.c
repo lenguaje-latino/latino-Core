@@ -69,6 +69,9 @@ char *tipo(int tipo) {
         case T_CFUN:
             return "cfun";
             break;
+        case T_CPTR:
+            return "(void *)";
+            break;
         default:
             return "indefinido";
             break;
@@ -216,6 +219,7 @@ static void base_limpiar(lat_mv *mv) { system(latC_clear); }
 
 static void base_tipo(lat_mv *mv) {
     lat_objeto *a = latC_desapilar(mv);
+    // printf("TIPO: %s\n", tipo(a->tipo));
     latC_apilar_string(mv, tipo(a->tipo));
 }
 

@@ -95,7 +95,8 @@ extern int yydebug;
     ENTRE_IGUAL = 301,
     MODULO_IGUAL = 302,
     REGEX = 303,
-    GLOBAL = 304
+    GLOBAL = 304,
+    CLASE = 305
   };
 #endif
 /* Tokens.  */
@@ -146,6 +147,7 @@ extern int yydebug;
 #define MODULO_IGUAL 302
 #define REGEX 303
 #define GLOBAL 304
+#define CLASE 305
 
 /* Value type.  */
 
