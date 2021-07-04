@@ -65,7 +65,7 @@ THE SOFTWARE.
 /** Version menor de Latino */
 #define LAT_VERSION_MENOR 4
 /** Version de correcion de errores */
-#define LAT_VERSION_PARCHE 1
+#define LAT_VERSION_PARCHE 2
 /** Version de Latino */
 #define LAT_VERSION                                                            \
     "Latino " LAT_stringize(LAT_VERSION_MAYOR) "." LAT_stringize(              \
@@ -76,7 +76,7 @@ THE SOFTWARE.
     "\nTodos los derechos reservados (C) 2015-2021. Latinoamerica"
 
 #define LAT_ERRMEM 1
-#define LAT_ERRRUN 3
+#define LAT_ERRRUN 2
 
 /** Define el manejo de excepciones en Latino */
 #define LAT_THROW(mv, j) longjmp((j)->b, 1)
