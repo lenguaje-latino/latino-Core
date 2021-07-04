@@ -76,7 +76,7 @@ THE SOFTWARE.
     "\nTodos los derechos reservados (C) 2015-2021. Latinoamerica"
 
 #define LAT_ERRMEM 1
-#define LAT_ERRRUN 2
+#define LAT_ERRRUN 3
 
 /** Define el manejo de excepciones en Latino */
 #define LAT_THROW(mv, j) longjmp((j)->b, 1)

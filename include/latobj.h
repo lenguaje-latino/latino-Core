@@ -149,7 +149,6 @@ typedef struct lat_funcion {
 
 /**\brief Define una clase de usuario */
 typedef struct lat_class {
-    // int nparams;
     int ninst;
     char *nombre;
     lat_bytecode *codigo;

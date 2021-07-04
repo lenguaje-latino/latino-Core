@@ -785,15 +785,6 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             f->nombre = strdup(fun->nombre->valor->val.cadena);
             dbc(STORE_NAME, 0, 0, o, nodo->nlin, nodo->ncol,
                 mv->nombre_archivo);
-            // if (!strcmp(f->nombre, "anonima")) {
-            //     lat_objeto *anon = latO_clonar(mv, o);
-            //     anon->marca = 0;
-            //     dbc(LOAD_NAME, 0, 0, anon, nodo->nlin, nodo->ncol,
-            //         mv->nombre_archivo);
-            // }
-            // if (!strcmp(getstr(getCadena(o)), "menu")) {
-            //     mv->global->menu = true;
-            // }
             mv->enClase = false;
         } break;
         default:

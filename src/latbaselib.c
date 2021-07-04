@@ -219,7 +219,6 @@ static void base_limpiar(lat_mv *mv) { system(latC_clear); }
 
 static void base_tipo(lat_mv *mv) {
     lat_objeto *a = latC_desapilar(mv);
-    // printf("TIPO: %s\n", tipo(a->tipo));
     latC_apilar_string(mv, tipo(a->tipo));
 }
 
