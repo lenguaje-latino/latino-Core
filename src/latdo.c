@@ -655,22 +655,22 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             printf("NODO_FUNCION_USUARIO.funcion_codigo: %p\n", funcion_codigo);
 #endif
             fi = 0;
+            fdbc(PUSH_CTX, 0, 0, NULL, fun->nombre->nlin, fun->nombre->ncol,
+                 mv->nombre_archivo);
             // procesar lista de parametros
             bool es_vararg = false;
             if (fun->params) {
                 fpn(mv, fun->params);
                 es_vararg = encontrar_vararg(fun->params);
             }
-            fdbc(PUSH_CTX, 0, 0, NULL, fun->nombre->nlin, fun->nombre->ncol,
-                 mv->nombre_archivo);
             // procesar instrucciones
             fpn(mv, fun->stmts);
             // se agrega "retorno" por default en caso de que la funcion no
             // tenga uno
-            fdbc(RETURN_VALUE, 0, 0, latO_nulo, fun->nombre->nlin,
-                 fun->nombre->ncol, mv->nombre_archivo);
             fdbc(POP_CTX, 0, 0, NULL, fun->nombre->nlin, fun->nombre->ncol,
                  mv->nombre_archivo);
+            fdbc(RETURN_VALUE, 0, 0, latO_nulo, fun->nombre->nlin,
+                 fun->nombre->ncol, mv->nombre_archivo);
             lat_objeto *latFun = latC_crear_funcion(mv, funcion_codigo, fi + 1);
             latFun->marca = 0;
             latFun->es_vararg = es_vararg;

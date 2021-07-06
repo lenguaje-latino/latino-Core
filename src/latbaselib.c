@@ -66,6 +66,9 @@ char *tipo(int tipo) {
         case T_FUN:
             return "fun";
             break;
+        case T_CLASS:
+            return "clase";
+            break;
         case T_CFUN:
             return "cfun";
             break;

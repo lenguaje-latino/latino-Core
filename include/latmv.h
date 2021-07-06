@@ -40,7 +40,7 @@ typedef void (*lat_CFuncion)(lat_mv *mv);
 
 /**\brief Muestra las instrucciones que se van ejecutando con la Maquina Virtual
  */
-#define DEPURAR_MV 0
+#define DEPURAR_MV 1
 
 /**\brief op_codes de la maquina virtual */
 #define NOP 0
@@ -137,6 +137,7 @@ typedef struct lat_mv {
     lat_objeto *base;
     lat_objeto *contexto[256];
     lat_objeto *contexto_actual;
+    lat_objeto *ctx_global;
     lat_objeto *label_ctx;
     int ptrctx;
     int ptrpila;

@@ -55,7 +55,11 @@ void latO_asignar_ctx(lat_mv *mv, lat_objeto *ns, const char *name,
         if (strlen(name) > MAX_ID_LENGTH) {
             latC_error(mv, "Nombre de id mayor a %i caracteres", MAX_ID_LENGTH);
         }
+        // printf("latO_asignar_ctx(ANTES): %p, %s, %p\n", ns, name, o);
         latH_asignar(mv, h, name, o);
+        // lat_objeto *clon = latO_clonar(mv, o);
+        // latH_asignar(mv, h, name, clon);
+        // printf("latO_asignar_ctx(AHORA): %p, %s, %p\n", ns, name, clon);
     }
 }
 
@@ -66,6 +70,7 @@ lat_objeto *latO_obtener_contexto(lat_mv *mv, lat_objeto *ns,
     } else {
         hash_map *h = getCtx(ns);
         lat_objeto *ret = (lat_objeto *)latH_obtener(h, name);
+        // printf("latO_obtener_contexto: %p, %s, %p\n", ns, name, ret);
         return ret;
     }
     return NULL;
@@ -192,6 +197,7 @@ void latO_destruir(lat_mv *mv, lat_objeto *o) {
             latM_liberar(mv, inslist);
             latM_liberar(mv, fun);
         } break;
+        // TODO: Liberar memoria de clase
         case T_CFUN: {
             ;
         } break;
@@ -239,6 +245,13 @@ lat_objeto *latO_clonar(lat_mv *mv, lat_objeto *obj) {
             ret->tipo = obj->tipo;
             ret->nombre = obj->nombre;
             setFun(ret, getFun(obj));
+            ret->nparams = obj->nparams;
+            break;
+        case T_CLASS:
+            ret = latO_crear(mv);
+            ret->tipo = obj->tipo;
+            ret->nombre = obj->nombre;
+            setClass(ret, getClass(obj));
             ret->nparams = obj->nparams;
             break;
         case T_CFUN:
@@ -825,6 +838,8 @@ LATINO_API char *latC_astring(lat_mv *mv, lat_objeto *o) {
         return strdup(latC_checar_cadena(mv, o));
     } else if (o->tipo == T_FUN) {
         return strdup("fun");
+    } else if (o->tipo == T_CLASS) {
+        return strdup("clase");
     } else if (o->tipo == T_CFUN) {
         return strdup("cfun");
     } else if (o->tipo == T_CLASS) {

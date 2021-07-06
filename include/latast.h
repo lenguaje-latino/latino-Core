@@ -28,7 +28,7 @@ THE SOFTWARE.
 #include <stdbool.h>
 
 /**\brief Muestra las instrucciones que se generan con el AST */
-#define DEPURAR_AST 0
+#define DEPURAR_AST 1
 
 extern char *filename;
 
@@ -225,7 +225,8 @@ ast *latA_si(ast *cond, ast *th, ast *el);
 ast *latA_mientras(ast *cond, ast *stmts);
 ast *latA_hacer(ast *cond, ast *stmts);
 ast *latA_desde(ast *dec, ast *cond, ast *inc, ast *stmts);
-ast *latA_para(ast *identificador, ast *inicio, ast *fin, ast *incremento, ast *sentencias);
+ast *latA_para(ast *identificador, ast *inicio, ast *fin, ast *incremento,
+               ast *sentencias);
 ast *latA_funcion(ast *nombre, ast *params, ast *stmts, int nlin, int ncol);
 ast *latA_clase(ast *nombre, ast *base, ast *stmts, int nlin, int ncol);
 

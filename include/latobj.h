@@ -222,6 +222,12 @@ extern lat_objeto latO_falso_;
         i_o->val.gc = (lat_gcobjeto *)(v);                                     \
         i_o->tipo = T_FUN;                                                     \
     }
+#define setClass(obj, v)                                                       \
+    {                                                                          \
+        lat_objeto *i_o = (obj);                                               \
+        i_o->val.gc = (lat_gcobjeto *)(v);                                     \
+        i_o->tipo = T_CLASS;                                                   \
+    }
 #define setCfun(obj, v)                                                        \
     {                                                                          \
         lat_objeto *i_o = (obj);                                               \
@@ -277,6 +283,7 @@ extern lat_objeto latO_falso_;
             case T_DIC:                                                        \
             case T_CONTEXT:                                                    \
             case T_FUN:                                                        \
+            case T_CLASS:                                                      \
             case T_CFUN:                                                       \
             case T_CPTR:                                                       \
                 setobj(oo1, oo2);                                              \
@@ -295,6 +302,7 @@ extern lat_objeto latO_falso_;
 #define isLista(o) (getTipo(o) == T_LIST)
 #define isDic(o) (getTipo(o) == T_DIC)
 #define isFun(o) (getTipo(o) == T_FUN)
+#define isClass(o) (getTipo(o) == T_CLASS)
 #define isCfun(o) (getTipo(o) == T_CFUN)
 
 /* macros para obtener valores */

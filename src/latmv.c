@@ -288,7 +288,8 @@ static lat_objeto *obtener_contexto_previo(lat_mv *mv) {
     return NULL;
 }
 
-lat_objeto *obtener_contexto_global(lat_mv *mv) { return mv->contexto[0]; }
+// lat_objeto *obtener_contexto_global(lat_mv *mv) { return mv->contexto[0]; }
+lat_objeto *obtener_contexto_global(lat_mv *mv) { return mv->ctx_global; }
 
 static void apilar_contexto(lat_mv *mv, lat_objeto *ctx) {
     if (mv->ptrctx >= MAX_STACK_CONTEXT_SIZE) {
@@ -296,9 +297,11 @@ static void apilar_contexto(lat_mv *mv, lat_objeto *ctx) {
                "Desborde de la pila de contextos");
         exit(EXIT_FAILURE);
     }
-    mv->contexto[mv->ptrctx + 1] = latO_clonar(mv, mv->contexto[mv->ptrctx]);
+    // mv->contexto[mv->ptrctx + 1] = latO_clonar(mv, mv->contexto[mv->ptrctx]);
+    mv->contexto[mv->ptrctx + 1] = latO_contexto_crear(mv);
     mv->ptrctx++;
     mv->contexto_actual = mv->contexto[mv->ptrctx];
+    // printf(">>> apilar_contexto. mv->ptrctx: %i\n", mv->ptrctx);
 }
 
 static void desapilar_contexto(lat_mv *mv) {
@@ -307,8 +310,9 @@ static void desapilar_contexto(lat_mv *mv) {
                "Pila de contextos vacia");
         exit(EXIT_FAILURE);
     }
-    latO_destruir(mv, mv->contexto[mv->ptrctx--]);
-    mv->contexto_actual = mv->contexto[mv->ptrctx];
+    // latO_destruir(mv, mv->contexto[mv->ptrctx--]);
+    mv->contexto_actual = mv->contexto[mv->ptrctx--];
+    // printf("<<< desapilar_contexto. mv->ptrctx: %i\n", mv->ptrctx);
 }
 
 LATINO_API void latC_abrir_liblatino(lat_mv *mv, const char *nombre_lib,
@@ -368,6 +372,7 @@ LATINO_API lat_mv *latC_crear_mv() {
     mv->numejec = 0;
     memset(mv->contexto, 0, 256);
     mv->contexto[0] = latO_contexto_crear(mv);
+    mv->ctx_global = latO_contexto_crear(mv);
     mv->label_ctx = latO_contexto_crear(mv);
     mv->contexto[0]->marca = 0;
     mv->ptrctx = 0;
@@ -477,11 +482,8 @@ LATINO_API void latC_apilar(lat_mv *mv, lat_objeto *o) {
             setDic(mv->tope, getDic(o));
             break;
         case T_FUN:
-            setobj(mv->tope, o);
-            break;
+        case T_CLASS:
         case T_CFUN:
-            setobj(mv->tope, o);
-            break;
         case T_CPTR:
             setobj(mv->tope, o);
             break;
@@ -564,20 +566,23 @@ lat_objeto *latMV_get_symbol(lat_mv *mv, lat_objeto *name) {
     lat_objeto *ctx = obtener_contexto(mv);
     lat_objeto *val = (lat_objeto *)latO_obtener_contexto(
         mv, ctx, latC_checar_cadena(mv, name));
-    if (val == NULL) {
-        // Si no existe buscamos en contexto previo
-        ctx = obtener_contexto_previo(mv);
-        if (ctx) {
-            val = (lat_objeto *)latO_obtener_contexto(
-                mv, ctx, latC_checar_cadena(mv, name));
-        }
-    }
+
+    // if (val == NULL) {
+    //     // Si no existe buscamos en contexto previo
+    //     ctx = obtener_contexto_previo(mv);
+    //     if (ctx) {
+    //         val = (lat_objeto *)latO_obtener_contexto(
+    //             mv, ctx, latC_checar_cadena(mv, name));
+    //     }
+    // }
+
     if (val == NULL) {
         // Si no existe buscamos en contexto global
         ctx = obtener_contexto_global(mv);
         val = (lat_objeto *)latO_obtener_contexto(mv, ctx,
                                                   latC_checar_cadena(mv, name));
     }
+
     // Si no existe en ningun contexto manda error
     if (val == NULL) {
         latC_error(mv, "Variable '%s' indefinida",
@@ -615,11 +620,6 @@ void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
                            str_name);
             }
         }
-        // if (tmp) {
-        //     // modificamos el up value
-        //     latO_asignar_ctx(mv, ctx_prev, str_name, val);
-        //     return;
-        // }
     }
 
     lat_objeto *ctx_actual = obtener_contexto(mv);
@@ -646,6 +646,7 @@ void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
 
     // si no existe en el contexto actual creamos la variable
     latO_asignar_ctx(mv, ctx_actual, str_name, val);
+    // latO_asignar_ctx(mv, ctx_actual, str_name, latO_clonar(mv, val));
 }
 
 void latMV_set_label(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
@@ -1201,6 +1202,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
 #if DEPURAR_MV
                     printf("%i\n", cur.a);
 #endif
+                    desapilar_contexto(mv);
                     return cur.a;
                 } break;
                 case MAKE_FUNCTION: {

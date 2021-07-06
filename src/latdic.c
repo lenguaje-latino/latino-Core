@@ -55,6 +55,7 @@ LATINO_API void latH_asignar(lat_mv *mv, hash_map *m, const char *key,
                     lat_objeto *obj =
                         (lat_objeto *)((hash_val *)cur->valor)->valor;
                     setobj2obj(obj, val);
+                    // setobj2obj(obj, latO_clonar(mv, val));
                     return;
                 }
             }
@@ -130,11 +131,9 @@ LATINO_API hash_map *latH_clonar(lat_mv *mv, hash_map *m) {
                 LIST_FOREACH(list, primero, siguiente, cur) {
                     if (cur->valor) {
                         char *str_key = ((hash_val *)cur->valor)->llave;
-                        // latH_asignar(mv, ret, str_key,
-                        //              ((hash_val *)cur->valor)->valor);
-                        latH_asignar(
-                            mv, ret, str_key,
-                            latO_clonar(mv, ((hash_val *)cur->valor)->valor));
+                        lat_objeto *obj = ((hash_val *)cur->valor)->valor;
+                        // latH_asignar(mv, ret, str_key, obj);
+                        latH_asignar(mv, ret, str_key, latO_clonar(mv, obj));
                     }
                 }
             }
