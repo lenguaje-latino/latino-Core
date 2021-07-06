@@ -135,7 +135,6 @@ typedef struct lat_mv {
     lat_objeto *pila;
     lat_objeto *tope;
     lat_objeto *base;
-    lat_objeto *actfun;
     lat_objeto *contexto[256];
     lat_objeto *contexto_actual;
     lat_objeto *label_ctx;
@@ -155,7 +154,7 @@ typedef struct lat_mv {
     bool enClase;
     int goto_break[256];    // FIXME: Validar memoria utilizada
     int goto_continue[256]; // FIXME: Validar memoria utilizada
-    int goto_goto[256];
+    int goto_goto[256];     // FIXME: Validar memoria utilizada
 } lat_mv;
 
 #define lati_numUmin(a) (-(a))

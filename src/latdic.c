@@ -130,8 +130,11 @@ LATINO_API hash_map *latH_clonar(lat_mv *mv, hash_map *m) {
                 LIST_FOREACH(list, primero, siguiente, cur) {
                     if (cur->valor) {
                         char *str_key = ((hash_val *)cur->valor)->llave;
-                        latH_asignar(mv, ret, str_key,
-                                     ((hash_val *)cur->valor)->valor);
+                        // latH_asignar(mv, ret, str_key,
+                        //              ((hash_val *)cur->valor)->valor);
+                        latH_asignar(
+                            mv, ret, str_key,
+                            latO_clonar(mv, ((hash_val *)cur->valor)->valor));
                     }
                 }
             }

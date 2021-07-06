@@ -284,8 +284,8 @@ static bool encontrar_continuar(ast *nodo) {
     return rep;
 }
 
-void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val);
-lat_objeto *obtener_contexto_global(lat_mv *mv);
+// void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val);
+// lat_objeto *obtener_contexto_global(lat_mv *mv);
 
 // analiza los nodos para crear el bytecode
 static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
@@ -533,13 +533,6 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
                 mv->goto_break[mv->enBucle] = tmp_i + i;              // 16
                 latM_liberar(mv, code_tmp);
             }
-            // if (encontrar_continuar(nodo->der)) {
-            //     lat_bytecode *code_tmp = latM_asignar(mv,
-            //     sizeof(lat_bytecode) * MAX_BYTECODE_FUNCTION); int tmp_i =
-            //     ast_analizar(mv, nodo->der, code_tmp, 0);  // stmts
-            //     mv->goto_continue[mv->enBucle] = tmp_i + i; // 16
-            //     latM_liberar(mv, code_tmp);
-            // }
             pn(mv, nodo->der); // stmts
             dbc(JUMP_ABSOLUTE, (temp[0] - 1), 0, NULL, nodo->izq->nlin,
                 nodo->izq->ncol, mv->nombre_archivo);
@@ -597,27 +590,12 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             dbc(JUMP_ABSOLUTE, mv->goto_break[mv->enBucle], 0, NULL, mv->nlin,
                 mv->ncol, mv->nombre_archivo);
         } break;
-        // case NODO_CONTINUAR: {
-        //     if (mv->enBucle <= 0) {
-        //         char *info = malloc(MAX_INPUT_SIZE);
-        //         snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT,
-        //         mv->nombre_archivo, mv->nlin, mv->ncol, "Comando
-        //         \"continuar\" esta fuera de un bucle"); fprintf(stderr,
-        //         "%s\n", info);
-        //     }
-        //     dbc(JUMP_ABSOLUTE, mv->goto_continue[mv->enBucle], 0, NULL,
-        //     mv->nlin, mv->ncol,
-        //         mv->nombre_archivo);
-        // } break;
         case NODO_ETIQUETA: {
             lat_objeto *o = latC_crear_cadena(mv, nodo->izq->valor->val.cadena);
             o->nombre = nodo->izq->valor->val.cadena;
             o->tipo = T_LABEL;
             o->jump_label = i; // hacia qué instruccion vamos a saltar
-            // dbc(STORE_LABEL, 0, 0, o, nodo->nlin, nodo->ncol,
-            // mv->nombre_archivo);
             lat_objeto *val = latO_clonar(mv, o);
-            // latMV_set_symbol(mv, o, val);
             lat_objeto *ctx = mv->label_ctx;
             char *str_name = latC_checar_cadena(mv, o);
             lat_objeto *oldVal =
@@ -628,7 +606,6 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             latO_asignar_ctx(mv, ctx, str_name, val);
         } break;
         case NODO_IR: {
-            // if (si no encuentra etiqueta) {}
             lat_objeto *o = latC_crear_cadena(mv, nodo->izq->valor->val.cadena);
             o->nombre = nodo->izq->valor->val.cadena;
             dbc(JUMP_LABEL, 0, 0, o, nodo->nlin, nodo->ncol,
@@ -678,49 +655,56 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             printf("NODO_FUNCION_USUARIO.funcion_codigo: %p\n", funcion_codigo);
 #endif
             fi = 0;
-            // procesar lista de params
+            // procesar lista de parametros
             bool es_vararg = false;
             if (fun->params) {
                 fpn(mv, fun->params);
                 es_vararg = encontrar_vararg(fun->params);
             }
+            fdbc(PUSH_CTX, 0, 0, NULL, fun->nombre->nlin, fun->nombre->ncol,
+                 mv->nombre_archivo);
             // procesar instrucciones
             fpn(mv, fun->stmts);
+            // se agrega "retorno" por default en caso de que la funcion no
+            // tenga uno
             fdbc(RETURN_VALUE, 0, 0, latO_nulo, fun->nombre->nlin,
                  fun->nombre->ncol, mv->nombre_archivo);
-            lat_objeto *f = latC_crear_funcion(mv, funcion_codigo, fi + 1);
-            f->marca = 0;
-            f->es_vararg = es_vararg;
-            dbc(MAKE_FUNCTION, fi + 1, 0, f, fun->nombre->nlin,
+            fdbc(POP_CTX, 0, 0, NULL, fun->nombre->nlin, fun->nombre->ncol,
+                 mv->nombre_archivo);
+            lat_objeto *latFun = latC_crear_funcion(mv, funcion_codigo, fi + 1);
+            latFun->marca = 0;
+            latFun->es_vararg = es_vararg;
+            dbc(MAKE_FUNCTION, fi + 1, 0, latFun, fun->nombre->nlin,
                 fun->nombre->ncol, mv->nombre_archivo);
             funcion_codigo = NULL;
             fi = 0;
-            lat_objeto *o =
+            // nombre de la funcion que se creara
+            lat_objeto *funName =
                 latC_crear_cadena(mv, fun->nombre->valor->val.cadena);
-            o->marca = 0;
-            f->nparams =
+            funName->marca = 0;
+            latFun->nparams =
                 contar_num_parargs(fun->params, NODO_FUNCION_PARAMETROS);
-            f->nombre = strdup(fun->nombre->valor->val.cadena);
-            dbc(STORE_NAME, 0, 0, o, nodo->nlin, nodo->ncol,
+            latFun->nombre = strdup(fun->nombre->valor->val.cadena);
+            dbc(STORE_NAME, 0, 0, funName, nodo->nlin, nodo->ncol,
                 mv->nombre_archivo);
-            if(mv->enClase) {
-                dbc(LOAD_NAME, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
+            if (mv->enClase) {
+                dbc(LOAD_NAME, 0, 0, funName, nodo->der->nlin, nodo->der->ncol,
                     mv->nombre_archivo);
                 lat_objeto *mi = latC_crear_cadena(mv, "mi");
                 mi->marca = 0;
                 mi->esconst = false;
                 dbc(LOAD_NAME, 0, 0, mi, nodo->der->nlin, nodo->der->ncol,
-                mv->nombre_archivo);
-                dbc(STORE_ATTR, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
-                mv->nombre_archivo);
+                    mv->nombre_archivo);
+                dbc(STORE_ATTR, 0, 0, funName, nodo->der->nlin, nodo->der->ncol,
+                    mv->nombre_archivo);
             }
-            if (!strcmp(f->nombre, "anonima")) {
-                lat_objeto *anon = latO_clonar(mv, o);
+            if (!strcmp(latFun->nombre, "anonima")) {
+                lat_objeto *anon = latO_clonar(mv, funName);
                 anon->marca = 0;
                 dbc(LOAD_NAME, 0, 0, anon, nodo->nlin, nodo->ncol,
                     mv->nombre_archivo);
             }
-            if (!strcmp(getstr(getCadena(o)), "menu")) {
+            if (!strcmp(getstr(getCadena(funName)), "menu")) {
                 mv->global->menu = true;
             }
         } break;
@@ -816,35 +800,36 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             fi = 0;
             // procesar lista de params
             bool es_vararg = false;
-            
+
             // procesar instrucciones
             fpn(mv, fun->stmts);
 
-            // crear diccionario vacio            
-            dbc(BUILD_MAP, 0, 0, NULL, mv->nlin, mv->ncol,
-                mv->nombre_archivo);
+            // crear diccionario vacio
+            dbc(BUILD_MAP, 0, 0, NULL, mv->nlin, mv->ncol, mv->nombre_archivo);
             lat_objeto *mi = latC_crear_cadena(mv, "mi");
-                mi->marca = 0;
-                mi->esconst = false;
+            mi->marca = 0;
+            mi->esconst = false;
             dbc(STORE_NAME, 0, 0, mi, nodo->der->nlin, nodo->der->ncol,
-                    mv->nombre_archivo);
-            
-            dbc(LOAD_NAME, 0, 0, mi, nodo->nlin, nodo->ncol, mv->nombre_archivo);
-            fdbc(RETURN_VALUE, 1, 0, mi, fun->nombre->nlin,
-                 fun->nombre->ncol, mv->nombre_archivo);
-            lat_objeto *f = latC_crear_funcion(mv, funcion_codigo, fi + 1);
-            f->marca = 0;
-            f->es_vararg = es_vararg;
-            dbc(MAKE_CLASS, fi + 1, 0, f, fun->nombre->nlin,
+                mv->nombre_archivo);
+
+            dbc(LOAD_NAME, 0, 0, mi, nodo->nlin, nodo->ncol,
+                mv->nombre_archivo);
+            fdbc(RETURN_VALUE, 1, 0, mi, fun->nombre->nlin, fun->nombre->ncol,
+                 mv->nombre_archivo);
+            lat_objeto *latFun = latC_crear_funcion(mv, funcion_codigo, fi + 1);
+            latFun->marca = 0;
+            latFun->es_vararg = es_vararg;
+            dbc(MAKE_CLASS, fi + 1, 0, latFun, fun->nombre->nlin,
                 fun->nombre->ncol, mv->nombre_archivo);
             funcion_codigo = NULL;
             fi = 0;
-            lat_objeto *o =
+            // nombre de la funcion que se creara
+            lat_objeto *funName =
                 latC_crear_cadena(mv, fun->nombre->valor->val.cadena);
-            o->marca = 0;
-            f->es_clase = true;
-            f->nombre = strdup(fun->nombre->valor->val.cadena);
-            dbc(STORE_NAME, 0, 0, o, nodo->nlin, nodo->ncol,
+            funName->marca = 0;
+            latFun->es_clase = true;
+            latFun->nombre = strdup(fun->nombre->valor->val.cadena);
+            dbc(STORE_NAME, 0, 0, funName, nodo->nlin, nodo->ncol,
                 mv->nombre_archivo);
             mv->enClase = false;
         } break;

@@ -281,6 +281,12 @@ static void no_logico(lat_mv *mv) {
 }
 
 static lat_objeto *obtener_contexto(lat_mv *mv) { return mv->contexto_actual; }
+static lat_objeto *obtener_contexto_previo(lat_mv *mv) {
+    if (mv->ptrctx > 1) {
+        return mv->contexto[mv->ptrctx - 1];
+    }
+    return NULL;
+}
 
 lat_objeto *obtener_contexto_global(lat_mv *mv) { return mv->contexto[0]; }
 
@@ -369,7 +375,7 @@ LATINO_API lat_mv *latC_crear_mv() {
     mv->error = NULL;
     mv->global->menu = false;
     mv->enBucle = 0;
-    mv->goto_break;
+    mv->enClase = false;
 
     // cargar librerias de latino
     latC_abrir_liblatino_baselib(mv);
@@ -554,17 +560,26 @@ lat_bytecode latMV_bytecode_crear(int i, int a, int b, void *meta,
 }
 
 lat_objeto *latMV_get_symbol(lat_mv *mv, lat_objeto *name) {
+    // Buscamos en contexto actual
     lat_objeto *ctx = obtener_contexto(mv);
     lat_objeto *val = (lat_objeto *)latO_obtener_contexto(
         mv, ctx, latC_checar_cadena(mv, name));
     if (val == NULL) {
+        // Si no existe buscamos en contexto previo
+        ctx = obtener_contexto_previo(mv);
+        if (ctx) {
+            val = (lat_objeto *)latO_obtener_contexto(
+                mv, ctx, latC_checar_cadena(mv, name));
+        }
+    }
+    if (val == NULL) {
+        // Si no existe buscamos en contexto global
         ctx = obtener_contexto_global(mv);
         val = (lat_objeto *)latO_obtener_contexto(mv, ctx,
                                                   latC_checar_cadena(mv, name));
-        if (val == NULL) {
-            latC_error(mv, "Variable '%s' indefinida",
-                       latC_checar_cadena(mv, name));
-        }
+    }
+    // Si no existe en ningun contexto manda error
+    if (val == NULL) {
         latC_error(mv, "Variable '%s' indefinida",
                    latC_checar_cadena(mv, name));
     }
@@ -588,18 +603,37 @@ void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
     // printf("latMV_set_symbol.val:");
     // latO_imprimir(mv, val, false);
     // printf("\n");
-    lat_objeto *ctx = obtener_contexto(mv);
+
+    // Busca en el contexto previo si existe la variable
+    lat_objeto *ctx_prev = obtener_contexto_previo(mv);
+    if (ctx_prev) {
+        // objeto anterior
+        lat_objeto *tmp = latO_obtener_contexto(mv, ctx_prev, str_name);
+        if (name->esconst) {
+            if (tmp != NULL) {
+                latC_error(mv, "Intento de reasignar valor a constante '%s'",
+                           str_name);
+            }
+        }
+        // if (tmp) {
+        //     // modificamos el up value
+        //     latO_asignar_ctx(mv, ctx_prev, str_name, val);
+        //     return;
+        // }
+    }
+
+    lat_objeto *ctx_actual = obtener_contexto(mv);
     // objeto anterior
-    lat_objeto *tmp = latO_obtener_contexto(mv, ctx, str_name);
+    lat_objeto *tmp = latO_obtener_contexto(mv, ctx_actual, str_name);
     if (name->esconst) {
         if (tmp != NULL) {
             latC_error(mv, "Intento de reasignar valor a constante '%s'",
                        str_name);
         }
     }
-    ctx = obtener_contexto_global(mv);
+    lat_objeto *ctx_global = obtener_contexto_global(mv);
     lat_objeto *oldVal = (lat_objeto *)latO_obtener_contexto(
-        mv, ctx, latC_checar_cadena(mv, name));
+        mv, ctx_global, latC_checar_cadena(mv, name));
     /*
     // FIXME: Error en clases
     if (oldVal != NULL) {
@@ -609,7 +643,9 @@ void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
         }
     }
     */
-    latO_asignar_ctx(mv, ctx, str_name, val);
+
+    // si no existe en el contexto actual creamos la variable
+    latO_asignar_ctx(mv, ctx_actual, str_name, val);
 }
 
 void latMV_set_label(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
@@ -639,16 +675,18 @@ static void latMV_call_function(lat_mv *mv, lat_objeto *func, lat_bytecode cur,
         lat_objeto *ctor =
             (lat_objeto *)latH_obtener(latC_checar_dic(mv, mi), "constructor");
         if (ctor) {
-            if(ctor->nparams == num_args) {
+            if (ctor->nparams == num_args) {
                 latMV_funcion_correr(mv, ctor);
             } else {
-                latC_error(mv, "No existe un constructor con %i argumentos.", num_args);    
+                latC_error(mv, "No existe un constructor con %i argumentos.",
+                           num_args);
             }
         } else {
             // TODO: Pintar tambien el nombre de la clase donde da el error
-            latC_error(mv, "No existe un constructor con %i argumentos.", num_args);
+            latC_error(mv, "No existe un constructor con %i argumentos.",
+                       num_args);
         }
-        
+
         num_args = 0;
     }
 
