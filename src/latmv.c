@@ -87,7 +87,8 @@ static const char *const bycode_nombre[] = {"NOP", /* 0 */
                                             "SET_LOCAL",
                                             "POP_JUMP_IF_NEGATIVE",
                                             "JUMP_LABEL",
-                                            "STORE_LABEL"};
+                                            "STORE_LABEL",
+                                            "MAKE_CLASS"};
 
 void str_concatenar(lat_mv *mv);
 
@@ -99,9 +100,9 @@ void latC_abrir_liblatino_paqlib(lat_mv *mv);
 void latC_abrir_liblatino_filelib(lat_mv *mv);
 void latC_abrir_liblatino_mathlib(lat_mv *mv);
 void latC_abrir_liblatino_syslib(lat_mv *mv);
-void latC_abrir_liblatino_devlib(lat_mv *mv);
 
 /*
+void latC_abrir_liblatino_devlib(lat_mv *mv);
 void latC_abrir_liblatino_uilib     (lat_mv *mv);
 void latC_abrir_liblatino_gc(lat_mv *mv);
 void latC_abrir_liblatino_gtklib(lat_mv *mv);
@@ -280,9 +281,15 @@ static void no_logico(lat_mv *mv) {
     latC_apilar(mv, r);
 }
 
-static lat_objeto *obtener_contexto(lat_mv *mv) { return mv->contexto_actual; }
+static lat_objeto *obtener_contexto(lat_mv *mv) {
+    if (mv->globalCtx) {
+        return mv->ctx_global;
+    } else {
+        return mv->contexto_actual;
+    }
+}
 static lat_objeto *obtener_contexto_previo(lat_mv *mv) {
-    if (mv->ptrctx > 1) {
+    if (mv->ptrctx > 0) {
         return mv->contexto[mv->ptrctx - 1];
     }
     return NULL;
@@ -381,6 +388,7 @@ LATINO_API lat_mv *latC_crear_mv() {
     mv->global->menu = false;
     mv->enBucle = 0;
     mv->enClase = false;
+    mv->globalCtx = false;
 
     // cargar librerias de latino
     latC_abrir_liblatino_baselib(mv);
@@ -567,6 +575,8 @@ lat_objeto *latMV_get_symbol(lat_mv *mv, lat_objeto *name) {
     lat_objeto *val = (lat_objeto *)latO_obtener_contexto(
         mv, ctx, latC_checar_cadena(mv, name));
 
+    // FIXME: Si la funcion es una closure o una clase si buscamos en un nivel
+    // superior
     // if (val == NULL) {
     //     // Si no existe buscamos en contexto previo
     //     ctx = obtener_contexto_previo(mv);
@@ -1141,10 +1151,12 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
 #endif
                 } break;
                 case SET_GLOBAL: {
-                    mv->contexto_actual = obtener_contexto_global(mv);
+                    // mv->contexto_actual = obtener_contexto_global(mv);
+                    mv->globalCtx = true;
                 } break;
                 case SET_LOCAL: {
-                    mv->contexto_actual = mv->contexto[mv->ptrctx];
+                    // mv->contexto_actual = mv->contexto[mv->ptrctx];
+                    mv->globalCtx = false;
                 } break;
                 case LOAD_NAME: {
                     lat_objeto *name = (lat_objeto *)cur.meta;
@@ -1202,7 +1214,6 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
 #if DEPURAR_MV
                     printf("%i\n", cur.a);
 #endif
-                    desapilar_contexto(mv);
                     return cur.a;
                 } break;
                 case MAKE_FUNCTION: {

@@ -46,7 +46,9 @@ THE SOFTWARE.
 #define latC_clear "@cls"
 #define latC_sleep(mili) Sleep(mili * 1000)
 #define latC_leer_linea(x) fgets(x, MAX_INPUT_SIZE, stdin)
-#define LAT_ERROR_FMT "%s:%d:%d: %s\0"
+// TODO: Agregar colores
+#define LAT_ERROR_FMT "\x1B[31m%s:%d:%d:\x1B[0m %s\0"
+#define LAT_WARNING_FMT "\x1B[33m%s:%d:%d:\x1B[0m %s\0"
 // #if DEPURAR_MEM
 /* Visual Leak Detector for Visual C++ */
 // https://github.com/KindDragon/vld
@@ -75,6 +77,7 @@ THE SOFTWARE.
 #define latC_sleep(seg) sleep_ms(seg * 1000)
 #define latC_leer_linea(x) readline(NULL)
 #define LAT_ERROR_FMT "%s:%d:%d: %s\n"
+#define LAT_WARNING_FMT "%s:%d:%d: %s\n"
 #endif
 /* --EndsMacOS-- */
 
@@ -96,6 +99,7 @@ THE SOFTWARE.
 #define latC_sleep(seg) sleep_ms(seg * 1000)
 #define latC_leer_linea(x) readline(NULL)
 #define LAT_ERROR_FMT "\033[1;31m%s:%d:%d:\033[0m %s\n"
+#define LAT_WARNING_FMT "\033[1;33m%s:%d:%d:\033[0m %s\n"
 #endif /* __linux__ */
 
 #ifdef __CYGWIN__
@@ -114,6 +118,7 @@ THE SOFTWARE.
 #define latC_sleep(seg) sleep_ms(seg * 1000)
 #define latC_leer_linea(x) fgets(x, MAX_INPUT_SIZE, stdin)
 #define LAT_ERROR_FMT "\033[1;31m%s:%d:%d:\033[0m %s\n"
+#define LAT_WARNING_FMT "\033[1;33m%s:%d:%d:\033[0m %s\n"
 #endif
 
 /** Determina el compilador*/

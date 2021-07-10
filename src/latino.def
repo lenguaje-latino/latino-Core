@@ -9,6 +9,7 @@ EXPORTS
   latC_apilar_int
   latC_apilar_char
   latC_error
+  latC_advertencia
   latC_llamar_funcion
   latC_analizar
   latC_crear_logico

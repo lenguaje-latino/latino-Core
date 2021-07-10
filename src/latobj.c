@@ -820,6 +820,7 @@ LATINO_API char latC_achar(lat_mv *mv, lat_objeto *o) {
 }
 
 LATINO_API char *latC_astring(lat_mv *mv, lat_objeto *o) {
+    char buffer[MAX_INPUT_SIZE];
     if (o == NULL || o->tipo == T_NULL) {
         return strdup("nulo");
     } else if (o->tipo == T_BOOL) {
@@ -837,13 +838,14 @@ LATINO_API char *latC_astring(lat_mv *mv, lat_objeto *o) {
     } else if (o->tipo == T_LABEL) {
         return strdup(latC_checar_cadena(mv, o));
     } else if (o->tipo == T_FUN) {
-        return strdup("fun");
-    } else if (o->tipo == T_CLASS) {
-        return strdup("clase");
+        snprintf(buffer, MAX_INPUT_SIZE, "lat_funcion: <%s: %p>", o->nombre, o);
+        return strdup(buffer);
     } else if (o->tipo == T_CFUN) {
-        return strdup("cfun");
+        snprintf(buffer, MAX_INPUT_SIZE, "c_funcion: <%s: %p>", o->nombre, o);
+        return strdup(buffer);
     } else if (o->tipo == T_CLASS) {
-        return strdup("clase");
+	snprintf(buffer, MAX_INPUT_SIZE, "lat_clase: <%s: %p>", o->nombre, o);
+        return strdup(buffer);
     } else if (o->tipo == T_LIST) {
         return latL_acadena(mv, latC_checar_lista(mv, o));
     } else if (o->tipo == T_DIC) {

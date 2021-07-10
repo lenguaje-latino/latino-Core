@@ -162,7 +162,7 @@ ast *latA_hacer(ast *cond, ast *stmts) {
 ast *latA_desde(ast *dec, ast *cond, ast *inc, ast *stmts) {
     ast *a = (ast *)malloc(sizeof(ast));
     ast *tmp = stmts;
-    while(tmp->der != NULL) {
+    while (tmp->der != NULL) {
         tmp = tmp->der;
     }
     tmp->der = inc;
@@ -173,7 +173,8 @@ ast *latA_desde(ast *dec, ast *cond, ast *inc, ast *stmts) {
     return a;
 }
 
-ast *latA_para(ast *identificador, ast* inicio, ast* fin, ast* incremento, ast *sentencias) {
+ast *latA_para(ast *identificador, ast *inicio, ast *fin, ast *incremento,
+               ast *sentencias) {
     if (inicio == NULL) {
         inicio = latA_numerico(0, identificador->nlin, identificador->ncol);
     }
@@ -181,10 +182,12 @@ ast *latA_para(ast *identificador, ast* inicio, ast* fin, ast* incremento, ast *
         incremento = latA_numerico(1, identificador->nlin, identificador->ncol);
     }
     if (inicio->tipo == NODO_MENOS_UNARIO) {
-        inicio = latA_numerico(-(inicio->izq->valor->val.numerico), identificador->nlin, identificador->ncol);
+        inicio = latA_numerico(-(inicio->izq->valor->val.numerico),
+                               identificador->nlin, identificador->ncol);
     }
     if (fin->tipo == NODO_MENOS_UNARIO) {
-        fin = latA_numerico(-(fin->izq->valor->val.numerico), identificador->nlin, identificador->ncol);
+        fin = latA_numerico(-(fin->izq->valor->val.numerico),
+                            identificador->nlin, identificador->ncol);
     }
     ast *a = (ast *)malloc(sizeof(ast));
     /* asign -> (i = 3) */
@@ -194,20 +197,25 @@ ast *latA_para(ast *identificador, ast* inicio, ast* fin, ast* incremento, ast *
     if (incremento->tipo == NODO_MENOS_UNARIO) {
         // cuando es decremento
         if (inicio->valor->val.numerico > fin->valor->val.numerico) {
-            cond = latA_nodo(NODO_MAYOR_QUE, identificador, fin, identificador->nlin, identificador->ncol);
-            incremento = latA_numerico(-(incremento->izq->valor->val.numerico), identificador->nlin, identificador->ncol);
+            cond = latA_nodo(NODO_MAYOR_QUE, identificador, fin,
+                             identificador->nlin, identificador->ncol);
+            incremento =
+                latA_numerico(-(incremento->izq->valor->val.numerico),
+                              identificador->nlin, identificador->ncol);
         }
     } else {
         if (inicio->valor->val.numerico < fin->valor->val.numerico) {
-            cond = latA_nodo(NODO_MENOR_QUE, identificador, fin, identificador->nlin, identificador->ncol);
+            cond = latA_nodo(NODO_MENOR_QUE, identificador, fin,
+                             identificador->nlin, identificador->ncol);
         }
     }
     /* suma -> (i + inc) */
-    ast *suma = latA_nodo(NODO_SUMA, identificador, incremento, identificador->nlin, identificador->ncol);
+    ast *suma = latA_nodo(NODO_SUMA, identificador, incremento,
+                          identificador->nlin, identificador->ncol);
     /*inc -> (i = suma) -> i = i + 3 */
     ast *inc = latA_asign(suma, identificador);
     ast *tmp = sentencias;
-    while(tmp->der != NULL) {
+    while (tmp->der != NULL) {
         tmp = tmp->der;
     }
     tmp->der = inc;
@@ -240,7 +248,7 @@ ast *latA_clase(ast *nombre, ast *base, ast *stmts, int nlin, int ncol) {
 
 void latA_destruir(ast *a) {
     if (a) {
-        if(a->tipo < 51) { // a->tipo <= 50
+        if (a->tipo < 51) { // a->tipo <= 50
             switch (a->tipo) {
                 case NODO_SI: {
                     nodo_si *nsi = (nodo_si *)a;
@@ -268,7 +276,7 @@ void latA_destruir(ast *a) {
                 }
                 case NODO_IDENTIFICADOR:
                 case NODO_VALOR:
-                    if(a->valor) {
+                    if (a->valor) {
                         if (a->valor->tipo == VALOR_CADENA) {
                             free(a->valor->val.cadena);
                         }
@@ -287,6 +295,295 @@ void latA_destruir(ast *a) {
     }
 }
 
+void print_spaces(int n_spaces) {
+    int i = 0;
+    while (i < n_spaces) {
+        printf(" ");
+        i++;
+    }
+}
+
+void latA_imprimir(ast *a, int n_spaces) {
+    print_spaces(n_spaces);
+    if (a) {
+        n_spaces++;
+        switch (a->tipo) {
+            case NODO_NULO:
+                printf("`-%sNullNode %s<line: %i, col:%i> %s'NULL'\n", KRED,
+                       KYEL, a->nlin, a->ncol, KBLU);
+                break;
+            case NODO_VALOR: {
+                switch (a->valor->tipo) {
+                    case VALOR_NULO:
+                        printf("`-%sNullLiteral %s<line: %i, col:%i> 'nulo'\n",
+                               KMAG, KYEL, a->nlin, a->ncol);
+                        break;
+                    case VALOR_LOGICO:
+                        printf("`-%sBoolLiteral %s<line: %i, col:%i> %s\n",
+                               KMAG, KYEL, a->nlin, a->ncol,
+                               a->valor->val.logico ? "cierto" : "falso");
+                        break;
+                    case VALOR_NUMERICO:
+                        printf(
+                            "`-%sNumericLiteral %s<line: %i, col:%i> %.16g\n",
+                            KMAG, KYEL, a->nlin, a->ncol,
+                            a->valor->val.numerico);
+                        break;
+                    case VALOR_CADENA:
+                        printf(
+                            "`-%sStringLiteral %s<line: %i, col:%i> %s'%s'\n",
+                            KMAG, KYEL, a->nlin, a->ncol, KCYN,
+                            a->valor->val.cadena);
+                        break;
+                    default:
+                        break;
+                }
+            } break;
+            case NODO_MAS_UNARIO:
+                printf("`-%sUnaryOperator %s<line: %i, col:%i> %s'+'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_MENOS_UNARIO:
+                printf("`-%sUnaryOperator %s<line: %i, col:%i> %s'-'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_INC:
+                printf("`-%sIncrementDecl %s<line: %i, col:%i> %s'++'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_DEC:
+                printf("`-%sDecrementDecl %s<line: %i, col:%i> %s'--'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_SUMA:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'+'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_RESTA:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'-'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_POTENCIA:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'^'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_MULTIPLICACION:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'*'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_DIVISION:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'/'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_MODULO:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'%'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_MAYOR_QUE:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'>'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_MAYOR_IGUAL:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'>='\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_MENOR_QUE:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'<'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_MENOR_IGUAL:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'<='\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_IGUALDAD:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'=='\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_DESIGUALDAD:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'!='\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_Y:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'&&'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_O:
+                printf("`-%sBinaryOperator %s<line: %i, col:%i> %s'||'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_NO:
+                printf("`-%sUnaryOperator %s<line: %i, col:%i> %s'!'\n", KBLU,
+                       KYEL, a->nlin, a->ncol, KCYN);
+                break;
+            case NODO_IDENTIFICADOR:
+                printf("`-%sIdentifier %s<line: %i, col:%i> %s'%s'\n", KMAG,
+                       KYEL, a->nlin, a->ncol, KCYN, a->valor->val.cadena);
+                break;
+            case NODO_BLOQUE:
+                printf("`-%sCompoundStmt %s<line: %i, col:%i>\n", KMAG, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_ASIGNACION:
+                printf("|-%sVarDecl\n", KGRN);
+                break;
+            case NODO_SI:
+                printf("`-%sIfStmt %s<line: %i, col:%i>\n", KCYN, KYEL, a->nlin,
+                       a->ncol);
+                break;
+            case NODO_ELEGIR:
+                printf("`-%sSwitchStmt %s<line: %i, col:%i>\n", KCYN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_CASO:
+                printf("`-%sCaseStmt %s<line: %i, col:%i>\n", KCYN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_DEFECTO:
+                printf("`-%sCaseStmt %s<line: %i, col:%i>\n", KCYN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_CASOS:
+                printf("`-%sCasesStmts %s<line: %i, col:%i>\n", KCYN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_MIENTRAS:
+                printf("`-%sWhileStmt %s<line: %i, col:%i>\n", KCYN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_REPETIR:
+                printf("`-%sDoStmt %s<line: %i, col:%i>\n", KCYN, KYEL, a->nlin,
+                       a->ncol);
+                break;
+            case NODO_DESDE:
+                printf("`-%sForStmt %s<line: %i, col:%i>\n", KCYN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_FUNCION_PARAMETROS:
+                printf("|-%sParmVarDecl %s<line: %i, col:%i>\n", KGRN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_FUNCION_ARGUMENTOS:
+                printf("|-%sArgVarDecl %s<line: %i, col:%i>\n", KGRN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_FUNCION_LLAMADA:
+                printf("|-%sFunCallDecl %s<line: %i, col:%i>\n", KGRN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_FUNCION_USUARIO:
+                printf("|-%sFunctionDecl %s<line: %i, col:%i>\n", KGRN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_RETORNO:
+                printf("`-%sReturnStmt %s<line: %i, col:%i>\n", KGRN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_CONCATENAR:
+                printf("`-%sConcatStmt %s<line: %i, col:%i>\n", KMAG, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_LISTA:
+                printf("`-%sListDecl %s<line: %i, col:%i>\n", KBLU, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_LISTA_ASIGNAR_ELEMENTO:
+                printf("|-%sListAsignDecl %s<line: %i, col:%i>\n", KBLU, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_LISTA_AGREGAR_ELEMENTO:
+                printf("|-%sListAddStmt %s<line: %i, col:%i>\n", KBLU, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_LISTA_OBTENER_ELEMENTO:
+                printf("|-%sListGetDecl %s<line: %i, col:%i>\n", KBLU, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_DICCIONARIO:
+                printf("`-%sDicDecl %s<line: %i, col:%i>\n", KBLU, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_DICC_AGREGAR_ELEMENTO:
+                printf("|-%sDicAddStmt %s<line: %i, col:%i>\n", KBLU, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_DICC_ELEMENTO:
+                printf("|-%sDicElementDecl %s<line: %i, col:%i>\n", KBLU, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_ATRIBUTO:
+                printf("|-%sBuiltinAttr %s<line: %i, col:%i>\n", KBLU, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_GLOBAL:
+                printf("`-%sGlobalDecl %s<line: %i, col:%i>\n", KMAG, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_REGEX:
+                printf("`-%sRegexDecl %s<line: %i, col:%i>\n", KMAG, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_VAR_ARGS:
+                printf("`-%sVarArgsDecl %s<line: %i, col:%i>\n", KGRN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_LOAD_VAR_ARGS:
+                printf("`-%sLoadVarArgsDecl %s<line: %i, col:%i>\n", KGRN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+            case NODO_ROMPER:
+                printf("`-%sBreakDecl %s<line: %i, col:%i>\n", KGRN, KYEL,
+                       a->nlin, a->ncol);
+                break;
+        }
+        switch (a->tipo) {
+            case NODO_SI:
+                nodo_si *nsi = (nodo_si *)a;
+                latA_imprimir(nsi->cond, n_spaces);
+                latA_imprimir(nsi->entonces, n_spaces);
+                if (nsi->_sino) {
+                    latA_imprimir(nsi->_sino, n_spaces);
+                }
+                break;
+            case NODO_FUNCION_USUARIO:
+                nodo_funcion *fun = (nodo_funcion *)a;
+                latA_imprimir(fun->nombre, n_spaces);
+                if (fun->params) {
+                    latA_imprimir(fun->params, n_spaces);
+                }
+                if (fun->stmts) {
+                    latA_imprimir(fun->stmts, n_spaces);
+                }
+                break;
+            case NODO_LISTA_ASIGNAR_ELEMENTO:
+                nodo_lista_elem *nelem = (nodo_lista_elem *)a;
+                latA_imprimir(nelem->id, n_spaces);
+                latA_imprimir(nelem->pos, n_spaces);
+                latA_imprimir(nelem->exp, n_spaces);
+                break;
+            case NODO_MAS_UNARIO:
+            case NODO_MENOS_UNARIO:
+            case NODO_INC:
+            case NODO_DEC:
+                if (a->izq) {
+                    latA_imprimir(a->izq, n_spaces);
+                }
+                break;
+            default:
+                if (a->izq) {
+                    latA_imprimir(a->izq, n_spaces);
+                }
+                if (a->der) {
+                    latA_imprimir(a->der, n_spaces);
+                }
+                break;
+        }
+        printf("%s", KNRM);
+        n_spaces--;
+    } else {
+        printf("%sERROR: NODO_NULO%s\n", KRED, KNRM);
+    }
+}
+
 /**
  * latA_analizar_exp: Esta funcion crea el arbol abstracto de sintaxis a partir
  *de una cadena REM: liberar el nodo cuando se deje de ocupar
@@ -301,6 +598,11 @@ ast *latA_analizar_exp(char *expr, int *status) {
     *status = yyparse(&nodo, scanner);
     yy_delete_buffer(state, scanner);
     yylex_destroy(scanner);
+
+#if DEPURAR_AST
+    latA_imprimir(nodo, 0);
+#endif
+
     return nodo;
 }
 

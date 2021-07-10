@@ -40,7 +40,7 @@ typedef void (*lat_CFuncion)(lat_mv *mv);
 
 /**\brief Muestra las instrucciones que se van ejecutando con la Maquina Virtual
  */
-#define DEPURAR_MV 1
+#define DEPURAR_MV 0
 
 /**\brief op_codes de la maquina virtual */
 #define NOP 0
@@ -153,6 +153,7 @@ typedef struct lat_mv {
     struct lat_longjmp *error;
     int enBucle;
     bool enClase;
+    bool globalCtx;
     int goto_break[256];    // FIXME: Validar memoria utilizada
     int goto_continue[256]; // FIXME: Validar memoria utilizada
     int goto_goto[256];     // FIXME: Validar memoria utilizada

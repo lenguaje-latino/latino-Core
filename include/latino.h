@@ -196,6 +196,7 @@ LATINO_API void latC_apilar_char(lat_mv *mv, char c);
 LATINO_API lat_objeto *latC_analizar(lat_mv *mv, ast *nodo);
 LATINO_API int latC_llamar_funcion(lat_mv *mv, lat_objeto *func);
 LATINO_API void latC_error(lat_mv *mv, const char *fmt, ...);
+LATINO_API void latC_advertencia(lat_mv *mv, const char *fmt, ...);
 
 /* funciones para crear un objeto latino */
 LATINO_API lat_objeto *latC_crear_logico(lat_mv *mv, bool val);
@@ -205,6 +206,7 @@ LATINO_API lat_objeto *latC_crear_caracter(lat_mv *mv, char val);
 LATINO_API lat_objeto *latC_crear_cadena(lat_mv *mv, const char *val);
 LATINO_API lat_objeto *latC_crear_lista(lat_mv *mv, lista *l);
 LATINO_API lat_objeto *latC_crear_dic(lat_mv *mv, hash_map *dic);
+LATINO_API lat_objeto *latC_crear_ctx(lat_mv *mv, hash_map *dic);
 LATINO_API lat_objeto *latC_crear_cdato(lat_mv *mv, void *ptr);
 LATINO_API lat_objeto *latC_crear_funcion(lat_mv *mv, lat_bytecode *inslist,
                                           int ninst);

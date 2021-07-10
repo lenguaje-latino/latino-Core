@@ -358,14 +358,28 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
                     latC_crear_cadena(mv, nodo->der->valor->val.cadena);
                 o->marca = 0;
                 o->esconst = nodo->der->valor->esconst;
-                dbc(STORE_NAME, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
-                    mv->nombre_archivo);
+                if (mv->globalCtx) {
+                    dbc(SET_GLOBAL, 0, 0, NULL, nodo->der->nlin,
+                        nodo->der->ncol, mv->nombre_archivo);
+                    dbc(STORE_NAME, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
+                        mv->nombre_archivo);
+                    dbc(SET_LOCAL, 0, 0, NULL, nodo->der->nlin, nodo->der->ncol,
+                        mv->nombre_archivo);
+                } else {
+                    dbc(STORE_NAME, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
+                        mv->nombre_archivo);
+                }
             }
         } break;
         case NODO_GLOBAL: {
-            dbc(SET_GLOBAL, 0, 0, NULL, mv->nlin, mv->ncol, mv->nombre_archivo);
+            // FIXME: para global fun foo ...
+            // dbc(SET_GLOBAL, 0, 0, NULL, mv->nlin, mv->ncol,
+            // mv->nombre_archivo);
+            mv->globalCtx = true;
             pn(mv, nodo->izq);
-            dbc(SET_LOCAL, 0, 0, NULL, mv->nlin, mv->ncol, mv->nombre_archivo);
+            // dbc(SET_LOCAL, 0, 0, NULL, mv->nlin, mv->ncol,
+            // mv->nombre_archivo);
+            mv->globalCtx = false;
         } break;
         case NODO_MAS_UNARIO: {
             pn(mv, nodo->izq);
@@ -576,6 +590,8 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             pn(mv, nodo->izq);
             int num_args =
                 contar_num_parargs(nodo->izq, NODO_FUNCION_ARGUMENTOS);
+            dbc(POP_CTX, 0, 0, NULL, nodo->izq->nlin, nodo->izq->ncol,
+                mv->nombre_archivo);
             dbc(RETURN_VALUE, num_args == 0 ? 1 : num_args, 0, NULL,
                 nodo->izq->nlin, nodo->izq->ncol, mv->nombre_archivo);
         } break;
@@ -685,8 +701,17 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
             latFun->nparams =
                 contar_num_parargs(fun->params, NODO_FUNCION_PARAMETROS);
             latFun->nombre = strdup(fun->nombre->valor->val.cadena);
-            dbc(STORE_NAME, 0, 0, funName, nodo->nlin, nodo->ncol,
-                mv->nombre_archivo);
+            if (mv->globalCtx) {
+                dbc(SET_GLOBAL, 0, 0, NULL, nodo->nlin, nodo->ncol,
+                    mv->nombre_archivo);
+                dbc(STORE_NAME, 0, 0, funName, nodo->nlin, nodo->ncol,
+                    mv->nombre_archivo);
+                dbc(SET_LOCAL, 0, 0, NULL, nodo->nlin, nodo->ncol,
+                    mv->nombre_archivo);
+            } else {
+                dbc(STORE_NAME, 0, 0, funName, nodo->nlin, nodo->ncol,
+                    mv->nombre_archivo);
+            }
             if (mv->enClase) {
                 dbc(LOAD_NAME, 0, 0, funName, nodo->der->nlin, nodo->der->ncol,
                     mv->nombre_archivo);
@@ -1021,6 +1046,28 @@ LATINO_API void latC_error(lat_mv *mv, const char *fmt, ...) {
     latD_lanzar(mv, LAT_ERRRUN);
 }
 
+LATINO_API void latC_advertencia(lat_mv *mv, const char *fmt, ...) {
+    char buffer[MAX_INPUT_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsprintf(buffer, fmt, args);
+    va_end(args);
+    char *info = malloc(MAX_INPUT_SIZE);
+    if (strstr(buffer, "%") != NULL) {
+        snprintf(info, MAX_INPUT_SIZE, LAT_WARNING_FMT, mv->nombre_archivo,
+                 mv->nlin, mv->ncol, "");
+        latC_apilar(mv, latC_crear_cadena(mv, info));
+        latC_apilar(mv, latC_crear_cadena(mv, buffer));
+        str_concatenar(mv);
+        lat_objeto *err = latC_desapilar(mv);
+        fprintf(stderr, "%s\n", latC_astring(mv, err));
+    } else {
+        snprintf(info, MAX_INPUT_SIZE, LAT_WARNING_FMT, mv->nombre_archivo,
+                 mv->nlin, mv->ncol, buffer);
+        fprintf(stderr, "%s\n", info);
+    }
+}
+
 LATINO_API int latC_llamar_funcion(lat_mv *mv, lat_objeto *func) {
     // printf("latC_llamar_funcion\n");
     struct lat_longjmp lj;
@@ -1040,7 +1087,7 @@ LATINO_API lat_objeto *latC_analizar(lat_mv *mv, ast *nodo) {
 #endif
     int i = ast_analizar(mv, nodo, codigo, 0);
     dbc(HALT, 0, 0, NULL, 0, 0, mv->nombre_archivo);
-#if DEPURAR_AST
+#if DEPURAR_BYTECODE
     mostrar_bytecode(mv, codigo);
 #endif
     lat_bytecode *nuevo_codigo =

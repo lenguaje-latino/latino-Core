@@ -27,6 +27,8 @@ THE SOFTWARE.
 
 #include "latino.h"
 
+#define DEPURAR_BYTECODE 0
+
 void latD_lanzar(lat_mv *mv, int errcode); // throw
 
 #endif /* _LATINO_DO_H_ */

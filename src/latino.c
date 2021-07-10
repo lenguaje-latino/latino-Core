@@ -66,7 +66,7 @@ static void lat_ayuda() {
     printf("%s\n", "-Uso de latino: latino [opcion] [archivo]");
     printf("\n");
     printf("%s\n", "Opciones:");
-    printf("%s\n", "-a | --ayuda     : Muestra la ayuda de Latino");
+    printf("%s\n", "-a | --ayuda | --help    : Muestra la ayuda de Latino");
     printf("%s\n", "-v | --version   : Muestra la version de Latino");
     printf("%s\n", "-e               : Ejecuta una cadena de codigo");
     printf("%s\n", "archivo          : Nombre del archivo con extension .lat");

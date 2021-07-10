@@ -176,7 +176,7 @@ endif(UNIX)
 set(CPACK_GENERATOR                         "DEB;RPM")
 set(CPACK_DEBIAN_PACKAGE_NAME               "latino")
 set(CPACK_PACKAGE_VERSION                   "${LATINO_VERSION}")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER         "primitivo.roman.montero@gmail.com")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER         "primitivo.roman.montero@gmail.com;melving24@gmail.com")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION        "Lenguaje de programación de código abierto para latinos y de habla hispana. http://lenguajelatino.org/")
 set(CPACK_DEBIAN_PACKAGE_SECTION            "education")
 
