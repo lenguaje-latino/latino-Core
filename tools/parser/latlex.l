@@ -135,6 +135,14 @@ EXP ([Ee][-+]?[0-9]+)
 "en"                                            { return EN; }
 "rango"                                         { return RANGO; }
 "ir"                                            { return IR; }
+
+ /* Se agregan para corregir alcance de variables */
+"var"                                           { return VARIABLE; }
+"variable"                                      { return VARIABLE; }
+"const"                                         { return CONSTANTE; }
+"constante"                                     { return CONSTANTE; }
+
+ /* Soporte para clases */
 "clase"                                         { return CLASE; }
 
  /* names */

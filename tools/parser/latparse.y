@@ -112,6 +112,11 @@ int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
     REGEX
     GLOBAL
 
+/* Se agregan para corregir alcance de variables */
+%token
+    VARIABLE
+    CONSTANTE
+
 /* Soporte para clases */
 %token
     CLASE
@@ -554,8 +559,6 @@ clase_funciones
 clase_sentencia
     : clase_propiedades
     | clase_funciones
-    | RETORNO expression { $$ = latA_nodo(NODO_RETORNO, $2, NULL, @1.first_line, @1.first_column); }
-    | RETORNO argument_expression_list { $$ = latA_nodo(NODO_RETORNO, $2, NULL, @1.first_line, @1.first_column); }
     ;
 
 clase_sentencias

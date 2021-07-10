@@ -246,6 +246,8 @@ ast *latA_clase(ast *nombre, ast *base, ast *stmts, int nlin, int ncol) {
     return (ast *)a;
 }
 
+
+// TODO: Destruir NODO_CLASE
 void latA_destruir(ast *a) {
     if (a) {
         if (a->tipo < 51) { // a->tipo <= 50
