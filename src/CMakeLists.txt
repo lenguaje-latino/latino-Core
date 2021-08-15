@@ -81,7 +81,6 @@ if(WIN32)
     message(STATUS "CURRENT PATH WIN32.......... ${CMAKE_CURRENT_SOURCE_DIR}")
     include_directories(latino-regex/src)
     add_subdirectory(latino-regex)
-    set(VS_RESOURCES vs_resources/latino.rc vs_resources/latino.aps vs_resources/resource.h ../logo/icon_build.ico)
 endif()
 
 include_directories(linenoise)
@@ -98,19 +97,19 @@ linenoise/utf8.c linenoise/linenoise.c)
 set(SRC_LATINO ${SRC_LIB})
 
 if(MSVC)
-    add_executable(latino ${SRC_LATINO} ${SRC_LIB} ${VS_RESOURCES})
+    add_executable(${PROJECT_NAME} ${SRC_LATINO} ${SRC_LIB} vs_resources/latino.rc)
 else()
-    add_executable(latino ${SRC_LATINO} ${SRC_LIB})
+    add_executable(${PROJECT_NAME} ${SRC_LATINO} ${SRC_LIB})
 endif(MSVC)
 
-target_link_libraries(latino LINK_PUBLIC ${CMAKE_DL_LIBS})
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})
 
 if(MSVC)
     SET ( CMAKE_SHARED_LINKER_FLAGS /MANIFEST:NO )
 
     message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
     link_directories("${CMAKE_CURRENT_BINARY_DIR}/../latino-regex/src/${CMAKE_BUILD_TYPE}")
-    target_link_libraries(latino regex2)
+    target_link_libraries(${PROJECT_NAME} regex2)
     link_libraries(regex2)
     set(LATINO_DEF latino.def)
 
