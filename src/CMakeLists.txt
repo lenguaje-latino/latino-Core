@@ -17,9 +17,9 @@ set(INSTALL_INCLUDE                         ${CMAKE_INSTALL_PREFIX}/include )
 set(INSTALL_LIB                             ${CMAKE_INSTALL_PREFIX}/lib     )
 set(INSTALL_SHARE                           ${CMAKE_INSTALL_PREFIX}/share   )
 
-message(STATUS "INSTALL_BIN: ${INSTALL_BIN}")
-message(STATUS "INSTALL_INCLUDE: ${INSTALL_INCLUDE}")
-message(STATUS "INSTALL_LIB: ${INSTALL_LIB}")
+message(STATUS "INSTALL_BIN:        ${INSTALL_BIN}")
+message(STATUS "INSTALL_INCLUDE:    ${INSTALL_INCLUDE}")
+message(STATUS "INSTALL_LIB:        ${INSTALL_LIB}")
 
 # Set the output folder where your program will be created
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -48,13 +48,6 @@ else()
     link_libraries(readline)
     set(CMAKE_C_FLAGS                       "${CMAKE_C_FLAGS} -D_GNU_SOURCE -Wall -std=c11 -rdynamic -ldl -fPIC"        )
     set(CMAKE_C_FLAGS_DEBUG                 "${CMAKE_C_FLAGS} -D_GNU_SOURCE -g -O0 -Wall -std=c11 -rdynamic -ldl -fPIC" )
-    
-    # # MSYS
-    # if(MSYS)
-    #     message(STATUS "MSYS: ${MSYS}")
-    #     set(CMAKE_SHARED_LIBRARY_PREFIX "")
-    #     set(CMAKE_STATIC_LIBRARY_PREFIX "")
-    # endif()
 endif()
 
 
@@ -94,12 +87,10 @@ latmathlib.c latsyslib.c latpaqlib.c latdevlib.c latuilib.c
 #extra
 linenoise/utf8.c linenoise/linenoise.c)
 
-set(SRC_LATINO ${SRC_LIB})
-
 if(MSVC)
-    add_executable(${PROJECT_NAME} ${SRC_LATINO} ${SRC_LIB} vs_resources/latino.rc)
+    add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
 else()
-    add_executable(${PROJECT_NAME} ${SRC_LATINO} ${SRC_LIB})
+    add_executable(${PROJECT_NAME} ${SRC_LIB})
 endif(MSVC)
 
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})

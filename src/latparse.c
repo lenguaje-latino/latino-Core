@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.7.6.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -34,6 +34,10 @@
 /* C LALR(1) parser skeleton written by Richard Stallman, by
    simplifying the original so-called "semantic" parser.  */
 
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
 /* All symbols defined below should begin with yy or YY, to avoid
    infringing on user name space.  This should be done even for local
    variables, as they might otherwise be expanded by user macros.
@@ -41,14 +45,11 @@
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* Identify Bison output, and Bison version.  */
+#define YYBISON 30706
 
-/* Identify Bison output.  */
-#define YYBISON 1
-
-/* Bison version.  */
-#define YYBISON_VERSION "3.5.1"
+/* Bison version string.  */
+#define YYBISON_VERSION "3.7.6"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -118,7 +119,7 @@ int yyerror(struct YYLTYPE *yylloc_param, void *scanner, struct ast **root, cons
 int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 
 
-#line 122 "latparse.c"
+#line 123 "latparse.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -141,152 +142,133 @@ int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 #  endif
 # endif
 
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-/* Use api.header.include to #include this header
-   instead of duplicating it here.  */
-#ifndef YY_YY_LATPARSE_H_INCLUDED
-# define YY_YY_LATPARSE_H_INCLUDED
-/* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
-
-/* Token type.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
-  {
-    NUMERICO = 258,
-    CADENA = 259,
-    IDENTIFICADOR = 260,
-    VAR_ARGS = 261,
-    SI = 262,
-    O_SI = 263,
-    FIN = 264,
-    SINO = 265,
-    MIENTRAS = 266,
-    REPETIR = 267,
-    ROMPER = 268,
-    CONTINUAR = 269,
-    HASTA = 270,
-    FUNCION = 271,
-    DESDE = 272,
-    RETORNO = 273,
-    ELEGIR = 274,
-    CASO = 275,
-    DEFECTO = 276,
-    ATRIBUTO = 277,
-    VERDADERO = 278,
-    FALSO = 279,
-    NULO = 280,
-    EXPONENTE = 281,
-    PARA = 282,
-    EN = 283,
-    RANGO = 284,
-    IR = 285,
-    MAYOR_QUE = 286,
-    MENOR_QUE = 287,
-    MAYOR_IGUAL = 288,
-    MENOR_IGUAL = 289,
-    IGUAL_LOGICO = 290,
-    DIFERENTE = 291,
-    Y_LOGICO = 292,
-    O_LOGICO = 293,
-    INCREMENTO = 294,
-    DECREMENTO = 295,
-    CONCATENAR = 296,
-    CONCATENAR_IGUAL = 297,
-    MAS_IGUAL = 298,
-    MENOS_IGUAL = 299,
-    POR_IGUAL = 300,
-    ENTRE_IGUAL = 301,
-    MODULO_IGUAL = 302,
-    REGEX = 303,
-    GLOBAL = 304,
-    CLASE = 305
-  };
-#endif
-/* Tokens.  */
-#define NUMERICO 258
-#define CADENA 259
-#define IDENTIFICADOR 260
-#define VAR_ARGS 261
-#define SI 262
-#define O_SI 263
-#define FIN 264
-#define SINO 265
-#define MIENTRAS 266
-#define REPETIR 267
-#define ROMPER 268
-#define CONTINUAR 269
-#define HASTA 270
-#define FUNCION 271
-#define DESDE 272
-#define RETORNO 273
-#define ELEGIR 274
-#define CASO 275
-#define DEFECTO 276
-#define ATRIBUTO 277
-#define VERDADERO 278
-#define FALSO 279
-#define NULO 280
-#define EXPONENTE 281
-#define PARA 282
-#define EN 283
-#define RANGO 284
-#define IR 285
-#define MAYOR_QUE 286
-#define MENOR_QUE 287
-#define MAYOR_IGUAL 288
-#define MENOR_IGUAL 289
-#define IGUAL_LOGICO 290
-#define DIFERENTE 291
-#define Y_LOGICO 292
-#define O_LOGICO 293
-#define INCREMENTO 294
-#define DECREMENTO 295
-#define CONCATENAR 296
-#define CONCATENAR_IGUAL 297
-#define MAS_IGUAL 298
-#define MENOS_IGUAL 299
-#define POR_IGUAL 300
-#define ENTRE_IGUAL 301
-#define MODULO_IGUAL 302
-#define REGEX 303
-#define GLOBAL 304
-#define CLASE 305
-
-/* Value type.  */
-
-/* Location type.  */
-#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
-typedef struct YYLTYPE YYLTYPE;
-struct YYLTYPE
+#include "latparse.h"
+/* Symbol kind.  */
+enum yysymbol_kind_t
 {
-  int first_line;
-  int first_column;
-  int last_line;
-  int last_column;
+  YYSYMBOL_YYEMPTY = -2,
+  YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
+  YYSYMBOL_YYerror = 1,                    /* error  */
+  YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
+  YYSYMBOL_NUMERICO = 3,                   /* NUMERICO  */
+  YYSYMBOL_CADENA = 4,                     /* CADENA  */
+  YYSYMBOL_IDENTIFICADOR = 5,              /* IDENTIFICADOR  */
+  YYSYMBOL_VAR_ARGS = 6,                   /* VAR_ARGS  */
+  YYSYMBOL_SI = 7,                         /* SI  */
+  YYSYMBOL_O_SI = 8,                       /* O_SI  */
+  YYSYMBOL_FIN = 9,                        /* FIN  */
+  YYSYMBOL_SINO = 10,                      /* SINO  */
+  YYSYMBOL_MIENTRAS = 11,                  /* MIENTRAS  */
+  YYSYMBOL_REPETIR = 12,                   /* REPETIR  */
+  YYSYMBOL_ROMPER = 13,                    /* ROMPER  */
+  YYSYMBOL_CONTINUAR = 14,                 /* CONTINUAR  */
+  YYSYMBOL_HASTA = 15,                     /* HASTA  */
+  YYSYMBOL_FUNCION = 16,                   /* FUNCION  */
+  YYSYMBOL_DESDE = 17,                     /* DESDE  */
+  YYSYMBOL_RETORNO = 18,                   /* RETORNO  */
+  YYSYMBOL_ELEGIR = 19,                    /* ELEGIR  */
+  YYSYMBOL_CASO = 20,                      /* CASO  */
+  YYSYMBOL_DEFECTO = 21,                   /* DEFECTO  */
+  YYSYMBOL_ATRIBUTO = 22,                  /* ATRIBUTO  */
+  YYSYMBOL_VERDADERO = 23,                 /* VERDADERO  */
+  YYSYMBOL_FALSO = 24,                     /* FALSO  */
+  YYSYMBOL_NULO = 25,                      /* NULO  */
+  YYSYMBOL_EXPONENTE = 26,                 /* EXPONENTE  */
+  YYSYMBOL_PARA = 27,                      /* PARA  */
+  YYSYMBOL_EN = 28,                        /* EN  */
+  YYSYMBOL_RANGO = 29,                     /* RANGO  */
+  YYSYMBOL_IR = 30,                        /* IR  */
+  YYSYMBOL_MAYOR_QUE = 31,                 /* MAYOR_QUE  */
+  YYSYMBOL_MENOR_QUE = 32,                 /* MENOR_QUE  */
+  YYSYMBOL_MAYOR_IGUAL = 33,               /* MAYOR_IGUAL  */
+  YYSYMBOL_MENOR_IGUAL = 34,               /* MENOR_IGUAL  */
+  YYSYMBOL_IGUAL_LOGICO = 35,              /* IGUAL_LOGICO  */
+  YYSYMBOL_DIFERENTE = 36,                 /* DIFERENTE  */
+  YYSYMBOL_Y_LOGICO = 37,                  /* Y_LOGICO  */
+  YYSYMBOL_O_LOGICO = 38,                  /* O_LOGICO  */
+  YYSYMBOL_INCREMENTO = 39,                /* INCREMENTO  */
+  YYSYMBOL_DECREMENTO = 40,                /* DECREMENTO  */
+  YYSYMBOL_CONCATENAR = 41,                /* CONCATENAR  */
+  YYSYMBOL_CONCATENAR_IGUAL = 42,          /* CONCATENAR_IGUAL  */
+  YYSYMBOL_MAS_IGUAL = 43,                 /* MAS_IGUAL  */
+  YYSYMBOL_MENOS_IGUAL = 44,               /* MENOS_IGUAL  */
+  YYSYMBOL_POR_IGUAL = 45,                 /* POR_IGUAL  */
+  YYSYMBOL_ENTRE_IGUAL = 46,               /* ENTRE_IGUAL  */
+  YYSYMBOL_MODULO_IGUAL = 47,              /* MODULO_IGUAL  */
+  YYSYMBOL_REGEX = 48,                     /* REGEX  */
+  YYSYMBOL_GLOBAL = 49,                    /* GLOBAL  */
+  YYSYMBOL_CLASE = 50,                     /* CLASE  */
+  YYSYMBOL_51_ = 51,                       /* '='  */
+  YYSYMBOL_52_ = 52,                       /* '+'  */
+  YYSYMBOL_53_ = 53,                       /* '-'  */
+  YYSYMBOL_54_ = 54,                       /* '*'  */
+  YYSYMBOL_55_ = 55,                       /* '/'  */
+  YYSYMBOL_56_ = 56,                       /* '%'  */
+  YYSYMBOL_57_ = 57,                       /* '!'  */
+  YYSYMBOL_58_ = 58,                       /* '^'  */
+  YYSYMBOL_59_ = 59,                       /* '?'  */
+  YYSYMBOL_60_ = 60,                       /* ':'  */
+  YYSYMBOL_61_ = 61,                       /* '('  */
+  YYSYMBOL_62_ = 62,                       /* ')'  */
+  YYSYMBOL_63_ = 63,                       /* '['  */
+  YYSYMBOL_64_ = 64,                       /* ']'  */
+  YYSYMBOL_65_ = 65,                       /* ';'  */
+  YYSYMBOL_66_ = 66,                       /* ','  */
+  YYSYMBOL_67_ = 67,                       /* '{'  */
+  YYSYMBOL_68_ = 68,                       /* '}'  */
+  YYSYMBOL_YYACCEPT = 69,                  /* $accept  */
+  YYSYMBOL_constant_expression = 70,       /* constant_expression  */
+  YYSYMBOL_primary_expression = 71,        /* primary_expression  */
+  YYSYMBOL_unary_expression = 72,          /* unary_expression  */
+  YYSYMBOL_multiplicative_expression = 73, /* multiplicative_expression  */
+  YYSYMBOL_additive_expression = 74,       /* additive_expression  */
+  YYSYMBOL_relational_expression = 75,     /* relational_expression  */
+  YYSYMBOL_equality_expression = 76,       /* equality_expression  */
+  YYSYMBOL_logical_not_expression = 77,    /* logical_not_expression  */
+  YYSYMBOL_logical_and_expression = 78,    /* logical_and_expression  */
+  YYSYMBOL_logical_or_expression = 79,     /* logical_or_expression  */
+  YYSYMBOL_ternary_expression = 80,        /* ternary_expression  */
+  YYSYMBOL_concat_expression = 81,         /* concat_expression  */
+  YYSYMBOL_expression = 82,                /* expression  */
+  YYSYMBOL_program = 83,                   /* program  */
+  YYSYMBOL_statement_list = 84,            /* statement_list  */
+  YYSYMBOL_statement = 85,                 /* statement  */
+  YYSYMBOL_incdec_statement = 86,          /* incdec_statement  */
+  YYSYMBOL_variable_access = 87,           /* variable_access  */
+  YYSYMBOL_field_designator = 88,          /* field_designator  */
+  YYSYMBOL_global_declaration = 89,        /* global_declaration  */
+  YYSYMBOL_declaration = 90,               /* declaration  */
+  YYSYMBOL_labeled_statements = 91,        /* labeled_statements  */
+  YYSYMBOL_labeled_statement_case = 92,    /* labeled_statement_case  */
+  YYSYMBOL_labeled_statement_case_case = 93, /* labeled_statement_case_case  */
+  YYSYMBOL_labeled_statement_default = 94, /* labeled_statement_default  */
+  YYSYMBOL_selection_statement = 95,       /* selection_statement  */
+  YYSYMBOL_osi_statements = 96,            /* osi_statements  */
+  YYSYMBOL_osi_statement = 97,             /* osi_statement  */
+  YYSYMBOL_iteration_statement = 98,       /* iteration_statement  */
+  YYSYMBOL_goto_etiqueta = 99,             /* goto_etiqueta  */
+  YYSYMBOL_jump_statement = 100,           /* jump_statement  */
+  YYSYMBOL_jump_loop = 101,                /* jump_loop  */
+  YYSYMBOL_function_definition = 102,      /* function_definition  */
+  YYSYMBOL_function_anonymous = 103,       /* function_anonymous  */
+  YYSYMBOL_function_call = 104,            /* function_call  */
+  YYSYMBOL_argument_expression_list = 105, /* argument_expression_list  */
+  YYSYMBOL_parameter_list = 106,           /* parameter_list  */
+  YYSYMBOL_list_new = 107,                 /* list_new  */
+  YYSYMBOL_list_items = 108,               /* list_items  */
+  YYSYMBOL_dict_new = 109,                 /* dict_new  */
+  YYSYMBOL_dict_items = 110,               /* dict_items  */
+  YYSYMBOL_dict_item = 111,                /* dict_item  */
+  YYSYMBOL_clase_propiedad = 112,          /* clase_propiedad  */
+  YYSYMBOL_clase_propiedades = 113,        /* clase_propiedades  */
+  YYSYMBOL_clase_funcion = 114,            /* clase_funcion  */
+  YYSYMBOL_clase_funciones = 115,          /* clase_funciones  */
+  YYSYMBOL_clase_sentencia = 116,          /* clase_sentencia  */
+  YYSYMBOL_clase_sentencias = 117,         /* clase_sentencias  */
+  YYSYMBOL_clase_declaracion = 118         /* clase_declaracion  */
 };
-# define YYLTYPE_IS_DECLARED 1
-# define YYLTYPE_IS_TRIVIAL 1
-#endif
+typedef enum yysymbol_kind_t yysymbol_kind_t;
 
-
-
-int yyparse (ast **root, void *scanner);
-
-#endif /* !YY_YY_LATPARSE_H_INCLUDED  */
 
 
 
@@ -325,6 +307,18 @@ typedef __INT_LEAST16_TYPE__ yytype_int16;
 typedef int_least16_t yytype_int16;
 #else
 typedef short yytype_int16;
+#endif
+
+/* Work around bug in HP-UX 11.23, which defines these macros
+   incorrectly for preprocessor constants.  This workaround can likely
+   be removed in 2023, as HPE has promised support for HP-UX 11.23
+   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
+   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
+#ifdef __hpux
+# undef UINT_LEAST8_MAX
+# undef UINT_LEAST16_MAX
+# define UINT_LEAST8_MAX 255
+# define UINT_LEAST16_MAX 65535
 #endif
 
 #if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
@@ -386,6 +380,7 @@ typedef int yytype_uint16;
 
 #define YYSIZEOF(X) YY_CAST (YYPTRDIFF_T, sizeof (X))
 
+
 /* Stored state numbers (used for stacks). */
 typedef yytype_int16 yy_state_t;
 
@@ -403,6 +398,7 @@ typedef int yy_state_fast_t;
 #  define YY_(Msgid) Msgid
 # endif
 #endif
+
 
 #ifndef YY_ATTRIBUTE_PURE
 # if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
@@ -422,9 +418,9 @@ typedef int yy_state_fast_t;
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
@@ -461,7 +457,7 @@ typedef int yy_state_fast_t;
 
 #define YY_ASSERT(E) ((void) (0 && (E)))
 
-#if ! defined yyoverflow || YYERROR_VERBOSE
+#if !defined yyoverflow
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
@@ -526,8 +522,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 # endif
-#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
-
+#endif /* !defined yyoverflow */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
@@ -606,14 +601,16 @@ union yyalloc
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  278
 
-#define YYUNDEFTOK  2
+/* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   305
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
-#define YYTRANSLATE(YYX)                                                \
-  (0 <= (YYX) && (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+#define YYTRANSLATE(YYX)                                \
+  (0 <= (YYX) && (YYX) <= YYMAXUTOK                     \
+   ? YY_CAST (yysymbol_kind_t, yytranslate[YYX])        \
+   : YYSYMBOL_YYUNDEF)
 
 /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex.  */
@@ -674,18 +671,25 @@ static const yytype_int16 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+/** Accessing symbol of state STATE.  */
+#define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
+
+#if YYDEBUG || 0
+/* The user-facing name of the symbol whose (internal) number is
+   YYSYMBOL.  No bounds checking.  */
+static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
+
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "NUMERICO", "CADENA", "IDENTIFICADOR",
-  "VAR_ARGS", "SI", "O_SI", "FIN", "SINO", "MIENTRAS", "REPETIR", "ROMPER",
-  "CONTINUAR", "HASTA", "FUNCION", "DESDE", "RETORNO", "ELEGIR", "CASO",
-  "DEFECTO", "ATRIBUTO", "VERDADERO", "FALSO", "NULO", "EXPONENTE", "PARA",
-  "EN", "RANGO", "IR", "MAYOR_QUE", "MENOR_QUE", "MAYOR_IGUAL",
-  "MENOR_IGUAL", "IGUAL_LOGICO", "DIFERENTE", "Y_LOGICO", "O_LOGICO",
-  "INCREMENTO", "DECREMENTO", "CONCATENAR", "CONCATENAR_IGUAL",
+  "\"end of file\"", "error", "\"invalid token\"", "NUMERICO", "CADENA",
+  "IDENTIFICADOR", "VAR_ARGS", "SI", "O_SI", "FIN", "SINO", "MIENTRAS",
+  "REPETIR", "ROMPER", "CONTINUAR", "HASTA", "FUNCION", "DESDE", "RETORNO",
+  "ELEGIR", "CASO", "DEFECTO", "ATRIBUTO", "VERDADERO", "FALSO", "NULO",
+  "EXPONENTE", "PARA", "EN", "RANGO", "IR", "MAYOR_QUE", "MENOR_QUE",
+  "MAYOR_IGUAL", "MENOR_IGUAL", "IGUAL_LOGICO", "DIFERENTE", "Y_LOGICO",
+  "O_LOGICO", "INCREMENTO", "DECREMENTO", "CONCATENAR", "CONCATENAR_IGUAL",
   "MAS_IGUAL", "MENOS_IGUAL", "POR_IGUAL", "ENTRE_IGUAL", "MODULO_IGUAL",
   "REGEX", "GLOBAL", "CLASE", "'='", "'+'", "'-'", "'*'", "'/'", "'%'",
   "'!'", "'^'", "'?'", "':'", "'('", "')'", "'['", "']'", "';'", "','",
@@ -706,9 +710,15 @@ static const char *const yytname[] =
   "clase_funciones", "clase_sentencia", "clase_sentencias",
   "clase_declaracion", YY_NULLPTR
 };
+
+static const char *
+yysymbol_name (yysymbol_kind_t yysymbol)
+{
+  return yytname[yysymbol];
+}
 #endif
 
-# ifdef YYPRINT
+#ifdef YYPRINT
 /* YYTOKNUM[NUM] -- (External) token number corresponding to the
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_int16 yytoknum[] =
@@ -721,7 +731,7 @@ static const yytype_int16 yytoknum[] =
      305,    61,    43,    45,    42,    47,    37,    33,    94,    63,
       58,    40,    41,    91,    93,    59,    44,   123,   125
 };
-# endif
+#endif
 
 #define YYPACT_NINF (-191)
 
@@ -813,9 +823,9 @@ static const yytype_int16 yypgoto[] =
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
-static const yytype_int16 yydefgoto[] =
+static const yytype_uint8 yydefgoto[] =
 {
-      -1,    50,    51,    52,    53,    54,    55,    56,    57,    58,
+       0,    50,    51,    52,    53,    54,    55,    56,    57,    58,
       59,    60,    61,   159,    17,    18,    19,    63,    64,    22,
       23,    24,   137,   138,   203,   139,    25,   194,   195,    26,
       27,    28,    29,    30,    65,    66,    74,    32,    67,   106,
@@ -1124,10 +1134,10 @@ static const yytype_int8 yyr2[] =
 };
 
 
+enum { YYENOMEM = -2 };
+
 #define yyerrok         (yyerrstatus = 0)
 #define yyclearin       (yychar = YYEMPTY)
-#define YYEMPTY         (-2)
-#define YYEOF           0
 
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
@@ -1153,10 +1163,9 @@ static const yytype_int8 yyr2[] =
       }                                                           \
   while (0)
 
-/* Error token number */
-#define YYTERROR        1
-#define YYERRCODE       256
-
+/* Backward compatibility with an undocumented macro.
+   Use YYerror or YYUNDEF. */
+#define YYERRCODE YYUNDEF
 
 /* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
    If N is 0, then set CURRENT to the empty location which ends
@@ -1204,8 +1213,8 @@ do {                                            \
    This macro was not mandated originally: define only if we know
    we won't break user code: when these are the locations we know.  */
 
-#ifndef YY_LOCATION_PRINT
-# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+# ifndef YY_LOCATION_PRINT
+#  if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
 
 /* Print *YYLOCP on YYO.  Private, do not rely on its existence. */
 
@@ -1235,22 +1244,22 @@ yy_location_print_ (FILE *yyo, YYLTYPE const * const yylocp)
   return res;
  }
 
-#  define YY_LOCATION_PRINT(File, Loc)          \
+#   define YY_LOCATION_PRINT(File, Loc)          \
   yy_location_print_ (File, &(Loc))
 
-# else
-#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-# endif
-#endif
+#  else
+#   define YY_LOCATION_PRINT(File, Loc) ((void) 0)
+#  endif
+# endif /* !defined YY_LOCATION_PRINT */
 
 
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)                    \
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
 do {                                                                      \
   if (yydebug)                                                            \
     {                                                                     \
       YYFPRINTF (stderr, "%s ", Title);                                   \
       yy_symbol_print (stderr,                                            \
-                  Type, Value, Location, root, scanner); \
+                  Kind, Value, Location, root, scanner); \
       YYFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
@@ -1261,21 +1270,22 @@ do {                                                                      \
 `-----------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, ast **root, void *scanner)
+yy_symbol_value_print (FILE *yyo,
+                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, ast **root, void *scanner)
 {
   FILE *yyoutput = yyo;
-  YYUSE (yyoutput);
-  YYUSE (yylocationp);
-  YYUSE (root);
-  YYUSE (scanner);
+  YY_USE (yyoutput);
+  YY_USE (yylocationp);
+  YY_USE (root);
+  YY_USE (scanner);
   if (!yyvaluep)
     return;
 # ifdef YYPRINT
-  if (yytype < YYNTOKENS)
-    YYPRINT (yyo, yytoknum[yytype], *yyvaluep);
+  if (yykind < YYNTOKENS)
+    YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
 # endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yytype);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1285,14 +1295,15 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, YY
 `---------------------------*/
 
 static void
-yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, ast **root, void *scanner)
+yy_symbol_print (FILE *yyo,
+                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, ast **root, void *scanner)
 {
   YYFPRINTF (yyo, "%s %s (",
-             yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
+             yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
 
   YY_LOCATION_PRINT (yyo, *yylocationp);
   YYFPRINTF (yyo, ": ");
-  yy_symbol_value_print (yyo, yytype, yyvaluep, yylocationp, root, scanner);
+  yy_symbol_value_print (yyo, yykind, yyvaluep, yylocationp, root, scanner);
   YYFPRINTF (yyo, ")");
 }
 
@@ -1325,7 +1336,8 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, ast **root, void *scanner)
+yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp,
+                 int yyrule, ast **root, void *scanner)
 {
   int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -1337,9 +1349,9 @@ yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, 
     {
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr,
-                       yystos[+yyssp[yyi + 1 - yynrhs]],
-                       &yyvsp[(yyi + 1) - (yynrhs)]
-                       , &(yylsp[(yyi + 1) - (yynrhs)])                       , root, scanner);
+                       YY_ACCESSING_SYMBOL (+yyssp[yyi + 1 - yynrhs]),
+                       &yyvsp[(yyi + 1) - (yynrhs)],
+                       &(yylsp[(yyi + 1) - (yynrhs)]), root, scanner);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -1354,8 +1366,8 @@ do {                                    \
    multiple parsers can coexist.  */
 int yydebug;
 #else /* !YYDEBUG */
-# define YYDPRINTF(Args)
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)
+# define YYDPRINTF(Args) ((void) 0)
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
 # define YY_STACK_PRINT(Bottom, Top)
 # define YY_REDUCE_PRINT(Rule)
 #endif /* !YYDEBUG */
@@ -1378,257 +1390,32 @@ int yydebug;
 #endif
 
 
-#if YYERROR_VERBOSE
 
-# ifndef yystrlen
-#  if defined __GLIBC__ && defined _STRING_H
-#   define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
-#  else
-/* Return the length of YYSTR.  */
-static YYPTRDIFF_T
-yystrlen (const char *yystr)
-{
-  YYPTRDIFF_T yylen;
-  for (yylen = 0; yystr[yylen]; yylen++)
-    continue;
-  return yylen;
-}
-#  endif
-# endif
 
-# ifndef yystpcpy
-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
-#   define yystpcpy stpcpy
-#  else
-/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-   YYDEST.  */
-static char *
-yystpcpy (char *yydest, const char *yysrc)
-{
-  char *yyd = yydest;
-  const char *yys = yysrc;
 
-  while ((*yyd++ = *yys++) != '\0')
-    continue;
-
-  return yyd - 1;
-}
-#  endif
-# endif
-
-# ifndef yytnamerr
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
-   heuristic is that double-quoting is unnecessary unless the string
-   contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
-   null, do not copy; instead, return the length of what the result
-   would have been.  */
-static YYPTRDIFF_T
-yytnamerr (char *yyres, const char *yystr)
-{
-  if (*yystr == '"')
-    {
-      YYPTRDIFF_T yyn = 0;
-      char const *yyp = yystr;
-
-      for (;;)
-        switch (*++yyp)
-          {
-          case '\'':
-          case ',':
-            goto do_not_strip_quotes;
-
-          case '\\':
-            if (*++yyp != '\\')
-              goto do_not_strip_quotes;
-            else
-              goto append;
-
-          append:
-          default:
-            if (yyres)
-              yyres[yyn] = *yyp;
-            yyn++;
-            break;
-
-          case '"':
-            if (yyres)
-              yyres[yyn] = '\0';
-            return yyn;
-          }
-    do_not_strip_quotes: ;
-    }
-
-  if (yyres)
-    return yystpcpy (yyres, yystr) - yyres;
-  else
-    return yystrlen (yystr);
-}
-# endif
-
-/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
-   about the unexpected token YYTOKEN for the state stack whose top is
-   YYSSP.
-
-   Return 0 if *YYMSG was successfully written.  Return 1 if *YYMSG is
-   not large enough to hold the message.  In that case, also set
-   *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
-   required number of bytes is too large to store.  */
-static int
-yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
-                yy_state_t *yyssp, int yytoken)
-{
-  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-  /* Internationalized format string. */
-  const char *yyformat = YY_NULLPTR;
-  /* Arguments of yyformat: reported tokens (one for the "unexpected",
-     one per "expected"). */
-  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-  /* Actual size of YYARG. */
-  int yycount = 0;
-  /* Cumulated lengths of YYARG.  */
-  YYPTRDIFF_T yysize = 0;
-
-  /* There are many possibilities here to consider:
-     - If this state is a consistent state with a default action, then
-       the only way this function was invoked is if the default action
-       is an error action.  In that case, don't check for expected
-       tokens because there are none.
-     - The only way there can be no lookahead present (in yychar) is if
-       this state is a consistent state with a default action.  Thus,
-       detecting the absence of a lookahead is sufficient to determine
-       that there is no unexpected or expected token to report.  In that
-       case, just report a simple "syntax error".
-     - Don't assume there isn't a lookahead just because this state is a
-       consistent state with a default action.  There might have been a
-       previous inconsistent state, consistent state with a non-default
-       action, or user semantic action that manipulated yychar.
-     - Of course, the expected token list depends on states to have
-       correct lookahead information, and it depends on the parser not
-       to perform extra reductions after fetching a lookahead from the
-       scanner and before detecting a syntax error.  Thus, state merging
-       (from LALR or IELR) and default reductions corrupt the expected
-       token list.  However, the list is correct for canonical LR with
-       one exception: it will still contain any token that will not be
-       accepted due to an error action in a later state.
-  */
-  if (yytoken != YYEMPTY)
-    {
-      int yyn = yypact[+*yyssp];
-      YYPTRDIFF_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
-      yysize = yysize0;
-      yyarg[yycount++] = yytname[yytoken];
-      if (!yypact_value_is_default (yyn))
-        {
-          /* Start YYX at -YYN if negative to avoid negative indexes in
-             YYCHECK.  In other words, skip the first -YYN actions for
-             this state because they are default actions.  */
-          int yyxbegin = yyn < 0 ? -yyn : 0;
-          /* Stay within bounds of both yycheck and yytname.  */
-          int yychecklim = YYLAST - yyn + 1;
-          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-          int yyx;
-
-          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
-                && !yytable_value_is_error (yytable[yyx + yyn]))
-              {
-                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                  {
-                    yycount = 1;
-                    yysize = yysize0;
-                    break;
-                  }
-                yyarg[yycount++] = yytname[yyx];
-                {
-                  YYPTRDIFF_T yysize1
-                    = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
-                  if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
-                    yysize = yysize1;
-                  else
-                    return 2;
-                }
-              }
-        }
-    }
-
-  switch (yycount)
-    {
-# define YYCASE_(N, S)                      \
-      case N:                               \
-        yyformat = S;                       \
-      break
-    default: /* Avoid compiler warnings. */
-      YYCASE_(0, YY_("syntax error"));
-      YYCASE_(1, YY_("syntax error, unexpected %s"));
-      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
-# undef YYCASE_
-    }
-
-  {
-    /* Don't count the "%s"s in the final size, but reserve room for
-       the terminator.  */
-    YYPTRDIFF_T yysize1 = yysize + (yystrlen (yyformat) - 2 * yycount) + 1;
-    if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
-      yysize = yysize1;
-    else
-      return 2;
-  }
-
-  if (*yymsg_alloc < yysize)
-    {
-      *yymsg_alloc = 2 * yysize;
-      if (! (yysize <= *yymsg_alloc
-             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
-        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
-      return 1;
-    }
-
-  /* Avoid sprintf, as that infringes on the user's name space.
-     Don't have undefined behavior even if the translation
-     produced a string with the wrong number of "%s"s.  */
-  {
-    char *yyp = *yymsg;
-    int yyi = 0;
-    while ((*yyp = *yyformat) != '\0')
-      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
-        {
-          yyp += yytnamerr (yyp, yyarg[yyi++]);
-          yyformat += 2;
-        }
-      else
-        {
-          ++yyp;
-          ++yyformat;
-        }
-  }
-  return 0;
-}
-#endif /* YYERROR_VERBOSE */
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, ast **root, void *scanner)
+yydestruct (const char *yymsg,
+            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, ast **root, void *scanner)
 {
-  YYUSE (yyvaluep);
-  YYUSE (yylocationp);
-  YYUSE (root);
-  YYUSE (scanner);
+  YY_USE (yyvaluep);
+  YY_USE (yylocationp);
+  YY_USE (root);
+  YY_USE (scanner);
   if (!yymsg)
     yymsg = "Deleting";
-  YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
+  YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yytype);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
+
+
 
 
 
@@ -1640,7 +1427,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
 int
 yyparse (ast **root, void *scanner)
 {
-/* The lookahead symbol.  */
+/* Lookahead token kind.  */
 int yychar;
 
 
@@ -1659,55 +1446,47 @@ static YYLTYPE yyloc_default
 YYLTYPE yylloc = yyloc_default;
 
     /* Number of syntax errors so far.  */
-    int yynerrs;
+    int yynerrs = 0;
 
-    yy_state_fast_t yystate;
+    yy_state_fast_t yystate = 0;
     /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
+    int yyerrstatus = 0;
 
-    /* The stacks and their tools:
-       'yyss': related to states.
-       'yyvs': related to semantic values.
-       'yyls': related to locations.
-
-       Refer to the stacks through separate pointers, to allow yyoverflow
+    /* Refer to the stacks through separate pointers, to allow yyoverflow
        to reallocate them elsewhere.  */
 
-    /* The state stack.  */
+    /* Their size.  */
+    YYPTRDIFF_T yystacksize = YYINITDEPTH;
+
+    /* The state stack: array, bottom, top.  */
     yy_state_t yyssa[YYINITDEPTH];
-    yy_state_t *yyss;
-    yy_state_t *yyssp;
+    yy_state_t *yyss = yyssa;
+    yy_state_t *yyssp = yyss;
 
-    /* The semantic value stack.  */
+    /* The semantic value stack: array, bottom, top.  */
     YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
+    YYSTYPE *yyvs = yyvsa;
+    YYSTYPE *yyvsp = yyvs;
 
-    /* The location stack.  */
+    /* The location stack: array, bottom, top.  */
     YYLTYPE yylsa[YYINITDEPTH];
-    YYLTYPE *yyls;
-    YYLTYPE *yylsp;
-
-    /* The locations where the error started and ended.  */
-    YYLTYPE yyerror_range[3];
-
-    YYPTRDIFF_T yystacksize;
+    YYLTYPE *yyls = yylsa;
+    YYLTYPE *yylsp = yyls;
 
   int yyn;
+  /* The return value of yyparse.  */
   int yyresult;
-  /* Lookahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  /* Lookahead symbol kind.  */
+  yysymbol_kind_t yytoken = YYSYMBOL_YYEMPTY;
   /* The variables used to return semantic value and location from the
      action routines.  */
   YYSTYPE yyval;
   YYLTYPE yyloc;
 
-#if YYERROR_VERBOSE
-  /* Buffer for error messages, and its allocated size.  */
-  char yymsgbuf[128];
-  char *yymsg = yymsgbuf;
-  YYPTRDIFF_T yymsg_alloc = sizeof yymsgbuf;
-#endif
+  /* The locations where the error started and ended.  */
+  YYLTYPE yyerror_range[3];
+
+
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N), yylsp -= (N))
 
@@ -1715,16 +1494,8 @@ YYLTYPE yylloc = yyloc_default;
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  yyssp = yyss = yyssa;
-  yyvsp = yyvs = yyvsa;
-  yylsp = yyls = yylsa;
-  yystacksize = YYINITDEPTH;
-
   YYDPRINTF ((stderr, "Starting parse\n"));
 
-  yystate = 0;
-  yyerrstatus = 0;
-  yynerrs = 0;
   yychar = YYEMPTY; /* Cause a token to be read.  */
   yylsp[0] = yylloc;
   goto yysetstate;
@@ -1748,6 +1519,7 @@ yysetstate:
   YY_IGNORE_USELESS_CAST_BEGIN
   *yyssp = YY_CAST (yy_state_t, yystate);
   YY_IGNORE_USELESS_CAST_END
+  YY_STACK_PRINT (yyss, yyssp);
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
@@ -1797,7 +1569,7 @@ yysetstate:
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
         YYSTACK_RELOCATE (yyls_alloc, yyls);
-# undef YYSTACK_RELOCATE
+#  undef YYSTACK_RELOCATE
         if (yyss1 != yyssa)
           YYSTACK_FREE (yyss1);
       }
@@ -1837,17 +1609,29 @@ yybackup:
 
   /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
+  /* YYCHAR is either empty, or end-of-input, or a valid lookahead.  */
   if (yychar == YYEMPTY)
     {
-      YYDPRINTF ((stderr, "Reading a token: "));
+      YYDPRINTF ((stderr, "Reading a token\n"));
       yychar = yylex (&yylval, &yylloc, scanner);
     }
 
   if (yychar <= YYEOF)
     {
-      yychar = yytoken = YYEOF;
+      yychar = YYEOF;
+      yytoken = YYSYMBOL_YYEOF;
       YYDPRINTF ((stderr, "Now at end of input.\n"));
+    }
+  else if (yychar == YYerror)
+    {
+      /* The scanner already issued an error message, process directly
+         to error recovery.  But do not keep the error token as
+         lookahead, it is too special and may lead us to an endless
+         loop in error recovery. */
+      yychar = YYUNDEF;
+      yytoken = YYSYMBOL_YYerror;
+      yyerror_range[1] = yylloc;
+      goto yyerrlab1;
     }
   else
     {
@@ -1920,546 +1704,546 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 5:
+  case 5: /* primary_expression: VERDADERO  */
 #line 163 "latparse.y"
                 { (yyval.node) = latA_logico(1, (yylsp[0]).first_line, (yylsp[0]).first_column);}
-#line 1927 "latparse.c"
+#line 1711 "latparse.c"
     break;
 
-  case 6:
+  case 6: /* primary_expression: FALSO  */
 #line 164 "latparse.y"
             { (yyval.node) = latA_logico(0, (yylsp[0]).first_line, (yylsp[0]).first_column);}
-#line 1933 "latparse.c"
+#line 1717 "latparse.c"
     break;
 
-  case 7:
+  case 7: /* primary_expression: NULO  */
 #line 165 "latparse.y"
            { (yyval.node) = latA_nulo(NULL, (yylsp[0]).first_line, (yylsp[0]).first_column);}
-#line 1939 "latparse.c"
+#line 1723 "latparse.c"
     break;
 
-  case 8:
+  case 8: /* unary_expression: '-' expression  */
 #line 169 "latparse.y"
                                {
         (yyval.node) = latA_nodo(NODO_MENOS_UNARIO, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 1948 "latparse.c"
+#line 1732 "latparse.c"
     break;
 
-  case 9:
+  case 9: /* unary_expression: '+' expression  */
 #line 173 "latparse.y"
                                {
         (yyval.node) = latA_nodo(NODO_MAS_UNARIO, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 1957 "latparse.c"
+#line 1741 "latparse.c"
     break;
 
-  case 10:
+  case 10: /* multiplicative_expression: expression '^' expression  */
 #line 180 "latparse.y"
                                 {
         (yyval.node) = latA_nodo(NODO_POTENCIA, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 1966 "latparse.c"
+#line 1750 "latparse.c"
     break;
 
-  case 11:
+  case 11: /* multiplicative_expression: expression EXPONENTE expression  */
 #line 184 "latparse.y"
                                       {
         (yyval.node) = latA_nodo(NODO_POTENCIA, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 1975 "latparse.c"
+#line 1759 "latparse.c"
     break;
 
-  case 12:
+  case 12: /* multiplicative_expression: expression '*' expression  */
 #line 188 "latparse.y"
                                 {
         (yyval.node) = latA_nodo(NODO_MULTIPLICACION, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 1984 "latparse.c"
+#line 1768 "latparse.c"
     break;
 
-  case 13:
+  case 13: /* multiplicative_expression: expression '/' expression  */
 #line 192 "latparse.y"
                                 {
         (yyval.node) = latA_nodo(NODO_DIVISION, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 1993 "latparse.c"
+#line 1777 "latparse.c"
     break;
 
-  case 14:
+  case 14: /* multiplicative_expression: expression '%' expression  */
 #line 196 "latparse.y"
                                           {
         (yyval.node) = latA_nodo(NODO_MODULO, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 2002 "latparse.c"
+#line 1786 "latparse.c"
     break;
 
-  case 15:
+  case 15: /* additive_expression: expression '-' expression  */
 #line 203 "latparse.y"
                                 {
         (yyval.node) = latA_nodo(NODO_RESTA, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 2011 "latparse.c"
+#line 1795 "latparse.c"
     break;
 
-  case 16:
+  case 16: /* additive_expression: expression '+' expression  */
 #line 207 "latparse.y"
                                 {
         (yyval.node) = latA_nodo(NODO_SUMA, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         if((yyval.node) == NULL) YYABORT;
     }
-#line 2020 "latparse.c"
+#line 1804 "latparse.c"
     break;
 
-  case 17:
+  case 17: /* relational_expression: expression MAYOR_QUE expression  */
 #line 214 "latparse.y"
                                       { (yyval.node) = latA_nodo(NODO_MAYOR_QUE, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2026 "latparse.c"
+#line 1810 "latparse.c"
     break;
 
-  case 18:
+  case 18: /* relational_expression: expression MENOR_QUE expression  */
 #line 215 "latparse.y"
                                       { (yyval.node) = latA_nodo(NODO_MENOR_QUE, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2032 "latparse.c"
+#line 1816 "latparse.c"
     break;
 
-  case 19:
+  case 19: /* relational_expression: expression MAYOR_IGUAL expression  */
 #line 216 "latparse.y"
                                         { (yyval.node) = latA_nodo(NODO_MAYOR_IGUAL, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2038 "latparse.c"
+#line 1822 "latparse.c"
     break;
 
-  case 20:
+  case 20: /* relational_expression: expression MENOR_IGUAL expression  */
 #line 217 "latparse.y"
                                         { (yyval.node) = latA_nodo(NODO_MENOR_IGUAL, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2044 "latparse.c"
+#line 1828 "latparse.c"
     break;
 
-  case 21:
+  case 21: /* equality_expression: expression DIFERENTE expression  */
 #line 221 "latparse.y"
                                       { (yyval.node) = latA_nodo(NODO_DESIGUALDAD, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2050 "latparse.c"
+#line 1834 "latparse.c"
     break;
 
-  case 22:
+  case 22: /* equality_expression: expression IGUAL_LOGICO expression  */
 #line 222 "latparse.y"
                                          { (yyval.node) = latA_nodo(NODO_IGUALDAD, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2056 "latparse.c"
+#line 1840 "latparse.c"
     break;
 
-  case 23:
+  case 23: /* equality_expression: expression REGEX expression  */
 #line 223 "latparse.y"
                                   { (yyval.node) = latA_nodo(NODO_REGEX, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2062 "latparse.c"
+#line 1846 "latparse.c"
     break;
 
-  case 24:
+  case 24: /* logical_not_expression: '!' expression  */
 #line 227 "latparse.y"
                                { (yyval.node) = latA_nodo(NODO_NO, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2068 "latparse.c"
+#line 1852 "latparse.c"
     break;
 
-  case 25:
+  case 25: /* logical_and_expression: expression Y_LOGICO expression  */
 #line 231 "latparse.y"
                                      { (yyval.node) = latA_nodo(NODO_Y, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2074 "latparse.c"
+#line 1858 "latparse.c"
     break;
 
-  case 26:
+  case 26: /* logical_or_expression: expression O_LOGICO expression  */
 #line 235 "latparse.y"
                                      { (yyval.node) = latA_nodo(NODO_O, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2080 "latparse.c"
+#line 1864 "latparse.c"
     break;
 
-  case 27:
+  case 27: /* ternary_expression: expression '?' expression ':' expression  */
 #line 239 "latparse.y"
                                                  { (yyval.node) = latA_si((yyvsp[-4].node), (yyvsp[-2].node), (yyvsp[0].node)); }
-#line 2086 "latparse.c"
+#line 1870 "latparse.c"
     break;
 
-  case 28:
+  case 28: /* concat_expression: expression CONCATENAR expression  */
 #line 243 "latparse.y"
                                        { (yyval.node) = latA_nodo(NODO_CONCATENAR, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2092 "latparse.c"
+#line 1876 "latparse.c"
     break;
 
-  case 29:
+  case 29: /* expression: '(' expression ')'  */
 #line 247 "latparse.y"
                          { (yyval.node) = (yyvsp[-1].node); }
-#line 2098 "latparse.c"
+#line 1882 "latparse.c"
     break;
 
-  case 48:
+  case 48: /* expression: VAR_ARGS  */
 #line 266 "latparse.y"
                { (yyval.node) = latA_nodo(NODO_LOAD_VAR_ARGS , NULL, NULL, 0, 0); }
-#line 2104 "latparse.c"
+#line 1888 "latparse.c"
     break;
 
-  case 49:
+  case 49: /* program: %empty  */
 #line 270 "latparse.y"
       { /* empty */
         *root = NULL;
     }
-#line 2112 "latparse.c"
+#line 1896 "latparse.c"
     break;
 
-  case 50:
+  case 50: /* program: statement_list  */
 #line 273 "latparse.y"
                      { *root = (yyvsp[0].node); }
-#line 2118 "latparse.c"
+#line 1902 "latparse.c"
     break;
 
-  case 51:
+  case 51: /* statement_list: statement statement_list  */
 #line 277 "latparse.y"
                                {
         if((yyvsp[0].node)){
             (yyval.node) = latA_nodo(NODO_BLOQUE, (yyvsp[-1].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         }
     }
-#line 2128 "latparse.c"
+#line 1912 "latparse.c"
     break;
 
-  case 52:
+  case 52: /* statement_list: statement  */
 #line 282 "latparse.y"
                 {
         if((yyvsp[0].node)){
           (yyval.node) = latA_nodo(NODO_BLOQUE, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column);
         }
     }
-#line 2138 "latparse.c"
+#line 1922 "latparse.c"
     break;
 
-  case 53:
+  case 53: /* statement_list: error statement_list  */
 #line 287 "latparse.y"
                            { yyerrok; yyclearin;}
-#line 2144 "latparse.c"
+#line 1928 "latparse.c"
     break;
 
-  case 65:
+  case 65: /* incdec_statement: variable_access INCREMENTO  */
 #line 305 "latparse.y"
                                  { (yyval.node) = latA_nodo(NODO_INC, (yyvsp[-1].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2150 "latparse.c"
+#line 1934 "latparse.c"
     break;
 
-  case 66:
+  case 66: /* incdec_statement: variable_access DECREMENTO  */
 #line 306 "latparse.y"
                                  { (yyval.node) = latA_nodo(NODO_DEC, (yyvsp[-1].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2156 "latparse.c"
+#line 1940 "latparse.c"
     break;
 
-  case 70:
+  case 70: /* field_designator: variable_access ATRIBUTO IDENTIFICADOR  */
 #line 316 "latparse.y"
                                              { (yyval.node) = latA_nodo(NODO_ATRIBUTO, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2162 "latparse.c"
+#line 1946 "latparse.c"
     break;
 
-  case 71:
+  case 71: /* field_designator: variable_access '[' expression ']'  */
 #line 317 "latparse.y"
                                          { (yyval.node) = latA_nodo(NODO_LISTA_OBTENER_ELEMENTO, (yyvsp[-1].node), (yyvsp[-3].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2168 "latparse.c"
+#line 1952 "latparse.c"
     break;
 
-  case 72:
+  case 72: /* global_declaration: GLOBAL declaration  */
 #line 321 "latparse.y"
                          {
         (yyval.node) = latA_nodo(NODO_GLOBAL, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column);
     }
-#line 2176 "latparse.c"
+#line 1960 "latparse.c"
     break;
 
-  case 73:
+  case 73: /* global_declaration: GLOBAL function_definition  */
 #line 324 "latparse.y"
                                  {
         (yyval.node) = latA_nodo(NODO_GLOBAL, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column);
     }
-#line 2184 "latparse.c"
+#line 1968 "latparse.c"
     break;
 
-  case 74:
+  case 74: /* declaration: variable_access '=' expression  */
 #line 330 "latparse.y"
                                      { (yyval.node) = latA_asign((yyvsp[0].node), (yyvsp[-2].node)); }
-#line 2190 "latparse.c"
+#line 1974 "latparse.c"
     break;
 
-  case 75:
+  case 75: /* declaration: variable_access CONCATENAR_IGUAL expression  */
 #line 331 "latparse.y"
                                                   { (yyval.node) = latA_asign(
         (latA_nodo(NODO_CONCATENAR, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column)), (yyvsp[-2].node)); }
-#line 2197 "latparse.c"
+#line 1981 "latparse.c"
     break;
 
-  case 76:
+  case 76: /* declaration: variable_access MAS_IGUAL expression  */
 #line 333 "latparse.y"
                                            { (yyval.node) = latA_asign(
         (latA_nodo(NODO_SUMA, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column)), (yyvsp[-2].node)); }
-#line 2204 "latparse.c"
+#line 1988 "latparse.c"
     break;
 
-  case 77:
+  case 77: /* declaration: variable_access MENOS_IGUAL expression  */
 #line 335 "latparse.y"
                                              { (yyval.node) = latA_asign(
         (latA_nodo(NODO_RESTA, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column)), (yyvsp[-2].node)); }
-#line 2211 "latparse.c"
+#line 1995 "latparse.c"
     break;
 
-  case 78:
+  case 78: /* declaration: variable_access POR_IGUAL expression  */
 #line 337 "latparse.y"
                                            { (yyval.node) = latA_asign(
         (latA_nodo(NODO_MULTIPLICACION, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column)), (yyvsp[-2].node)); }
-#line 2218 "latparse.c"
+#line 2002 "latparse.c"
     break;
 
-  case 79:
+  case 79: /* declaration: variable_access ENTRE_IGUAL expression  */
 #line 339 "latparse.y"
                                              { (yyval.node) = latA_asign(
         (latA_nodo(NODO_DIVISION, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column)), (yyvsp[-2].node)); }
-#line 2225 "latparse.c"
+#line 2009 "latparse.c"
     break;
 
-  case 80:
+  case 80: /* declaration: variable_access MODULO_IGUAL expression  */
 #line 341 "latparse.y"
                                               { (yyval.node) = latA_asign(
         (latA_nodo(NODO_MODULO, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column)), (yyvsp[-2].node)); }
-#line 2232 "latparse.c"
+#line 2016 "latparse.c"
     break;
 
-  case 81:
+  case 81: /* declaration: parameter_list '=' argument_expression_list  */
 #line 343 "latparse.y"
                                                   { (yyval.node) = latA_asign((yyvsp[0].node), (yyvsp[-2].node)); }
-#line 2238 "latparse.c"
+#line 2022 "latparse.c"
     break;
 
-  case 82:
+  case 82: /* declaration: variable_access '[' expression ']' '=' expression  */
 #line 344 "latparse.y"
                                                         { (yyval.node) = latA_asign_le((yyvsp[0].node), (yyvsp[-5].node), (yyvsp[-3].node)); }
-#line 2244 "latparse.c"
+#line 2028 "latparse.c"
     break;
 
-  case 83:
+  case 83: /* labeled_statements: labeled_statement_case labeled_statements  */
 #line 348 "latparse.y"
                                                 {
         (yyval.node) = latA_nodo(NODO_CASOS, (yyvsp[-1].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
     }
-#line 2252 "latparse.c"
+#line 2036 "latparse.c"
     break;
 
-  case 84:
+  case 84: /* labeled_statements: labeled_statement_case  */
 #line 351 "latparse.y"
                              {
         (yyval.node) = latA_nodo(NODO_CASOS, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column);
     }
-#line 2260 "latparse.c"
+#line 2044 "latparse.c"
     break;
 
-  case 85:
+  case 85: /* labeled_statements: labeled_statement_default  */
 #line 354 "latparse.y"
                                 {
         (yyval.node) = latA_nodo(NODO_CASOS, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column);
     }
-#line 2268 "latparse.c"
+#line 2052 "latparse.c"
     break;
 
-  case 86:
+  case 86: /* labeled_statement_case: CASO labeled_statement_case_case statement_list  */
 #line 360 "latparse.y"
                                                       {
         (yyval.node) = latA_nodo(NODO_CASO, (yyvsp[-1].node), (yyvsp[0].node), (yylsp[-2]).first_line, (yylsp[-2]).first_column);
     }
-#line 2276 "latparse.c"
+#line 2060 "latparse.c"
     break;
 
-  case 88:
+  case 88: /* labeled_statement_case_case: constant_expression ':' CASO labeled_statement_case_case  */
 #line 367 "latparse.y"
                                                                {
         (yyval.node) = latA_nodo(NODO_CASOS, (yyvsp[-3].node), (yyvsp[0].node), (yylsp[-3]).first_line, (yylsp[-3]).first_column);
     }
-#line 2284 "latparse.c"
+#line 2068 "latparse.c"
     break;
 
-  case 89:
+  case 89: /* labeled_statement_default: DEFECTO ':' statement_list  */
 #line 373 "latparse.y"
                                  {
         (yyval.node) = latA_nodo(NODO_DEFECTO, NULL, (yyvsp[0].node), (yylsp[-2]).first_line, (yylsp[-2]).first_column);
     }
-#line 2292 "latparse.c"
+#line 2076 "latparse.c"
     break;
 
-  case 90:
+  case 90: /* selection_statement: SI expression statement_list FIN  */
 #line 379 "latparse.y"
                                        {
         (yyval.node) = latA_si((yyvsp[-2].node), (yyvsp[-1].node), NULL); }
-#line 2299 "latparse.c"
+#line 2083 "latparse.c"
     break;
 
-  case 91:
+  case 91: /* selection_statement: SI expression statement_list SINO statement_list FIN  */
 #line 381 "latparse.y"
                                                            {
         (yyval.node) = latA_si((yyvsp[-4].node), (yyvsp[-3].node), (yyvsp[-1].node)); }
-#line 2306 "latparse.c"
+#line 2090 "latparse.c"
     break;
 
-  case 92:
+  case 92: /* selection_statement: SI expression statement_list osi_statements FIN  */
 #line 383 "latparse.y"
                                                       {
         (yyval.node) = latA_si((yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[-1].node)); }
-#line 2313 "latparse.c"
+#line 2097 "latparse.c"
     break;
 
-  case 93:
+  case 93: /* selection_statement: ELEGIR expression labeled_statements FIN  */
 #line 385 "latparse.y"
                                                {
         (yyval.node) = latA_nodo(NODO_ELEGIR, (yyvsp[-2].node), (yyvsp[-1].node), (yylsp[-3]).first_line, (yylsp[-3]).first_column);
     }
-#line 2321 "latparse.c"
+#line 2105 "latparse.c"
     break;
 
-  case 96:
+  case 96: /* osi_statement: O_SI expression statement_list  */
 #line 396 "latparse.y"
                                      {
           (yyval.node) = latA_si((yyvsp[-1].node), (yyvsp[0].node), NULL);
     }
-#line 2329 "latparse.c"
+#line 2113 "latparse.c"
     break;
 
-  case 97:
+  case 97: /* osi_statement: O_SI expression statement_list SINO statement_list  */
 #line 399 "latparse.y"
                                                          {
           (yyval.node) = latA_si((yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[0].node));
     }
-#line 2337 "latparse.c"
+#line 2121 "latparse.c"
     break;
 
-  case 98:
+  case 98: /* osi_statement: O_SI expression statement_list osi_statements  */
 #line 402 "latparse.y"
                                                     {
           (yyval.node) = latA_si((yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
     }
-#line 2345 "latparse.c"
+#line 2129 "latparse.c"
     break;
 
-  case 99:
+  case 99: /* iteration_statement: MIENTRAS expression statement_list FIN  */
 #line 408 "latparse.y"
                                              {
         (yyval.node) = latA_mientras((yyvsp[-2].node), (yyvsp[-1].node)); }
-#line 2352 "latparse.c"
+#line 2136 "latparse.c"
     break;
 
-  case 100:
+  case 100: /* iteration_statement: REPETIR statement_list HASTA expression  */
 #line 410 "latparse.y"
                                               {
         (yyval.node) = latA_hacer((yyvsp[0].node), (yyvsp[-2].node)); }
-#line 2359 "latparse.c"
+#line 2143 "latparse.c"
     break;
 
-  case 101:
+  case 101: /* iteration_statement: DESDE '(' declaration ';' expression ';' statement ')' statement_list FIN  */
 #line 413 "latparse.y"
                             {
         (yyval.node) = latA_desde((yyvsp[-7].node), (yyvsp[-5].node), (yyvsp[-3].node), (yyvsp[-1].node)); }
-#line 2366 "latparse.c"
+#line 2150 "latparse.c"
     break;
 
-  case 102:
+  case 102: /* iteration_statement: PARA IDENTIFICADOR EN RANGO '(' expression ')' statement_list FIN  */
 #line 416 "latparse.y"
                            {
         (yyval.node) = latA_para((yyvsp[-7].node), NULL, (yyvsp[-3].node), NULL, (yyvsp[-1].node));
         }
-#line 2374 "latparse.c"
+#line 2158 "latparse.c"
     break;
 
-  case 103:
+  case 103: /* iteration_statement: PARA IDENTIFICADOR EN RANGO '(' expression ',' expression ')' statement_list FIN  */
 #line 420 "latparse.y"
                            {
         (yyval.node) = latA_para((yyvsp[-9].node), (yyvsp[-5].node), (yyvsp[-3].node), NULL, (yyvsp[-1].node));
         }
-#line 2382 "latparse.c"
+#line 2166 "latparse.c"
     break;
 
-  case 104:
+  case 104: /* iteration_statement: PARA IDENTIFICADOR EN RANGO '(' expression ',' expression ',' expression ')' statement_list FIN  */
 #line 424 "latparse.y"
                            {
         (yyval.node) = latA_para((yyvsp[-11].node), (yyvsp[-7].node), (yyvsp[-5].node), (yyvsp[-3].node), (yyvsp[-1].node));
         }
-#line 2390 "latparse.c"
+#line 2174 "latparse.c"
     break;
 
-  case 105:
+  case 105: /* goto_etiqueta: IDENTIFICADOR ':'  */
 #line 430 "latparse.y"
                         { (yyval.node) = latA_nodo(NODO_ETIQUETA, (yyvsp[-1].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2396 "latparse.c"
+#line 2180 "latparse.c"
     break;
 
-  case 106:
+  case 106: /* jump_statement: RETORNO expression  */
 #line 434 "latparse.y"
                          { (yyval.node) = latA_nodo(NODO_RETORNO, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2402 "latparse.c"
+#line 2186 "latparse.c"
     break;
 
-  case 107:
+  case 107: /* jump_statement: RETORNO argument_expression_list  */
 #line 435 "latparse.y"
                                        { (yyval.node) = latA_nodo(NODO_RETORNO, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2408 "latparse.c"
+#line 2192 "latparse.c"
     break;
 
-  case 108:
+  case 108: /* jump_statement: IR IDENTIFICADOR  */
 #line 436 "latparse.y"
                        { (yyval.node) =  latA_nodo(NODO_IR, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2414 "latparse.c"
+#line 2198 "latparse.c"
     break;
 
-  case 109:
+  case 109: /* jump_loop: ROMPER  */
 #line 440 "latparse.y"
                 { (yyval.node) = latA_nodo(NODO_ROMPER, NULL, NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2420 "latparse.c"
+#line 2204 "latparse.c"
     break;
 
-  case 110:
+  case 110: /* jump_loop: CONTINUAR  */
 #line 441 "latparse.y"
                 { (yyval.node) = latA_nodo(NODO_CONTINUAR, NULL, NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2426 "latparse.c"
+#line 2210 "latparse.c"
     break;
 
-  case 111:
+  case 111: /* function_definition: FUNCION IDENTIFICADOR '(' parameter_list ')' statement_list FIN  */
 #line 445 "latparse.y"
                                                                       {
         (yyval.node) = latA_funcion((yyvsp[-5].node), (yyvsp[-3].node), (yyvsp[-1].node), (yylsp[-5]).first_line, (yylsp[-5]).first_column);
     }
-#line 2434 "latparse.c"
+#line 2218 "latparse.c"
     break;
 
-  case 112:
+  case 112: /* function_anonymous: FUNCION '(' parameter_list ')' statement_list FIN  */
 #line 451 "latparse.y"
                                                         {
         (yyval.node) = latA_funcion(latA_var("anonima", (yylsp[-5]).first_line, (yylsp[-5]).first_column, false), (yyvsp[-3].node), (yyvsp[-1].node), (yylsp[-5]).first_line, (yylsp[-5]).first_column);
     }
-#line 2442 "latparse.c"
+#line 2226 "latparse.c"
     break;
 
-  case 113:
+  case 113: /* function_call: variable_access '(' argument_expression_list ')'  */
 #line 457 "latparse.y"
                                                        { (yyval.node) = latA_nodo(NODO_FUNCION_LLAMADA, (yyvsp[-3].node), (yyvsp[-1].node), (yylsp[-3]).first_line, (yylsp[-3]).first_column); }
-#line 2448 "latparse.c"
+#line 2232 "latparse.c"
     break;
 
-  case 114:
+  case 114: /* argument_expression_list: %empty  */
 #line 461 "latparse.y"
                   { (yyval.node) = NULL; }
-#line 2454 "latparse.c"
+#line 2238 "latparse.c"
     break;
 
-  case 115:
+  case 115: /* argument_expression_list: expression  */
 #line 462 "latparse.y"
                  { (yyval.node) = latA_nodo(NODO_FUNCION_ARGUMENTOS, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2460 "latparse.c"
+#line 2244 "latparse.c"
     break;
 
-  case 116:
+  case 116: /* argument_expression_list: expression ',' argument_expression_list  */
 #line 463 "latparse.y"
                                               {
         if((yyvsp[-2].node)->tipo == NODO_VAR_ARGS){
@@ -2468,28 +2252,28 @@ yyreduce:
         }
         (yyval.node) = latA_nodo(NODO_FUNCION_ARGUMENTOS, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-2]).first_line, (yylsp[-2]).first_column);
     }
-#line 2472 "latparse.c"
+#line 2256 "latparse.c"
     break;
 
-  case 117:
+  case 117: /* parameter_list: %empty  */
 #line 473 "latparse.y"
                   { (yyval.node) = NULL; }
-#line 2478 "latparse.c"
+#line 2262 "latparse.c"
     break;
 
-  case 118:
+  case 118: /* parameter_list: IDENTIFICADOR  */
 #line 474 "latparse.y"
                     { (yyval.node) = latA_nodo(NODO_FUNCION_PARAMETROS, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2484 "latparse.c"
+#line 2268 "latparse.c"
     break;
 
-  case 119:
+  case 119: /* parameter_list: VAR_ARGS  */
 #line 475 "latparse.y"
                { (yyval.node) = latA_nodo(NODO_FUNCION_PARAMETROS, (yyvsp[0].node), NULL, 0, 0); }
-#line 2490 "latparse.c"
+#line 2274 "latparse.c"
     break;
 
-  case 120:
+  case 120: /* parameter_list: parameter_list ',' IDENTIFICADOR  */
 #line 476 "latparse.y"
                                        {
         if((yyvsp[-2].node)->izq->tipo == NODO_VAR_ARGS){
@@ -2497,34 +2281,34 @@ yyreduce:
             YYABORT;
         }
         (yyval.node) = latA_nodo(NODO_FUNCION_PARAMETROS, (yyvsp[0].node), (yyvsp[-2].node), (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2501 "latparse.c"
+#line 2285 "latparse.c"
     break;
 
-  case 121:
+  case 121: /* parameter_list: parameter_list ',' VAR_ARGS  */
 #line 482 "latparse.y"
                                   { (yyval.node) = latA_nodo(NODO_FUNCION_PARAMETROS, (yyvsp[0].node), (yyvsp[-2].node), 0, 0); }
-#line 2507 "latparse.c"
+#line 2291 "latparse.c"
     break;
 
-  case 122:
+  case 122: /* list_new: '[' list_items ']'  */
 #line 486 "latparse.y"
                          { (yyval.node) = latA_nodo(NODO_LISTA, (yyvsp[-1].node), NULL, (yylsp[-2]).first_line, (yylsp[-2]).first_column); }
-#line 2513 "latparse.c"
+#line 2297 "latparse.c"
     break;
 
-  case 123:
+  case 123: /* list_items: %empty  */
 #line 490 "latparse.y"
                   { (yyval.node) = NULL; }
-#line 2519 "latparse.c"
+#line 2303 "latparse.c"
     break;
 
-  case 124:
+  case 124: /* list_items: expression  */
 #line 491 "latparse.y"
                  { (yyval.node) = latA_nodo(NODO_LISTA_AGREGAR_ELEMENTO, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2525 "latparse.c"
+#line 2309 "latparse.c"
     break;
 
-  case 125:
+  case 125: /* list_items: expression ',' list_items  */
 #line 492 "latparse.y"
                                 {
         if((yyvsp[-2].node)->tipo == NODO_LOAD_VAR_ARGS){
@@ -2533,158 +2317,158 @@ yyreduce:
         }
         (yyval.node) = latA_nodo(NODO_LISTA_AGREGAR_ELEMENTO, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[0]).first_line, (yylsp[0]).first_column);
     }
-#line 2537 "latparse.c"
+#line 2321 "latparse.c"
     break;
 
-  case 126:
+  case 126: /* dict_new: '{' dict_items '}'  */
 #line 502 "latparse.y"
                          { (yyval.node) = latA_nodo(NODO_DICCIONARIO, (yyvsp[-1].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2543 "latparse.c"
+#line 2327 "latparse.c"
     break;
 
-  case 127:
+  case 127: /* dict_items: %empty  */
 #line 506 "latparse.y"
                   { (yyval.node) = NULL; }
-#line 2549 "latparse.c"
+#line 2333 "latparse.c"
     break;
 
-  case 128:
+  case 128: /* dict_items: dict_item  */
 #line 507 "latparse.y"
                 { (yyval.node) = latA_nodo(NODO_DICC_AGREGAR_ELEMENTO, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2555 "latparse.c"
+#line 2339 "latparse.c"
     break;
 
-  case 129:
+  case 129: /* dict_items: dict_items ',' dict_item  */
 #line 508 "latparse.y"
                                { (yyval.node) = latA_nodo(NODO_DICC_AGREGAR_ELEMENTO, (yyvsp[0].node), (yyvsp[-2].node), (yylsp[0]).first_line, (yylsp[0]).first_column); }
-#line 2561 "latparse.c"
+#line 2345 "latparse.c"
     break;
 
-  case 130:
+  case 130: /* dict_item: %empty  */
 #line 512 "latparse.y"
       { /* empty */ (yyval.node) = NULL; }
-#line 2567 "latparse.c"
+#line 2351 "latparse.c"
     break;
 
-  case 131:
+  case 131: /* dict_item: expression ':' expression  */
 #line 513 "latparse.y"
                                 { (yyval.node) = latA_nodo(NODO_DICC_ELEMENTO, (yyvsp[-2].node), (yyvsp[0].node), (yylsp[-2]).first_line, (yylsp[-2]).first_column); }
-#line 2573 "latparse.c"
+#line 2357 "latparse.c"
     break;
 
-  case 132:
+  case 132: /* clase_propiedad: IDENTIFICADOR '=' expression  */
 #line 517 "latparse.y"
                                    { (yyval.node) = latA_asign((yyvsp[0].node), (yyvsp[-2].node)); }
-#line 2579 "latparse.c"
+#line 2363 "latparse.c"
     break;
 
-  case 133:
+  case 133: /* clase_propiedades: clase_propiedad clase_propiedades  */
 #line 521 "latparse.y"
                                         {
         if((yyvsp[0].node)){
             (yyval.node) = latA_nodo(NODO_BLOQUE, (yyvsp[-1].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         }
     }
-#line 2589 "latparse.c"
+#line 2373 "latparse.c"
     break;
 
-  case 134:
+  case 134: /* clase_propiedades: clase_propiedad  */
 #line 526 "latparse.y"
                       {
         if((yyvsp[0].node)){
           (yyval.node) = latA_nodo(NODO_BLOQUE, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column);
         }
     }
-#line 2599 "latparse.c"
+#line 2383 "latparse.c"
     break;
 
-  case 135:
+  case 135: /* clase_propiedades: error statement_list  */
 #line 531 "latparse.y"
                            { yyerrok; yyclearin;}
-#line 2605 "latparse.c"
+#line 2389 "latparse.c"
     break;
 
-  case 136:
+  case 136: /* clase_funcion: FUNCION IDENTIFICADOR '(' parameter_list ')' statement_list FIN  */
 #line 535 "latparse.y"
                                                                       {
         (yyval.node) = latA_funcion((yyvsp[-5].node), (yyvsp[-3].node), (yyvsp[-1].node), (yylsp[-5]).first_line, (yylsp[-5]).first_column);
     }
-#line 2613 "latparse.c"
+#line 2397 "latparse.c"
     break;
 
-  case 137:
+  case 137: /* clase_funciones: clase_funcion clase_funciones  */
 #line 541 "latparse.y"
                                     {
         if((yyvsp[0].node)){
             (yyval.node) = latA_nodo(NODO_BLOQUE, (yyvsp[-1].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         }
     }
-#line 2623 "latparse.c"
+#line 2407 "latparse.c"
     break;
 
-  case 138:
+  case 138: /* clase_funciones: clase_funcion  */
 #line 546 "latparse.y"
                     {
         if((yyvsp[0].node)){
           (yyval.node) = latA_nodo(NODO_BLOQUE, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column);
         }
     }
-#line 2633 "latparse.c"
+#line 2417 "latparse.c"
     break;
 
-  case 139:
+  case 139: /* clase_funciones: error statement_list  */
 #line 551 "latparse.y"
                            { yyerrok; yyclearin;}
-#line 2639 "latparse.c"
+#line 2423 "latparse.c"
     break;
 
-  case 142:
+  case 142: /* clase_sentencia: RETORNO expression  */
 #line 557 "latparse.y"
                          { (yyval.node) = latA_nodo(NODO_RETORNO, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2645 "latparse.c"
+#line 2429 "latparse.c"
     break;
 
-  case 143:
+  case 143: /* clase_sentencia: RETORNO argument_expression_list  */
 #line 558 "latparse.y"
                                        { (yyval.node) = latA_nodo(NODO_RETORNO, (yyvsp[0].node), NULL, (yylsp[-1]).first_line, (yylsp[-1]).first_column); }
-#line 2651 "latparse.c"
+#line 2435 "latparse.c"
     break;
 
-  case 144:
+  case 144: /* clase_sentencias: clase_sentencia clase_sentencias  */
 #line 562 "latparse.y"
                                        {
         if((yyvsp[0].node)){
             (yyval.node) = latA_nodo(NODO_BLOQUE, (yyvsp[-1].node), (yyvsp[0].node), (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         }
     }
-#line 2661 "latparse.c"
+#line 2445 "latparse.c"
     break;
 
-  case 145:
+  case 145: /* clase_sentencias: clase_sentencia  */
 #line 567 "latparse.y"
                       {
         if((yyvsp[0].node)){
           (yyval.node) = latA_nodo(NODO_BLOQUE, (yyvsp[0].node), NULL, (yylsp[0]).first_line, (yylsp[0]).first_column);
         }
     }
-#line 2671 "latparse.c"
+#line 2455 "latparse.c"
     break;
 
-  case 146:
+  case 146: /* clase_sentencias: error statement_list  */
 #line 572 "latparse.y"
                            { yyerrok; yyclearin;}
-#line 2677 "latparse.c"
+#line 2461 "latparse.c"
     break;
 
-  case 147:
+  case 147: /* clase_declaracion: CLASE IDENTIFICADOR clase_sentencias FIN  */
 #line 576 "latparse.y"
                                                {
         (yyval.node) = latA_clase((yyvsp[-2].node), NULL, (yyvsp[-1].node), (yylsp[-2]).first_line, (yylsp[-2]).first_column); }
-#line 2684 "latparse.c"
+#line 2468 "latparse.c"
     break;
 
 
-#line 2688 "latparse.c"
+#line 2472 "latparse.c"
 
       default: break;
     }
@@ -2699,11 +2483,10 @@ yyreduce:
      case of YYERROR or YYBACKUP, subsequent parser actions might lead
      to an incorrect destructor call or verbose syntax error message
      before the lookahead is translated.  */
-  YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
+  YY_SYMBOL_PRINT ("-> $$ =", YY_CAST (yysymbol_kind_t, yyr1[yyn]), &yyval, &yyloc);
 
   YYPOPSTACK (yylen);
   yylen = 0;
-  YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
   *++yylsp = yyloc;
@@ -2728,50 +2511,15 @@ yyreduce:
 yyerrlab:
   /* Make sure we have latest lookahead translation.  See comments at
      user semantic actions for why this is necessary.  */
-  yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
-
+  yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
       ++yynerrs;
-#if ! YYERROR_VERBOSE
       yyerror (&yylloc, root, scanner, YY_("syntax error"));
-#else
-# define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
-                                        yyssp, yytoken)
-      {
-        char const *yymsgp = YY_("syntax error");
-        int yysyntax_error_status;
-        yysyntax_error_status = YYSYNTAX_ERROR;
-        if (yysyntax_error_status == 0)
-          yymsgp = yymsg;
-        else if (yysyntax_error_status == 1)
-          {
-            if (yymsg != yymsgbuf)
-              YYSTACK_FREE (yymsg);
-            yymsg = YY_CAST (char *, YYSTACK_ALLOC (YY_CAST (YYSIZE_T, yymsg_alloc)));
-            if (!yymsg)
-              {
-                yymsg = yymsgbuf;
-                yymsg_alloc = sizeof yymsgbuf;
-                yysyntax_error_status = 2;
-              }
-            else
-              {
-                yysyntax_error_status = YYSYNTAX_ERROR;
-                yymsgp = yymsg;
-              }
-          }
-        yyerror (&yylloc, root, scanner, yymsgp);
-        if (yysyntax_error_status == 2)
-          goto yyexhaustedlab;
-      }
-# undef YYSYNTAX_ERROR
-#endif
     }
 
   yyerror_range[1] = yylloc;
-
   if (yyerrstatus == 3)
     {
       /* If just tried and failed to reuse lookahead token after an
@@ -2820,13 +2568,14 @@ yyerrorlab:
 yyerrlab1:
   yyerrstatus = 3;      /* Each real token shifted decrements this.  */
 
+  /* Pop stack until we find a state that shifts the error token.  */
   for (;;)
     {
       yyn = yypact[yystate];
       if (!yypact_value_is_default (yyn))
         {
-          yyn += YYTERROR;
-          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
+          yyn += YYSYMBOL_YYerror;
+          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYSYMBOL_YYerror)
             {
               yyn = yytable[yyn];
               if (0 < yyn)
@@ -2840,7 +2589,7 @@ yyerrlab1:
 
       yyerror_range[1] = *yylsp;
       yydestruct ("Error: popping",
-                  yystos[yystate], yyvsp, yylsp, root, scanner);
+                  YY_ACCESSING_SYMBOL (yystate), yyvsp, yylsp, root, scanner);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -2851,13 +2600,11 @@ yyerrlab1:
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 
   yyerror_range[2] = yylloc;
-  /* Using YYLLOC is tempting, but would change the location of
-     the lookahead.  YYLOC is available though.  */
-  YYLLOC_DEFAULT (yyloc, yyerror_range, 2);
-  *++yylsp = yyloc;
+  ++yylsp;
+  YYLLOC_DEFAULT (*yylsp, yyerror_range, 2);
 
   /* Shift the error token.  */
-  YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
+  YY_SYMBOL_PRINT ("Shifting", YY_ACCESSING_SYMBOL (yyn), yyvsp, yylsp);
 
   yystate = yyn;
   goto yynewstate;
@@ -2879,20 +2626,20 @@ yyabortlab:
   goto yyreturn;
 
 
-#if !defined yyoverflow || YYERROR_VERBOSE
+#if !defined yyoverflow
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
   yyerror (&yylloc, root, scanner, YY_("memory exhausted"));
   yyresult = 2;
-  /* Fall through.  */
+  goto yyreturn;
 #endif
 
 
-/*-----------------------------------------------------.
-| yyreturn -- parsing is finished, return the result.  |
-`-----------------------------------------------------*/
+/*-------------------------------------------------------.
+| yyreturn -- parsing is finished, clean up and return.  |
+`-------------------------------------------------------*/
 yyreturn:
   if (yychar != YYEMPTY)
     {
@@ -2909,19 +2656,17 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[+*yyssp], yyvsp, yylsp, root, scanner);
+                  YY_ACCESSING_SYMBOL (+*yyssp), yyvsp, yylsp, root, scanner);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
 #endif
-#if YYERROR_VERBOSE
-  if (yymsg != yymsgbuf)
-    YYSTACK_FREE (yymsg);
-#endif
+
   return yyresult;
 }
+
 #line 580 "latparse.y"
 
 

@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.7.6.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_LATPARSE_H_INCLUDED
 # define YY_YY_LATPARSE_H_INCLUDED
@@ -44,62 +45,71 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    NUMERICO = 258,
-    CADENA = 259,
-    IDENTIFICADOR = 260,
-    VAR_ARGS = 261,
-    SI = 262,
-    O_SI = 263,
-    FIN = 264,
-    SINO = 265,
-    MIENTRAS = 266,
-    REPETIR = 267,
-    ROMPER = 268,
-    CONTINUAR = 269,
-    HASTA = 270,
-    FUNCION = 271,
-    DESDE = 272,
-    RETORNO = 273,
-    ELEGIR = 274,
-    CASO = 275,
-    DEFECTO = 276,
-    ATRIBUTO = 277,
-    VERDADERO = 278,
-    FALSO = 279,
-    NULO = 280,
-    EXPONENTE = 281,
-    PARA = 282,
-    EN = 283,
-    RANGO = 284,
-    IR = 285,
-    MAYOR_QUE = 286,
-    MENOR_QUE = 287,
-    MAYOR_IGUAL = 288,
-    MENOR_IGUAL = 289,
-    IGUAL_LOGICO = 290,
-    DIFERENTE = 291,
-    Y_LOGICO = 292,
-    O_LOGICO = 293,
-    INCREMENTO = 294,
-    DECREMENTO = 295,
-    CONCATENAR = 296,
-    CONCATENAR_IGUAL = 297,
-    MAS_IGUAL = 298,
-    MENOS_IGUAL = 299,
-    POR_IGUAL = 300,
-    ENTRE_IGUAL = 301,
-    MODULO_IGUAL = 302,
-    REGEX = 303,
-    GLOBAL = 304,
-    CLASE = 305
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    NUMERICO = 258,                /* NUMERICO  */
+    CADENA = 259,                  /* CADENA  */
+    IDENTIFICADOR = 260,           /* IDENTIFICADOR  */
+    VAR_ARGS = 261,                /* VAR_ARGS  */
+    SI = 262,                      /* SI  */
+    O_SI = 263,                    /* O_SI  */
+    FIN = 264,                     /* FIN  */
+    SINO = 265,                    /* SINO  */
+    MIENTRAS = 266,                /* MIENTRAS  */
+    REPETIR = 267,                 /* REPETIR  */
+    ROMPER = 268,                  /* ROMPER  */
+    CONTINUAR = 269,               /* CONTINUAR  */
+    HASTA = 270,                   /* HASTA  */
+    FUNCION = 271,                 /* FUNCION  */
+    DESDE = 272,                   /* DESDE  */
+    RETORNO = 273,                 /* RETORNO  */
+    ELEGIR = 274,                  /* ELEGIR  */
+    CASO = 275,                    /* CASO  */
+    DEFECTO = 276,                 /* DEFECTO  */
+    ATRIBUTO = 277,                /* ATRIBUTO  */
+    VERDADERO = 278,               /* VERDADERO  */
+    FALSO = 279,                   /* FALSO  */
+    NULO = 280,                    /* NULO  */
+    EXPONENTE = 281,               /* EXPONENTE  */
+    PARA = 282,                    /* PARA  */
+    EN = 283,                      /* EN  */
+    RANGO = 284,                   /* RANGO  */
+    IR = 285,                      /* IR  */
+    MAYOR_QUE = 286,               /* MAYOR_QUE  */
+    MENOR_QUE = 287,               /* MENOR_QUE  */
+    MAYOR_IGUAL = 288,             /* MAYOR_IGUAL  */
+    MENOR_IGUAL = 289,             /* MENOR_IGUAL  */
+    IGUAL_LOGICO = 290,            /* IGUAL_LOGICO  */
+    DIFERENTE = 291,               /* DIFERENTE  */
+    Y_LOGICO = 292,                /* Y_LOGICO  */
+    O_LOGICO = 293,                /* O_LOGICO  */
+    INCREMENTO = 294,              /* INCREMENTO  */
+    DECREMENTO = 295,              /* DECREMENTO  */
+    CONCATENAR = 296,              /* CONCATENAR  */
+    CONCATENAR_IGUAL = 297,        /* CONCATENAR_IGUAL  */
+    MAS_IGUAL = 298,               /* MAS_IGUAL  */
+    MENOS_IGUAL = 299,             /* MENOS_IGUAL  */
+    POR_IGUAL = 300,               /* POR_IGUAL  */
+    ENTRE_IGUAL = 301,             /* ENTRE_IGUAL  */
+    MODULO_IGUAL = 302,            /* MODULO_IGUAL  */
+    REGEX = 303,                   /* REGEX  */
+    GLOBAL = 304,                  /* GLOBAL  */
+    CLASE = 305                    /* CLASE  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define NUMERICO 258
 #define CADENA 259
 #define IDENTIFICADOR 260
