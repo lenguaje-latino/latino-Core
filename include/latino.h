@@ -61,19 +61,20 @@ THE SOFTWARE.
 #define LAT_stringize(x) LAT_STRINGIZE(x)
 
 /** Version mayor de Latino */
-#define LAT_VERSION_MAYOR 1
+#define LAT_VERSION_MAYOR   1
 /** Version menor de Latino */
-#define LAT_VERSION_MENOR 4
+#define LAT_VERSION_MENOR   4
 /** Version de correcion de errores */
-#define LAT_VERSION_PARCHE 3
+#define LAT_VERSION_PARCHE  3
 /** Version de Latino */
+#define LAT_CURRENT_YEAR    2021
 #define LAT_VERSION                                                            \
     "Latino " LAT_stringize(LAT_VERSION_MAYOR) "." LAT_stringize(              \
         LAT_VERSION_MENOR) "." LAT_stringize(LAT_VERSION_PARCHE)
 /** Derechos de Latino */
 #define LAT_DERECHOS                                                           \
     LAT_VERSION                                                                \
-    "\nTodos los derechos reservados (C) 2015-2021. Latinoamerica"
+    "\nTodos los derechos reservados (C) 2015-"LAT_stringize(LAT_CURRENT_YEAR)". Latinoamerica"
 
 #define LAT_ERRMEM 1
 #define LAT_ERRRUN 2

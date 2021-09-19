@@ -17,9 +17,9 @@ set(INSTALL_INCLUDE                         ${CMAKE_INSTALL_PREFIX}/include )
 set(INSTALL_LIB                             ${CMAKE_INSTALL_PREFIX}/lib     )
 set(INSTALL_SHARE                           ${CMAKE_INSTALL_PREFIX}/share   )
 
-message(STATUS "INSTALL_BIN:        ${INSTALL_BIN}")
-message(STATUS "INSTALL_INCLUDE:    ${INSTALL_INCLUDE}")
-message(STATUS "INSTALL_LIB:        ${INSTALL_LIB}")
+message(STATUS "INSTALL_BIN:             ${INSTALL_BIN}")
+message(STATUS "INSTALL_INCLUDE:         ${INSTALL_INCLUDE}")
+message(STATUS "INSTALL_LIB:             ${INSTALL_LIB}")
 
 # Set the output folder where your program will be created
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -71,7 +71,7 @@ add_definitions(-D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STD
 add_subdirectory(linenoise)
 
 if(WIN32)
-    message(STATUS "CURRENT PATH WIN32.......... ${CMAKE_CURRENT_SOURCE_DIR}")
+    message(STATUS "CURRENT PATH WIN32....... ${CMAKE_CURRENT_SOURCE_DIR}")
     include_directories(latino-regex/src)
     add_subdirectory(latino-regex)
 endif()

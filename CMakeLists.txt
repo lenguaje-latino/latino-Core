@@ -10,6 +10,7 @@
 # CMAKE configuraciones
 cmake_minimum_required(VERSION 3.13)
 
+set(latCore TRUE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/")
 
 project(latino)
@@ -36,6 +37,7 @@ message(STATUS "Tipo de Build .......... ${CMAKE_BUILD_TYPE}"   )
 
 include(GetLatVersion)
 message(STATUS "Latino Version ......... ${LATINO_VERSION}"     )
+include(ResourceUpdate)
 
 include(BuildLatOptions)
 
