@@ -45,17 +45,17 @@ void str_ejecutar(lat_mv *mv);
 /**
  * Muestra solo la version de latino
  */
-static void lat_version_simple() { printf("%s\n", LAT_VERSION); }
+static void lat_version_simple() { puts(LAT_VERSION); }
 
 /**
  * Muestra la version de latino y los derechos en la consola
  */
-static void lat_version() { printf("%s\n", LAT_DERECHOS); }
+static void lat_version() { puts(LAT_DERECHOS); }
 
 /**
  * Para crear el logo en ascii
  */
-static void lat_logo() { printf("%s\n", LAT_LOGO); }
+static void lat_logo() { puts(LAT_LOGO); }
 
 /**
  * Muestra la ayuda en la consola
@@ -63,17 +63,15 @@ static void lat_logo() { printf("%s\n", LAT_LOGO); }
 static void lat_ayuda() {
     lat_logo();
     lat_version();
-    printf("%s\n", "-Uso de latino: latino [opcion] [archivo]");
-    printf("\n");
-    printf("%s\n", "Opciones:");
-    printf("%s\n", "-a | --ayuda     : Muestra la ayuda de Latino");
-    printf("%s\n", "-v | --version   : Muestra la version de Latino");
-    printf("%s\n", "-e               : Ejecuta una cadena de codigo");
-    printf("%s\n", "archivo          : Nombre del archivo con extension .lat");
-    printf("%s\n", "Ctrl + C         : Para cerrar");
-    printf("\n");
-    printf("%s\n", "Variables de entorno:");
-    printf("%s\n", "_____________________");
+    puts("-Uso de latino: latino [opcion] [archivo]\n\n"
+         "Opciones:\n"
+         "-a | --ayuda     : Muestra la ayuda de Latino\n"
+         "-v | --version   : Muestra la version de Latino\n"
+         "-e               : Ejecuta una cadena de codigo\n"
+         "archivo          : Nombre del archivo con extension .lat\n"
+         "Ctrl + C         : Para cerrar\n\n"
+         "Variables de entorno:\n"
+         "_____________________\n");
     printf("%s%s\n", "LATINO_PATH      : ", getenv("LATINO_PATH"));
     printf("%s%s\n", "LATINO_LIB       : ", getenv("LATINO_LIB"));
     printf("%s%s\n", "LATINO_LIBC      : ", getenv("LATINO_LIBC"));
@@ -111,7 +109,7 @@ int main(int argc, char *argv[]) {
     if (pe) {
         /* Ejecuta una cadena de codigo */
         if (argc != 3) {
-            printf("Error: Se requiere una cadena para ejecución.\n");
+            puts("Error: Se requiere una cadena para ejecución.");
             return EXIT_FAILURE;
         }
         char *cmd = malloc(MAX_INPUT_SIZE);
