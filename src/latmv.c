@@ -422,9 +422,9 @@ void imprimir_pila(lat_mv *mv) {
             latO_imprimir(mv, &o, false);
             printf(", ");
         }
-        printf("]");
+        putchar(']');
     }
-    printf("\n");
+    putchar('\n');
 }
 
 void checar_pila(lat_mv *mv) {
@@ -763,7 +763,7 @@ static void latMV_load_attr(lat_mv *mv, lat_bytecode cur, lat_bytecode next) {
     lat_objeto *val = NULL;
 #if DEPURAR_MV
     latO_imprimir(mv, attr, false);
-    printf("\t");
+    putchar('\t');
 #endif
     if (obj->tipo == T_DIC) {
         val = (lat_objeto *)latH_obtener(latC_checar_dic(mv, obj),
@@ -967,7 +967,7 @@ static void latMV_load_var_args(lat_mv *mv) {
 int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
     if (func->tipo == T_FUN) {
 #if DEPURAR_MV
-        printf("\n.::Ejecutando fun::.\n");
+        puts("\n.::Ejecutando fun::.");
 #endif
         if (func->nombre == NULL) {
             func->nombre = "dummy";
@@ -1074,7 +1074,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                     lat_objeto *o = (lat_objeto *)cur.meta;
 #if DEPURAR_MV
                     latO_imprimir(mv, o, false);
-                    printf("\t");
+                    putchar('\t');
 #endif
                     latC_apilar(mv, o);
                 } break;
@@ -1089,7 +1089,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                     latMV_set_symbol(mv, name, val);
 #if DEPURAR_MV
                     latO_imprimir(mv, name, false);
-                    printf("\t");
+                    putchar('\t');
 #endif
                 } break;
                 case STORE_LABEL: {
@@ -1098,7 +1098,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                     latMV_set_label(mv, name, val);
 #if DEPURAR_MV
                     latO_imprimir(mv, name, false);
-                    printf("\t");
+                    putchar('\t');
 #endif
                 } break;
                 case SET_GLOBAL: {
@@ -1111,7 +1111,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                     lat_objeto *name = (lat_objeto *)cur.meta;
 #if DEPURAR_MV
                     latO_imprimir(mv, name, false);
-                    printf("\t");
+                    putchar('\t');
 #endif
                     lat_objeto *val = latMV_get_symbol(mv, name);
                     latC_apilar(mv, val);
@@ -1142,7 +1142,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
                     lat_objeto *name = (lat_objeto *)cur.meta;
 #if DEPURAR_MV
                     latO_imprimir(mv, name, false);
-                    printf("\t");
+                    putchar('\t');
 #endif
                     lat_objeto *val = latMV_get_label(mv, name);
                     // if(val->tipo != T_LABEL) {
