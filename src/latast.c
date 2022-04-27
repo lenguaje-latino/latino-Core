@@ -310,7 +310,7 @@ ast *latA_analizar_exp(char *expr, int *status) {
  **/
 ast *latA_analizar_arch(char *infile, int *status) {
     if (infile == NULL) {
-        fputs("Especifique un archivo");
+        puts("Especifique un archivo");
         return NULL;
     }
     char *dot = strrchr(infile, '.');
