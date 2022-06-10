@@ -966,9 +966,9 @@ void mostrar_bytecode(lat_mv *mv, lat_bytecode *codigo) {
                 printf("BUILD_MAP\t%i\n", cur.a);
             } break;
             case MAKE_FUNCTION: {
-                printf("\n-------------------------------------------\n");
-                printf("MAKE_FUNCTION\n");
-                printf("-------------------------------------------\n");
+                puts("\n-------------------------------------------\n"
+                     "MAKE_FUNCTION\n"
+                     "-------------------------------------------");
                 o = (lat_objeto *)cur.meta;
                 lat_funcion *fun = getFun(o);
                 mostrar_bytecode(mv, fun->codigo);
@@ -986,9 +986,9 @@ void mostrar_bytecode(lat_mv *mv, lat_bytecode *codigo) {
                 free(buffer);
             } break;
             case MAKE_CLASS: {
-                printf("\n-------------------------------------------\n");
-                printf("MAKE_CLASS\n");
-                printf("-------------------------------------------\n");
+                puts("\n-------------------------------------------\n"
+                     "MAKE_CLASS\n"
+                     "-------------------------------------------");
                 o = (lat_objeto *)cur.meta;
                 lat_class *fun = getClass(o);
                 mostrar_bytecode(mv, fun->codigo);

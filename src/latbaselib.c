@@ -81,7 +81,7 @@ char *tipo(int tipo) {
 void base_poner(lat_mv *mv) {
     lat_objeto *o = latC_desapilar(mv);
     latO_imprimir(mv, o, false);
-    printf("\n");
+    putchar('\n');
 }
 
 void str_formato(lat_mv *mv);
@@ -260,7 +260,7 @@ static void base_error(lat_mv *mv) {
 }
 
 static void base_beep(lat_mv *mv) {
-    fprintf(stderr, "\x7");
+    fputs("\x7", stderr);
     fflush(stderr);
 }
 
