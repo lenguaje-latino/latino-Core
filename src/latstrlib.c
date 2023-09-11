@@ -173,13 +173,13 @@ char *analizar(const char *s, size_t len) {
 }
 
 char *decimal_acadena(double d) {
-    char *buffer = calloc(1, 64);
-    snprintf(buffer, 64, LAT_NUMERIC_FMT, d);
+    char *buffer = calloc(1, MAX_STR_INTERN);
+    snprintf(buffer, MAX_STR_INTERN, LAT_NUMERIC_FMT, d);
     return buffer;
 }
 
 char *entero_acadena(int i) {
-    char *buffer = calloc(1, 64);
+    char *buffer = calloc(1, MAX_STR_INTERN);
     snprintf(buffer, 64, "%i", i);
     return buffer;
 }

@@ -44,8 +44,11 @@ static void dev_mostrar(lat_mv *mv) {
 void imprimir_pila(lat_mv *mv);
 static void dev_imprimir_pila(lat_mv *mv) { imprimir_pila(mv); }
 
+static void dev_lat_version() { printf("%s\n", LAT_VERSION); }
+
 static const lat_CReg liblat[] = {{"mostrar", dev_mostrar, 1},
                                   {"imprimir_pila", dev_imprimir_pila, 0},
+                                  {"version", dev_lat_version, 0},
                                   {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_devlib(lat_mv *mv) {
