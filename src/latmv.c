@@ -369,6 +369,7 @@ LATINO_API lat_mv *latC_crear_mv() {
     mv->error = NULL;
     mv->global->menu = false;
     mv->enBucle = 0;
+    mv->enClase = 0;
     mv->goto_break;
 
     // cargar librerias de latino
@@ -597,18 +598,16 @@ void latMV_set_symbol(lat_mv *mv, lat_objeto *name, lat_objeto *val) {
                        str_name);
         }
     }
-    ctx = obtener_contexto_global(mv);
-    lat_objeto *oldVal = (lat_objeto *)latO_obtener_contexto(
-        mv, ctx, latC_checar_cadena(mv, name));
-    /*
-    // FIXME: Error en clases
+    lat_objeto *global_ctx = obtener_contexto_global(mv);
+    lat_objeto *oldVal = latO_obtener_contexto(
+        mv, global_ctx, latC_checar_cadena(mv, name));
     if (oldVal != NULL) {
         if (oldVal->tipo == T_CFUN || oldVal->tipo == T_FUN) {
             latC_error(mv, "Intento de reasignar valor a la funcion '%s'",
-                       str_name);
+                    str_name);
         }
+        ctx = global_ctx;
     }
-    */
     latO_asignar_ctx(mv, ctx, str_name, val);
 }
 
@@ -699,7 +698,7 @@ static void latMV_call_function(lat_mv *mv, lat_objeto *func, lat_bytecode cur,
     }
     bool apilar = next.ins == STORE_NAME || !strcmp(fun->nombre, "incluir") ||
                   (fun->nombre != NULL && func->nombre != NULL &&
-                   !strcmp(func->nombre, fun->nombre));
+                   strcmp(func->nombre, fun->nombre));
     if (apilar) {
         apilar_contexto(mv, NULL);
         mv->ptrprevio = (mv->ptrpila);

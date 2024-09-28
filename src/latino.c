@@ -81,8 +81,12 @@ static void lat_ayuda() {
 }
 
 int main(int argc, char *argv[]) {
-    setlocale(LC_ALL, "");
-    setlocale(LC_CTYPE, "");
+    #if (defined __WIN32__) || (defined _WIN32)
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
+    #endif
+    setlocale(LC_ALL, "C.UTF-8");
+    setlocale(LC_CTYPE, "C.UTF-8");
     /* para numeros decimales */
     // setlocale(LC_NUMERIC, "es_MX");
     // setlocale(LC_MONETARY, "es_MX");

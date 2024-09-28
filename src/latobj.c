@@ -818,7 +818,7 @@ LATINO_API char *latC_astring(lat_mv *mv, lat_objeto *o) {
     } else if (o->tipo == T_INTEGER) {
         return entero_acadena(getEntero(o));
     } else if (o->tipo == T_CHAR) {
-        return (char)getCaracter(o);
+        return &getCaracter(o);
     } else if (o->tipo == T_STR) {
         return strdup(latC_checar_cadena(mv, o));
     } else if (o->tipo == T_LABEL) {

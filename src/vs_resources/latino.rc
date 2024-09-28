@@ -45,7 +45,7 @@ BEGIN
             VALUE "FileDescription", "Lenguaje de programacion con sintaxis en Espanol"
             VALUE "FileVersion", "1.4.3.0"
             VALUE "InternalName", "latino.exe"
-            VALUE "LegalCopyright", "Copyleft (C) 2015-2021"
+            VALUE "LegalCopyright", "Copyleft (C) 2015-2024"
             VALUE "OriginalFilename", "latino.exe"
             VALUE "ProductName", "Latino"
             VALUE "ProductVersion", "1.4.3.0"
