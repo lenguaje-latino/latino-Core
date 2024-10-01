@@ -87,13 +87,17 @@ buscar_os_version() { // Busca y asigna el valor del Build del sistema operativo
     // TODO: Implementar para MSYS2
 #else
     struct utsname buffer;
+    char *p = buffer.release;
 
     if (uname(&buffer) < 0) {
         perror("Failed to uname");
     }
     // os_v.osMayor = (int)strtol(buffer.version, (char **)NULL, 10);
     // os_v.osMayor = atoi(buffer.version);
-    os_v.osMayor = buffer.release;
+    // os_v.osMayor = buffer.release;
+    os_v.osMayor = strtol(p, &p, 10);
+    os_v.osMenor = strtol(++p, &p, 10);
+    os_v.osBuild = strtol(++p, &p, 10);
 #endif
 
     return os_v;
