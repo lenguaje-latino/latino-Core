@@ -34,14 +34,19 @@ typedef struct lat_mv lat_mv;
 
 /**\brief Valor hash */
 typedef struct hash_val {
-    char llave[64];
-    lat_objeto *valor;
+  char llave[64];
+  lat_objeto *valor;
 } hash_val;
+
+/* Hash table configuration constants */
+#define HASH_INITIAL_CAPACITY 256
+#define HASH_LOAD_FACTOR 0.75
 
 /**\brief Mapa de valores hash */
 typedef struct hash_map {
-    lista *buckets[256];
-    size_t longitud;
+  lista **buckets; /* Dynamic array of buckets */
+  size_t capacity; /* Current capacity (number of buckets) */
+  size_t longitud; /* Number of elements */
 } hash_map;
 
 #define latH_longitud(hm) (hm)->longitud

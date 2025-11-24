@@ -96,66 +96,79 @@ typedef void (*lat_CFuncion)(lat_mv *mv);
 #define MAKE_CLASS 50
 
 union lat_gcobjeto {
-    lat_gcheader gch;
-    union lat_cadena cadena;
-    struct lista lista;
-    struct hash_map dic;
-    struct lat_funcion fun;
-    struct lat_class class;
-    lat_CFuncion *cfun;
-    void *ptr;
+  lat_gcheader gch;
+  union lat_cadena cadena;
+  struct lista lista;
+  struct hash_map dic;
+  struct lat_funcion fun;
+  struct lat_class class;
+  lat_CFuncion *cfun;
+  void *ptr;
 };
 
 typedef struct lat_proto {
-    int nparams;
-    int ninst;
-    char *nombre;
-    lat_bytecode *codigo;
-    lista *locals;
+  int nparams;
+  int ninst;
+  char *nombre;
+  lat_bytecode *codigo;
+  lista *locals;
 } lat_proto;
 
 typedef struct stringtable {
-    lat_gcobjeto **hash;
-    unsigned int nuse;
-    int size;
+  lat_gcobjeto **hash;
+  unsigned int nuse;
+  int size;
 } stringtable;
 
 typedef struct lat_global {
-    int argc;
-    lat_objeto *argv;
-    lat_objeto *gc_objetos;
-    stringtable strt;
-    bool menu;
-    bool REPL;
+  int argc;
+  lat_objeto *argv;
+  lat_objeto *gc_objetos;
+  stringtable strt;
+  bool menu;
+  bool REPL;
 } lat_global;
+
+/* Variable lookup cache for improved performance */
+#define VAR_CACHE_SIZE 16
+
+typedef struct var_cache_entry {
+  const char *name;  /* Variable name (not owned, points to interned string) */
+  lat_objeto *value; /* Cached value */
+  int ctx_level;     /* Context level where variable was found */
+  unsigned int hash; /* Hash of the name for quick comparison */
+} var_cache_entry;
 
 /**\brief Define la maquina virtual (MV) */
 typedef struct lat_mv {
-    lat_global *global;
-    lat_objeto *pila;
-    lat_objeto *tope;
-    lat_objeto *base;
-    lat_objeto *actfun;
-    lat_objeto *contexto[256];
-    lat_objeto *contexto_actual;
-    lat_objeto *label_ctx;
-    int ptrctx;
-    int ptrpila;
-    int ptrprevio;
-    int prev_args;
-    int numejec;
-    size_t memoria_usada;
-    size_t gc_limite;
-    char *nombre_archivo;
-    int nlin;
-    int ncol;
-    int status;
-    struct lat_longjmp *error;
-    int enBucle;
-    bool enClase;
-    int goto_break[256];    // FIXME: Validar memoria utilizada
-    int goto_continue[256]; // FIXME: Validar memoria utilizada
-    int goto_goto[256];
+  lat_global *global;
+  lat_objeto *pila;
+  lat_objeto *tope;
+  lat_objeto *base;
+  lat_objeto *actfun;
+  lat_objeto *contexto[256];
+  lat_objeto *contexto_actual;
+  lat_objeto *label_ctx;
+  int ptrctx;
+  int ptrpila;
+  int ptrprevio;
+  int prev_args;
+  int numejec;
+  size_t memoria_usada;
+  size_t gc_limite;
+  char *nombre_archivo;
+  int nlin;
+  int ncol;
+  int status;
+  struct lat_longjmp *error;
+  int enBucle;
+  bool enClase;
+  int goto_break[256];    // FIXME: Validar memoria utilizada
+  int goto_continue[256]; // FIXME: Validar memoria utilizada
+  int goto_goto[256];
+  /* Variable lookup cache */
+  var_cache_entry var_cache[VAR_CACHE_SIZE];
+  int var_cache_next; /* Next slot to use (circular buffer) */
 } lat_mv;
 
 #define lati_numUmin(a) (-(a))
@@ -170,12 +183,12 @@ typedef struct lat_mv {
 #define lati_numLe(a, b) ((a) <= (b))
 
 #define arith_op(op)                                                           \
-    {                                                                          \
-        lat_objeto *b = latC_desapilar(mv);                                    \
-        lat_objeto *a = latC_desapilar(mv);                                    \
-        setNumerico(mv->tope, op(latC_adouble(mv, a), latC_adouble(mv, b)));   \
-        inc_pila(mv);                                                          \
-    }
+  {                                                                            \
+    lat_objeto *b = latC_desapilar(mv);                                        \
+    lat_objeto *a = latC_desapilar(mv);                                        \
+    setNumerico(mv->tope, op(latC_adouble(mv, a), latC_adouble(mv, b)));       \
+    inc_pila(mv);                                                              \
+  }
 
 const char *latMV_bytecode_nombre(int inst);
 

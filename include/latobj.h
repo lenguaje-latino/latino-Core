@@ -32,6 +32,10 @@ THE SOFTWARE.
 
 typedef unsigned char lat_byte;
 
+/* FNV-1a hash algorithm constants for improved string interning */
+#define FNV_OFFSET_BASIS 2166136261u
+#define FNV_PRIME 16777619u
+
 /** \file object.h
  *
  * Contiene las funciones para el manejo de objetos
@@ -324,6 +328,7 @@ lat_objeto *latO_contexto_crear(lat_mv *mv);
 void latO_destruir(lat_mv *mv, lat_objeto *o);
 lat_objeto *latO_clonar(lat_mv *mv, lat_objeto *o);
 int latO_comparar(lat_mv *mv, lat_objeto *lhs, lat_objeto *rhs);
+bool latO_es_igual(lat_mv *mv, lat_objeto *lhs, lat_objeto *rhs);
 void latO_imprimir(lat_mv *mv, lat_objeto *in, bool fmt);
 
 lat_objeto *latO_crear_funcion(lat_mv *mv);
