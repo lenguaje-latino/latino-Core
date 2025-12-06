@@ -22,8 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
 
-#define LATINO_CORE
-
 #include "latdic.h"
 #include "latgc.h"
 #include "latino.h"

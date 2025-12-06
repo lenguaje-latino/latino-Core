@@ -49,11 +49,13 @@ THE SOFTWARE.
 #include <string.h>
 
 #include "latast.h"
+#include "latclass.h"
 #include "latcompat.h"
 #include "latdic.h"
 #include "latlist.h"
 #include "latmv.h"
 #include "latobj.h"
+
 /* Suprime warn_unused_result */
 #pragma GCC diagnostic ignored "-Wunused-result"
 
@@ -61,20 +63,30 @@ THE SOFTWARE.
 #define LAT_stringize(x) LAT_STRINGIZE(x)
 
 /** Version mayor de Latino */
-#define LAT_VERSION_MAYOR   1
+#define LAT_VERSION_MAYOR 1
 /** Version menor de Latino */
-#define LAT_VERSION_MENOR   4
+#define LAT_VERSION_MENOR 4
 /** Version de correcion de errores */
-#define LAT_VERSION_PARCHE  4
+#define LAT_VERSION_PARCHE 4
 /** Version de Latino */
-#define LAT_CURRENT_YEAR    2024
+#define LAT_CURRENT_YEAR 2025
 #define LAT_VERSION                                                            \
-    "Latino " LAT_stringize(LAT_VERSION_MAYOR) "." LAT_stringize(              \
-        LAT_VERSION_MENOR) "." LAT_stringize(LAT_VERSION_PARCHE)
+  "Latino " LAT_stringize(LAT_VERSION_MAYOR) "." LAT_stringize(                \
+      LAT_VERSION_MENOR) "." LAT_stringize(LAT_VERSION_PARCHE)
 /** Derechos de Latino */
 #define LAT_DERECHOS                                                           \
-    LAT_VERSION                                                                \
-    "\nTodos los derechos reservados (C) 2015-"LAT_stringize(LAT_CURRENT_YEAR)". Latinoamerica"
+  LAT_VERSION                                                                  \
+  "\nTodos los derechos reservados (C) 2015-" LAT_stringize(                   \
+      LAT_CURRENT_YEAR) ". Latinoamerica"
+
+/** Logo de Latino en ASCII */
+#define LAT_LOGO                                                               \
+  ".__          __  .__|                                                      \
+\n|  | _____ _/  |_|__| ____   ____|                                           \
+\n|  | \\__  \\   __\\   |/    \\ /  _ \\                                          \
+\n|  |__/ __ \\|  | |  |   |  (  <_> )                                          \
+\n|____(____  /__| |__|___|  /\\____/|                                          \
+\n          \\/             \\/"
 
 #define LAT_ERRMEM 1
 #define LAT_ERRRUN 2
@@ -82,9 +94,9 @@ THE SOFTWARE.
 /** Define el manejo de excepciones en Latino */
 #define LAT_THROW(mv, j) longjmp((j)->b, 1)
 #define LAT_TRY(mv, j, f)                                                      \
-    if (_setjmp((j)->b) == 0) {                                                \
-        f                                                                      \
-    }
+  if (setjmp((j)->b) == 0) {                                                   \
+    f                                                                          \
+  }
 #define lat_jmpbuf jmp_buf
 
 /** Indica si se desea debuguear el parser de bison */
@@ -92,26 +104,6 @@ extern int debug;
 
 /** Indica que el parser no debe de devolver errores, se usa para REPL */
 extern int parse_silent;
-
-// generado en
-// http://www.patorjk.com/software/taag/#p=display&f=Graffiti&t=latino
-/**
- Dibuja el logo
- */
-#define LAT_LOGO                                                               \
-    "\n.__          __  .__               \n|  | _____ _/  |_|__| ____   "     \
-    "____  "                                                                   \
-    "\n|  | \\__  \\\\   __\\  |/    \\ /  _ \\ \n|  |__/ __ \\|  | |  | "     \
-    "  |  "                                                                    \
-    "(  <_> )\n|____(____  /__| |__|___|  /\\____/ \n          \\/       "     \
-    "      "                                                                   \
-    "\\/        \n"
-
-#define HISTORY_FILE ".lat_historial"
-
-/** Afirmar (asset), sirve para testear una condicion */
-#define latC_afirmar(cond) ((void)(false && (cond)))
-
 /** Maximo numero de size_t */
 #ifdef SIZE_MAX
 #define LAT_SIZE_MAX SIZE_MAX
@@ -134,6 +126,8 @@ extern int parse_silent;
 #define MAX_PATH_LENGTH 1024
 /** Tamanio maximo de la entrada por teclado */
 #define MAX_INPUT_SIZE 512
+/** Archivo de historial para REPL */
+#define HISTORY_FILE ".lat_historial"
 /** Maximo numero de llamadas recursivas a fun */
 #define MAX_CALL_FUNCTION 1024
 /** Maximo numero de caracteres para un identificador */
@@ -173,9 +167,9 @@ typedef struct lat_funcion lat_funcion;
 
 typedef void (*lat_CFuncion)(lat_mv *mv);
 typedef struct lat_CReg {
-    const char *nombre;
-    lat_CFuncion cfun;
-    int nparams;
+  const char *nombre;
+  lat_CFuncion cfun;
+  int nparams;
 } lat_CReg;
 
 /*****************************************************************************/

@@ -25,8 +25,6 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#define LATINO_CORE
-
 #include "latdic.h"
 #include "latgc.h"
 #include "latino.h"
@@ -36,7 +34,7 @@ THE SOFTWARE.
 
 lat_objeto latO_nulo_ = {{NULL}, T_NULL};
 lat_objeto latO_verdadero_ = {.val.logico = 1, .tipo = T_BOOL};
-lat_objeto latO_falso_ = {.val.logico = 0, T_BOOL};
+lat_objeto latO_falso_ = {.val.logico = 0, .tipo = T_BOOL};
 
 char *minusculas(const char *str);
 char *logico_acadena(int i);
@@ -51,6 +49,9 @@ void latO_asignar_ctx(lat_mv *mv, lat_objeto *ns, const char *name,
   if (ns->tipo != T_CONTEXT) {
     latC_error(mv, "Objeto no es un contexto");
   } else {
+    fprintf(stderr, "DEBUG latO_asignar_ctx: asignando '%s' (tipo=%d) en contexto\n", 
+            name, o ? o->tipo : -1);
+    fflush(stderr);
     hash_map *h = getCtx(ns);
     if (strlen(name) > MAX_ID_LENGTH) {
       latC_error(mv, "Nombre de id mayor a %i caracteres", MAX_ID_LENGTH);
@@ -126,11 +127,13 @@ static lat_cadena *nuevaCad(lat_mv *mv, const char *str, size_t l,
 
 static lat_cadena *latO_cadenaNueva(lat_mv *mv, const char *str, size_t l) {
   lat_gcobjeto *o;
-  unsigned int h = (unsigned int)l;
-  size_t step = (l >> 5) + 1;
-  size_t l1;
-  for (l1 = l; l1 >= step; l1 -= step) {
-    h = h ^ ((h << 5) + (h >> 2) + (unsigned char)str[l1 - 1]);
+  /* Use FNV-1a hash for better distribution and consistency */
+  unsigned int h = FNV_OFFSET_BASIS;
+  const unsigned char *p = (const unsigned char *)str;
+  size_t i;
+  for (i = 0; i < l; i++) {
+    h ^= p[i];
+    h *= FNV_PRIME;
   }
   for (o = mv->global->strt.hash[lmod(h, mv->global->strt.size)]; o != NULL;
        o = o->gch.next) {

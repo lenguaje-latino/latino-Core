@@ -95,6 +95,22 @@ typedef void (*lat_CFuncion)(lat_mv *mv);
 #define STORE_LABEL 49
 #define MAKE_CLASS 50
 
+/* Opcodes para operaciones con clases (51-56) */
+#define NEW_INSTANCE                                                           \
+  51                   /* Crear nueva instancia de clase: obj = nueva Clase() */
+#define LOAD_METHOD 52 /* Cargar método de una instancia: obj.metodo */
+#define CALL_METHOD 53 /* Llamar método con contexto de instancia */
+#define LOAD_SUPER 54  /* Cargar y llamar constructor de clase padre: super()  \
+                        */
+#define STORE_PROPERTY 55 /* Asignar propiedad de instancia: mi.x = valor */
+#define LOAD_PROPERTY 56  /* Obtener propiedad de instancia: valor = mi.x */
+
+/* Metadata for MAKE_CLASS opcode to carry function and optional base class */
+typedef struct lat_class_meta {
+  lat_objeto *func;         /* Function object containing class bytecode */
+  const char *base_name;    /* Optional base class name (may be NULL) */
+} lat_class_meta;
+
 union lat_gcobjeto {
   lat_gcheader gch;
   union lat_cadena cadena;
@@ -169,6 +185,10 @@ typedef struct lat_mv {
   /* Variable lookup cache */
   var_cache_entry var_cache[VAR_CACHE_SIZE];
   int var_cache_next; /* Next slot to use (circular buffer) */
+  /* Instrumentación: seguimiento de constructor padre (super) */
+  bool dbg_super_active;         /* Instrumentación activa para super() */
+  lat_objeto *dbg_target_ctor;   /* Constructor padre objetivo */
+  int dbg_super_depth;           /* Profundidad de ejecución del ctor padre */
 } lat_mv;
 
 #define lati_numUmin(a) (-(a))
@@ -198,5 +218,7 @@ lat_bytecode latMV_bytecode_crear(int i, int a, int b, void *meta,
                                   long int nlin, long int ncol,
                                   char *nombre_archivo);
 int latMV_funcion_correr(lat_mv *mv, lat_objeto *func);
+void latMV_ejecutar_constructor_padre(lat_mv *mv, lat_objeto *constructor,
+                                       lat_objeto *instancia, int nargs);
 
 #endif // _LATINO_MV_H_

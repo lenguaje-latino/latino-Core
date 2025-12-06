@@ -1,6 +1,8 @@
 #ignora directorios
 bin/
 build/
+backup/
+.cache/
 visualstudio/
 msvc/
 CMakeFiles/
@@ -51,3 +53,8 @@ compiling_error.txt
 <scratch>
 src/latino
 src/liblatino.so
+test_clases.lat
+comando.md
+build_config.log
+build_log.txt
+build_output.log

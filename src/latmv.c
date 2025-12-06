@@ -27,8 +27,6 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#define LATINO_CORE
-
 #include "latcompat.h"
 #include "latdo.h"
 #include "latgc.h"
@@ -87,7 +85,14 @@ static const char *const bycode_nombre[] = {"NOP", /* 0 */
                                             "SET_LOCAL",
                                             "POP_JUMP_IF_NEGATIVE",
                                             "JUMP_LABEL",
-                                            "STORE_LABEL"};
+                                            "STORE_LABEL",
+                                            "MAKE_CLASS", /*50*/
+                                            "NEW_INSTANCE",
+                                            "LOAD_METHOD",
+                                            "CALL_METHOD",
+                                            "LOAD_SUPER",
+                                            "STORE_PROPERTY", /*55*/
+                                            "LOAD_PROPERTY"};
 
 void str_concatenar(lat_mv *mv);
 
@@ -1025,6 +1030,112 @@ static void latMV_load_var_args(lat_mv *mv) {
   }
 }
 
+/* Ejecuta el constructor del padre (super) inyectando 'mi' y reusando
+ * argumentos */
+void latMV_ejecutar_constructor_padre(lat_mv *mv, lat_objeto *constructor,
+                                      lat_objeto *instancia, int nargs) {
+  if (!constructor || constructor->tipo != T_FUN) {
+    latC_error(mv, "Constructor inválido");
+    return;
+  }
+  if (!instancia || instancia->tipo != T_INSTANCE) {
+    latC_error(mv, "Instancia inválida");
+    return;
+  }
+
+  /* Desapilar argumentos actuales de super() */
+  lat_objeto **args = NULL;
+  if (nargs > 0) {
+    args = (lat_objeto **)latM_asignar(mv, sizeof(lat_objeto *) * nargs);
+    for (int i = nargs - 1; i >= 0; i--) {
+      args[i] = latC_desapilar(mv);
+    }
+  }
+
+  /* Inyectar 'mi' en el contexto actual */
+  latO_asignar_ctx(mv, obtener_contexto(mv), "mi", instancia);
+
+  /* Apilar 'mi' como primer argumento implícito */
+  latC_apilar(mv, instancia);
+
+  /* Apilar los argumentos explícitos en orden */
+  for (int i = 0; i < nargs; i++) {
+    latC_apilar(mv, args[i]);
+  }
+
+  /* Ejecutar el constructor del padre */
+  latC_llamar_funcion(mv, constructor);
+
+  if (args) {
+    latM_liberar(mv, args);
+  }
+}
+/* Instrumentación: utilidades para depurar super() dentro del constructor padre
+ */
+static const char *dbg_tipo_nombre(int t) {
+  switch (t) {
+  case T_NULL:
+    return "NULL";
+  case T_BOOL:
+    return "BOOL";
+  case T_NUMERIC:
+    return "NUMERIC";
+  case T_STR:
+    return "STR";
+  case T_CONTEXT:
+    return "CONTEXT";
+  case T_LIST:
+    return "LIST";
+  case T_DIC:
+    return "DIC";
+  case T_FUN:
+    return "FUN";
+  case T_CFUN:
+    return "CFUN";
+  case T_CPTR:
+    return "CPTR";
+  case T_CLASS:
+    return "CLASS";
+  case T_INSTANCE:
+    return "INSTANCE";
+  case T_INTEGER:
+    return "INTEGER";
+  case T_CHAR:
+    return "CHAR";
+  case T_LABEL:
+    return "LABEL";
+  default:
+    return "?";
+  }
+}
+
+static void dbg_super_log_stack(lat_mv *mv, lat_objeto *func,
+                                lat_bytecode cur) {
+  if (!mv->dbg_super_active || func != mv->dbg_target_ctor) {
+    return;
+  }
+  int nargs = (int)cur.a;
+  fprintf(stderr,
+          "DBG super: antes de CALL_FUNCTION en ctor padre (linea=%u, col=%u, "
+          "nargs=%d, stack=%d)\n",
+          mv->nlin, mv->ncol, nargs, mv->ptrpila);
+  int max_dump = 8; /* limitar salida */
+  int start = mv->ptrpila - 1;
+  int end = mv->ptrpila - max_dump;
+  if (end < 0)
+    end = -1;
+  for (int i = start; i > end; i--) {
+    if (i < 0)
+      break;
+    lat_objeto *o = &mv->pila[i];
+    const char *tipo = dbg_tipo_nombre(o->tipo);
+    const char *nombre = (o->nombre ? o->nombre : "");
+    fprintf(stderr, "  [%d] tipo=%s%s%s\n", i, tipo,
+            (nombre[0] ? ", nombre=" : ""), (nombre[0] ? nombre : ""));
+  }
+  fflush(stderr);
+}
+
 int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
   if (func->tipo == T_FUN) {
 #if DEPURAR_MV
@@ -1141,18 +1252,18 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
     cur = inslist[pc];
     DISPATCH();
   }
-  op_BINARY_ADD: {
-    arith_op(lati_numAdd);
-    pc++;
-    cur = inslist[pc];
-    DISPATCH();
-  }
   op_BINARY_SUB: {
     arith_op(lati_numSub);
     pc++;
     cur = inslist[pc];
     DISPATCH();
   }
+  op_BINARY_ADD: {
+    arith_op(lati_numAdd);
+    pc++;
+    cur = inslist[pc];
+    DISPATCH();
+
   op_BINARY_POW: {
     arith_op(lati_numPow);
     pc++;
@@ -1321,6 +1432,8 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
     DISPATCH();
   }
   op_CALL_FUNCTION: {
+    /* Instrumentación: registrar estado de pila justo antes de la llamada */
+    dbg_super_log_stack(mv, func, cur);
     latMV_call_function(mv, func, cur, inslist[pc + 1]);
     pc++;
     cur = inslist[pc];
@@ -1617,6 +1730,9 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
 #if DEPURAR_MV
         printf("\n[RESULTADO] >>> ");
 #endif
+        /* Instrumentación: registrar estado de pila justo antes de la llamada
+         */
+        dbg_super_log_stack(mv, func, cur);
         latMV_call_function(mv, func, cur, next);
       } break;
       case RETURN_VALUE: {
@@ -1685,6 +1801,202 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
           latC_desapilar(mv);
         }
       } break;
+      case LOAD_PROPERTY: {
+        // Obtener propiedad de una instancia: valor = mi.propiedad
+        // El nombre de la propiedad está en cur.meta
+        // La instancia debe estar en el tope de la pila
+        lat_objeto *prop_name = (lat_objeto *)cur.meta;
+        lat_objeto *inst = latC_desapilar(mv);
+
+        // Verificar que es una instancia
+        if (!inst || inst->tipo != T_INSTANCE) {
+          latC_error(mv, "LOAD_PROPERTY: No es una instancia");
+        }
+
+        // Obtener la instancia interna
+        lat_instancia *instancia = (lat_instancia *)inst->val.cpointer;
+
+        // Obtener la propiedad
+        lat_objeto *valor = latC_obtener_propiedad(
+            instancia, latC_checar_cadena(mv, prop_name));
+
+        // Si no existe, retornar nulo
+        if (!valor) {
+          valor = &latO_nulo_;
+        }
+
+        // Apilar el valor
+        latC_apilar(mv, valor);
+      } break;
+
+      case STORE_PROPERTY: {
+        // Asignar propiedad de una instancia: mi.propiedad = valor
+        // El nombre de la propiedad está en cur.meta
+        // En la pila: [instancia, valor] (valor en tope)
+        lat_objeto *prop_name = (lat_objeto *)cur.meta;
+        lat_objeto *valor = latC_desapilar(mv);
+        lat_objeto *inst = latC_desapilar(mv);
+
+        // Verificar que es una instancia
+        if (!inst || inst->tipo != T_INSTANCE) {
+          latC_error(mv, "STORE_PROPERTY: No es una instancia");
+        }
+
+        // Obtener la instancia interna
+        lat_instancia *instancia = (lat_instancia *)inst->val.cpointer;
+
+        // Asignar la propiedad
+        latC_asignar_propiedad(mv, instancia, latC_checar_cadena(mv, prop_name),
+                               valor);
+      } break;
+
+      case LOAD_SUPER: {
+        // Llamar constructor de clase padre: super(args)
+        // Número de argumentos en cur.a
+        // Los argumentos están en la pila
+        // Necesitamos obtener 'mi' del contexto actual
+        int num_args = cur.a;
+
+        // Obtener 'mi' del contexto (debe estar definido en el método)
+        lat_objeto *mi = latO_obtener_contexto(mv, NULL, "mi");
+        if (!mi || mi->tipo != T_INSTANCE) {
+          latC_error(mv, "LOAD_SUPER: super() solo puede usarse dentro de un "
+                         "método de clase");
+        }
+
+        // Obtener la instancia
+        lat_instancia *inst = (lat_instancia *)mi->val.cpointer;
+
+        // Verificar que hay clase padre
+        if (!inst->clase->padre) {
+          latC_error(mv, "LOAD_SUPER: La clase no tiene padre");
+        }
+
+        // Llamar constructor del padre
+        latC_llamar_super(mv, mi, num_args);
+      } break;
+
+      case LOAD_METHOD: {
+        // Cargar método de una instancia: obj.metodo
+        // El nombre del método está en cur.meta
+        // La instancia debe estar en el tope de la pila
+        lat_objeto *method_name = (lat_objeto *)cur.meta;
+        lat_objeto *inst = latC_desapilar(mv);
+
+        // Verificar que es una instancia
+        if (!inst || inst->tipo != T_INSTANCE) {
+          latC_error(mv, "LOAD_METHOD: No es una instancia");
+        }
+
+        // Obtener la instancia interna
+        lat_instancia *instancia = (lat_instancia *)inst->val.cpointer;
+
+        // Buscar el método en la clase
+        lat_objeto *metodo = latC_obtener_metodo(
+            instancia->clase, latC_checar_cadena(mv, method_name));
+
+        // Verificar que el método existe
+        if (!metodo) {
+          latC_error(mv, "LOAD_METHOD: Método '%s' no encontrado",
+                     latC_checar_cadena(mv, method_name));
+        }
+
+        // Apilar el método y la instancia (para CALL_METHOD)
+        latC_apilar(mv, metodo);
+        latC_apilar(mv, inst); // Guardar instancia para contexto 'mi'
+      } break;
+
+      case CALL_METHOD: {
+        // Llamar método con contexto de instancia
+        // Número de argumentos en cur.a
+        // En la pila: [metodo, instancia, arg1, arg2, ...]
+        int num_args = cur.a;
+
+        // Desapilar argumentos
+        lat_objeto **args = NULL;
+        if (num_args > 0) {
+          args =
+              (lat_objeto **)latM_asignar(mv, sizeof(lat_objeto *) * num_args);
+          for (int i = num_args - 1; i >= 0; i--) {
+            args[i] = latC_desapilar(mv);
+          }
+        }
+
+        // Desapilar instancia y método
+        lat_objeto *inst = latC_desapilar(mv);
+        lat_objeto *metodo = latC_desapilar(mv);
+
+        // Apilar instancia como 'mi' (primer argumento implícito)
+        latC_apilar(mv, inst);
+
+        // Apilar argumentos
+        for (int i = 0; i < num_args; i++) {
+          latC_apilar(mv, args[i]);
+        }
+
+        // Llamar función
+        latC_llamar_funcion(mv, metodo);
+
+        // Liberar array de argumentos
+        if (args) {
+          latM_liberar(mv, args);
+        }
+      } break;
+
+      case NEW_INSTANCE: {
+        // Crear nueva instancia de clase: obj = nueva Clase(args)
+        // Número de argumentos en cur.a
+        // La clase debe estar en el tope de la pila
+        // Los argumentos están en la pila
+        int num_args = cur.a;
+
+        // Desapilar argumentos
+        lat_objeto **args = NULL;
+        if (num_args > 0) {
+          args =
+              (lat_objeto **)latM_asignar(mv, sizeof(lat_objeto *) * num_args);
+          for (int i = num_args - 1; i >= 0; i--) {
+            args[i] = latC_desapilar(mv);
+          }
+        }
+
+        // Desapilar la clase
+        lat_objeto *clase_obj = latC_desapilar(mv);
+
+        // Verificar que es una función de clase
+        if (!clase_obj || clase_obj->tipo != T_FUN || !clase_obj->es_clase) {
+          latC_error(mv, "NEW_INSTANCE: No es una clase");
+        }
+
+        // Obtener la clase interna
+        lat_class *clase = (lat_class *)clase_obj->val.cpointer;
+
+        // Crear la instancia
+        lat_objeto *inst = latC_crear_instancia(mv, clase);
+
+        // Si hay constructor, llamarlo
+        if (clase->constructor) {
+          // Apilar instancia como 'mi'
+          latC_apilar(mv, inst);
+
+          // Apilar argumentos
+          for (int i = 0; i < num_args; i++) {
+            latC_apilar(mv, args[i]);
+          }
+
+          // Llamar constructor
+          latC_llamar_funcion(mv, clase->constructor);
+        }
+
+        // Liberar array de argumentos
+        if (args) {
+          latM_liberar(mv, args);
+        }
+
+        // Apilar la instancia creada
+        latC_apilar(mv, inst);
+      } break;
+
       default:
         continue;
       } // fin de switch
@@ -1697,12 +2009,13 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func) {
     gc_recolectar(mv);
 #endif
   } // fin if (T_FUN)
-  else if (func->tipo == T_CFUN) {
-    lat_CFuncion f = getCfun(func);
-    (f)(mv);
+    else if (func->tipo == T_CFUN) {
+      lat_CFuncion f = getCfun(func);
+      (f)(mv);
+      return 0;
+    }
+    else {
+      latC_error(mv, "El objeto no es una funcion");
+    }
     return 0;
-  } else {
-    latC_error(mv, "El objeto no es una funcion");
   }
-  return 0;
-}

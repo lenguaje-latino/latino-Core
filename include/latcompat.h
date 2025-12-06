@@ -28,13 +28,24 @@ THE SOFTWARE.
 /** Determina el sistema operativo*/
 #if (defined __WIN32__) || (defined _WIN32)
 #define SISTEMAOPERATIVO "WIN32"
-#define LATINO_BUILD_AS_DLL
+// #define LATINO_BUILD_AS_DLL
 #define PATH_SEP "\\"
 #define LAT_FUNC extern
 #include <limits.h>
 #include <windows.h>
 #include <winnt.h>
 // #include <WinInet.h>
+
+#include <io.h>     // For _popen, _pclose
+#include <stdio.h>  // For FILE type
+#include <stdlib.h> // For _strdup
+#include <string.h> // For string functions
+
+
+// Explicit declarations for MinGW
+FILE *_popen(const char *command, const char *mode);
+int _pclose(FILE *stream);
+char *_strdup(const char *str);
 
 #include "regex.h"
 #define snprintf(s, l, f, ...) _snprintf(s, l, f, __VA_ARGS__)
@@ -56,9 +67,9 @@ THE SOFTWARE.
 
 /* __MacOS__ */
 #ifdef __APPLE__
-//#include "TargetConditionals.h"
-//#include <GLUT/glut.h>
-//#include <OpenGL/OpenGL.h>
+// #include "TargetConditionals.h"
+// #include <GLUT/glut.h>
+// #include <OpenGL/OpenGL.h>
 #define SISTEMAOPERATIVO "APPLE"
 #include <dlfcn.h>
 #include <readline/history.h>
@@ -127,14 +138,14 @@ THE SOFTWARE.
 
 #include <time.h>
 #define TIME_THIS(X)                                                           \
-    {                                                                          \
-        struct timespec ts1, ts2;                                              \
-        clock_gettime(CLOCK_REALTIME, &ts1);                                   \
-        X;                                                                     \
-        clock_gettime(CLOCK_REALTIME, &ts2);                                   \
-        printf(#X " demora: %f\n",                                             \
-               (float)(1.0 * (1.0 * ts2.tv_nsec - ts1.tv_nsec * 1.0) * 1e-9 +  \
-                       1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec));                  \
-    }
+  {                                                                            \
+    struct timespec ts1, ts2;                                                  \
+    clock_gettime(CLOCK_REALTIME, &ts1);                                       \
+    X;                                                                         \
+    clock_gettime(CLOCK_REALTIME, &ts2);                                       \
+    printf(#X " demora: %f\n",                                                 \
+           (float)(1.0 * (1.0 * ts2.tv_nsec - ts1.tv_nsec * 1.0) * 1e-9 +      \
+                   1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec));                      \
+  }
 
 #endif /*_LATINO_COMPAT_H_*/

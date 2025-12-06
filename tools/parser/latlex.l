@@ -136,6 +136,12 @@ EXP ([Ee][-+]?[0-9]+)
 "rango"                                         { return RANGO; }
 "ir"                                            { return IR; }
 "clase"                                         { return CLASE; }
+"constructor"                                   { return CONSTRUCTOR; }
+"hereda"                                        { return HEREDA; }
+"super"                                         { return SUPER; }
+"mi"                                            { return MI; }
+"estatico"                                      { return ESTATICO; }
+"nueva"                                         { return NUEVA; }
 
  /* names */
 [_A-Z]*                                         { yylval->node = latA_var(yytext, yylloc->first_line, yylloc->first_column, 1); return IDENTIFICADOR; }

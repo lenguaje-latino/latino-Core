@@ -67,33 +67,51 @@ message(STATUS "TARGET_ARCH: ........... ${TARGET_ARCH}")
 
 #
 # librerias
-add_definitions(-D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS)
+add_definitions(-D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DLATINO_CORE)
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/linenoise)
 add_subdirectory(linenoise)
+
+# Define source files
+set(SRC_LIB
+    latast.c
+    latclass.c
+    latdic.c
+    latdo.c
+    latgc.c
+    latlex.c
+    latlist.c
+    latmem.c
+    latmv.c
+    latobj.c
+    latparse.c
+    latbaselib.c
+    # latcurseslib.c  # Commented out - requires PDCurses library
+    latdevlib.c
+    latdiclib.c
+    latfilelib.c
+    latlistlib.c
+    latmathlib.c
+    latpaqlib.c
+    latrepl.c
+    latstrlib.c
+    latsyslib.c
+    latino.c
+)
 
 if(WIN32)
     message(STATUS "CURRENT PATH WIN32....... ${CMAKE_CURRENT_SOURCE_DIR}")
     include_directories(latino-regex/src)
-    add_subdirectory(latino-regex)
+    add_subdirectory(latino-regex/src)
+    add_executable(${PROJECT_NAME} ${SRC_LIB})
+    # Allow multiple definitions (temporary workaround)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
+    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC regex2 linenoise)
 endif()
 
-include_directories(linenoise)
-include_directories(../include)
-
-set(SRC_LIB latino.c latlex.c latparse.c latast.c latmem.c
-latdic.c latdo.c latlist.c latmv.c latobj.c latpaqlib.c latrepl.c latgc.c
-#librerias
-latbaselib.c latstrlib.c latlistlib.c latdiclib.c latfilelib.c
-latmathlib.c latsyslib.c latpaqlib.c latdevlib.c latuilib.c
-#extra
-linenoise/utf8.c linenoise/linenoise.c)
-
-if(MSVC)
-    add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
-else()
-    add_executable(${PROJECT_NAME} ${SRC_LIB})
-endif(MSVC)
-
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})
+if(NOT WIN32)
+    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})
+endif()
 
 if(MSVC)
     SET ( CMAKE_SHARED_LINKER_FLAGS /MANIFEST:NO )
@@ -116,7 +134,9 @@ set_target_properties(liblatino PROPERTIES OUTPUT_NAME latino CLEAN_DIRECT_OUTPU
 
 # message(STATUS "LATINO_BUILD_AS_DLL: ${LATINO_BUILD_AS_DLL}")
 if(LATINO_BUILD_AS_DLL)
-    target_link_libraries (liblatino regex2)
+    if(WIN32)
+        target_link_libraries (liblatino regex2 linenoise)
+    endif()
     set_target_properties (liblatino PROPERTIES COMPILE_DEFINITIONS LATINO_BUILD_AS_DLL)
 endif ()
 

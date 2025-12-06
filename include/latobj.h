@@ -44,84 +44,85 @@ typedef unsigned char lat_byte;
 
 /**< Incrementa y decrementa las referencias de un objeto */
 #define Lat_INCREF(o)                                                          \
-    if (o != NULL && o->marca)                                                 \
-    o->nref++
+  if (o != NULL && o->marca)                                                   \
+  o->nref++
 
 #define Lat_DECREF(o)                                                          \
-    if (o != NULL && o->marca)                                                 \
-    o->nref--
+  if (o != NULL && o->marca)                                                   \
+  o->nref--
 
 /** \brief Tipo de dato
  *
  * Tipo de dato que maneja la maquina virtual
  */
 typedef enum lat_tipo {
-    T_NULL, // 0
-    T_BOOL,
-    T_NUMERIC,
-    T_STR,
-    T_CONTEXT,
-    T_LIST, // 5
-    T_DIC,
-    T_FUN,
-    T_CFUN,
-    T_CPTR,
-    T_CLASS, // 10
-    T_INTEGER,
-    T_CHAR,
-    T_LABEL,
+  T_NULL, // 0
+  T_BOOL,
+  T_NUMERIC,
+  T_STR,
+  T_CONTEXT,
+  T_LIST, // 5
+  T_DIC,
+  T_FUN,
+  T_CFUN,
+  T_CPTR,
+  T_CLASS,    // 10
+  T_INSTANCE, // Instancia de clase
+  T_INTEGER,
+  T_CHAR,
+  T_LABEL,
 } lat_tipo;
 
 typedef void (*lat_CFuncion)(lat_mv *mv);
 
 /**\brief Estructura que almacena las instrucciones bytecode de la MV */
 typedef struct lat_bytecode {
-    lat_byte ins;   /**< Instruccion */
-    unsigned int a; /**< registro a */
-    unsigned int b; /**< registro b */
-    unsigned int nlin;
-    unsigned int ncol;
-    char *nombre_archivo;
-    void *meta;
+  lat_byte ins;   /**< Instruccion */
+  unsigned int a; /**< registro a */
+  unsigned int b; /**< registro b */
+  unsigned int nlin;
+  unsigned int ncol;
+  char *nombre_archivo;
+  void *meta;
 } lat_bytecode;
 
 typedef union lat_gcobjeto lat_gcobjeto;
 
 #define lat_commonheader                                                       \
-    lat_gcobjeto *next;                                                        \
-    lat_byte tipo;                                                             \
-    lat_byte marked
+  lat_gcobjeto *next;                                                          \
+  lat_byte tipo;                                                               \
+  lat_byte marked
 
 typedef struct lat_gcheader {
-    lat_commonheader;
+  lat_commonheader;
 } lat_gcheader;
 
 #define LAT_USER_ALIGNMENT                                                     \
-    union {                                                                    \
-        double u;                                                              \
-        void *s;                                                               \
-        long l;                                                                \
-    }
+  union {                                                                      \
+    double u;                                                                  \
+    void *s;                                                                   \
+    long l;                                                                    \
+  }
 
 typedef LAT_USER_ALIGNMENT L_Umaxalign;
 
 typedef union lat_cadena {
-    L_Umaxalign dummy;
-    struct {
-        lat_commonheader;
-        lat_byte reserved;
-        unsigned int hash;
-        size_t len;
-    } tsv;
+  L_Umaxalign dummy;
+  struct {
+    lat_commonheader;
+    lat_byte reserved;
+    unsigned int hash;
+    size_t len;
+  } tsv;
 } lat_cadena;
 
 typedef union {
-    lat_gcobjeto *gc;
-    void *cpointer;
-    double numerico;
-    bool logico;
-    int entero;
-    char caracter;
+  lat_gcobjeto *gc;
+  void *cpointer;
+  double numerico;
+  bool logico;
+  int entero;
+  char caracter;
 } lat_valor;
 
 /** \brief Objeto
@@ -129,34 +130,29 @@ typedef union {
  * Almacena toda la informacion del objeto
  */
 typedef struct _lat_objeto {
-    lat_valor val;
-    lat_tipo tipo;
-    int nref;
-    bool esconst;
-    int marca;
-    const char *nombre;
-    int nparams;
-    int ninst;
-    size_t tam;
-    bool es_vararg;
-    int jump_label;
-    bool es_clase;
+  lat_valor val;
+  lat_tipo tipo;
+  int nref;
+  bool esconst;
+  int marca;
+  const char *nombre;
+  int nparams;
+  int ninst;
+  size_t tam;
+  bool es_vararg;
+  int jump_label;
+  bool es_clase;
 } lat_objeto;
 
 /**\brief Define una fun de usuario */
 typedef struct lat_funcion {
-    int nparams;
-    int ninst;
-    char *nombre;
-    lat_bytecode *codigo;
+  int nparams;
+  int ninst;
+  char *nombre;
+  lat_bytecode *codigo;
 } lat_funcion;
 
-/**\brief Define una clase de usuario */
-typedef struct lat_class {
-    int ninst;
-    char *nombre;
-    lat_bytecode *codigo;
-} lat_class;
+// lat_class is now defined in latclass.h
 
 #ifdef WIN32
 __declspec(dllexport) lat_objeto latO_nulo_;
@@ -170,125 +166,130 @@ extern lat_objeto latO_falso_;
 
 /* macros para asignar valores */
 #define setNulo(obj, v)                                                        \
-    { (obj)->tipo = T_NULL; }
+  {                                                                            \
+    (obj)->tipo = T_NULL;                                                      \
+  }
 #define setLogico(obj, v)                                                      \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.logico = (v);                                                 \
-        i_o->tipo = T_BOOL;                                                    \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.logico = (v);                                                     \
+    i_o->tipo = T_BOOL;                                                        \
+  }
 #define setNumerico(obj, v)                                                    \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.numerico = (v);                                               \
-        i_o->tipo = T_NUMERIC;                                                 \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.numerico = (v);                                                   \
+    i_o->tipo = T_NUMERIC;                                                     \
+  }
 #define setEntero(obj, v)                                                      \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.numerico = (v);                                               \
-        i_o->tipo = T_INTEGER;                                                 \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.numerico = (v);                                                   \
+    i_o->tipo = T_INTEGER;                                                     \
+  }
 #define setCaracter(obj, v)                                                    \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.caracter = (v);                                               \
-        i_o->tipo = T_CHAR;                                                    \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.caracter = (v);                                                   \
+    i_o->tipo = T_CHAR;                                                        \
+  }
 #define setCadena(obj, v)                                                      \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.gc = (lat_gcobjeto *)(v);                                     \
-        i_o->tipo = T_STR;                                                     \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.gc = (lat_gcobjeto *)(v);                                         \
+    i_o->tipo = T_STR;                                                         \
+  }
 #define setLista(obj, v)                                                       \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.gc = (lat_gcobjeto *)(v);                                     \
-        i_o->tipo = T_LIST;                                                    \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.gc = (lat_gcobjeto *)(v);                                         \
+    i_o->tipo = T_LIST;                                                        \
+  }
 #define setDic(obj, v)                                                         \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.gc = (lat_gcobjeto *)(v);                                     \
-        i_o->tipo = T_DIC;                                                     \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.gc = (lat_gcobjeto *)(v);                                         \
+    i_o->tipo = T_DIC;                                                         \
+  }
 #define setCtx(obj, v)                                                         \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.gc = (lat_gcobjeto *)(v);                                     \
-        i_o->tipo = T_CONTEXT;                                                 \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.gc = (lat_gcobjeto *)(v);                                         \
+    i_o->tipo = T_CONTEXT;                                                     \
+  }
 
 #define setFun(obj, v)                                                         \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.gc = (lat_gcobjeto *)(v);                                     \
-        i_o->tipo = T_FUN;                                                     \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.gc = (lat_gcobjeto *)(v);                                         \
+    i_o->tipo = T_FUN;                                                         \
+  }
 #define setCfun(obj, v)                                                        \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.gc = (lat_gcobjeto *)(v);                                     \
-        i_o->tipo = T_CFUN;                                                    \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.gc = (lat_gcobjeto *)(v);                                         \
+    i_o->tipo = T_CFUN;                                                        \
+  }
 #define setPtr(obj, v)                                                         \
-    {                                                                          \
-        lat_objeto *i_o = (obj);                                               \
-        i_o->val.gc = (lat_gcobjeto *)(v);                                     \
-        i_o->tipo = T_CPTR;                                                    \
-    }
+  {                                                                            \
+    lat_objeto *i_o = (obj);                                                   \
+    i_o->val.gc = (lat_gcobjeto *)(v);                                         \
+    i_o->tipo = T_CPTR;                                                        \
+  }
 
 #define setobj(obj1, obj2)                                                     \
-    {                                                                          \
-        const lat_objeto *o2 = (obj2);                                         \
-        lat_objeto *o1 = (obj1);                                               \
-        o1->val = o2->val;                                                     \
-        o1->tipo = o2->tipo;                                                   \
-        o1->nombre = o2->nombre;                                               \
-        o1->nparams = o2->nparams;                                             \
-        o1->es_vararg = o2->es_vararg;                                         \
-        o1->esconst = o2->esconst;                                             \
-        o1->jump_label = o2->jump_label;                                       \
-        o1->es_clase = o2->es_clase;                                           \
-    }
+  {                                                                            \
+    const lat_objeto *o2 = (obj2);                                             \
+    lat_objeto *o1 = (obj1);                                                   \
+    o1->val = o2->val;                                                         \
+    o1->tipo = o2->tipo;                                                       \
+    o1->nombre = o2->nombre;                                                   \
+    o1->nparams = o2->nparams;                                                 \
+    o1->es_vararg = o2->es_vararg;                                             \
+    o1->esconst = o2->esconst;                                                 \
+    o1->jump_label = o2->jump_label;                                           \
+    o1->es_clase = o2->es_clase;                                               \
+  }
 
 #define setobj2s setobj
 
 #define setobj2obj(obj1, obj2)                                                 \
-    {                                                                          \
-        const lat_objeto *oo2 = (obj2);                                        \
-        lat_objeto *oo1 = (obj1);                                              \
-        switch (getTipo(oo2)) {                                                \
-            case T_NULL:                                                       \
-                setNulo(oo1, NULL);                                            \
-                break;                                                         \
-            case T_BOOL:                                                       \
-                setLogico(oo1, getLogico(oo2));                                \
-                break;                                                         \
-            case T_NUMERIC:                                                    \
-                setNumerico(oo1, getNumerico(oo2));                            \
-                break;                                                         \
-            case T_INTEGER:                                                    \
-                setEntero(oo1, getEntero(oo2));                                \
-                break;                                                         \
-            case T_CHAR:                                                       \
-                setCaracter(oo1, getCaracter(oo2));                            \
-                break;                                                         \
-            case T_STR:                                                        \
-            case T_LABEL:                                                      \
-            case T_LIST:                                                       \
-            case T_DIC:                                                        \
-            case T_CONTEXT:                                                    \
-            case T_FUN:                                                        \
-            case T_CFUN:                                                       \
-            case T_CPTR:                                                       \
-                setobj(oo1, oo2);                                              \
-                break;                                                         \
-            default:                                                           \
-                break;                                                         \
-        }                                                                      \
-    }
+  {                                                                            \
+    const lat_objeto *oo2 = (obj2);                                            \
+    lat_objeto *oo1 = (obj1);                                                  \
+    switch (getTipo(oo2)) {                                                    \
+    case T_NULL:                                                               \
+      setNulo(oo1, NULL);                                                      \
+      break;                                                                   \
+    case T_BOOL:                                                               \
+      setLogico(oo1, getLogico(oo2));                                          \
+      break;                                                                   \
+    case T_NUMERIC:                                                            \
+      setNumerico(oo1, getNumerico(oo2));                                      \
+      break;                                                                   \
+    case T_INTEGER:                                                            \
+      setEntero(oo1, getEntero(oo2));                                          \
+      break;                                                                   \
+    case T_CHAR:                                                               \
+      setCaracter(oo1, getCaracter(oo2));                                      \
+      break;                                                                   \
+    case T_STR:                                                                \
+    case T_LABEL:                                                              \
+    case T_LIST:                                                               \
+    case T_DIC:                                                                \
+    case T_CONTEXT:                                                            \
+    case T_CLASS:                                                              \
+    case T_INSTANCE:                                                           \
+    case T_FUN:                                                                \
+    case T_CFUN:                                                               \
+    case T_CPTR:                                                               \
+      setobj(oo1, oo2);                                                        \
+      break;                                                                   \
+    default:                                                                   \
+      setobj(oo1, oo2);                                                        \
+      break;                                                                   \
+    }                                                                          \
+  }
 
 #define isNulo(o) (getTipo(o) == T_NULL)
 #define isLogico(o) (getTipo(o) == T_BOOL)
@@ -316,7 +317,7 @@ extern lat_objeto latO_falso_;
 #define getCfun(o) ((lat_CFuncion)(o)->val.gc)
 #define getPtr(o) ((void *)(o)->val.gc)
 
-#define lmod(s, size) ((int)s & ((size)-1))
+#define lmod(s, size) ((int)s & ((size) - 1))
 #define getstr(ts) ((char *)((ts) + 1))
 
 lat_objeto *latO_crear(lat_mv *mv);
@@ -328,7 +329,6 @@ lat_objeto *latO_contexto_crear(lat_mv *mv);
 void latO_destruir(lat_mv *mv, lat_objeto *o);
 lat_objeto *latO_clonar(lat_mv *mv, lat_objeto *o);
 int latO_comparar(lat_mv *mv, lat_objeto *lhs, lat_objeto *rhs);
-bool latO_es_igual(lat_mv *mv, lat_objeto *lhs, lat_objeto *rhs);
 void latO_imprimir(lat_mv *mv, lat_objeto *in, bool fmt);
 
 lat_objeto *latO_crear_funcion(lat_mv *mv);

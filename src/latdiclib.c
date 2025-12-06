@@ -91,7 +91,7 @@ static void dic_contiene(lat_mv *mv) {
         LIST_FOREACH(list, primero, siguiente, cur) {
           if (cur->valor != NULL) {
             char *str_key = ((hash_val *)cur->valor)->llave;
-            if (strcmp(str_key, latC_checar_cadena(mv, ll)) == 0) {
+            if (strcmp(str_key, llave) == 0) {
               tmp = latO_verdadero;
               break;
             }
