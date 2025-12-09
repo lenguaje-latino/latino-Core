@@ -38,16 +38,16 @@ if(WIN32)
         set(CMAKE_C_FLAGS_DEBUG             "${CMAKE_C_FLAGS_DEBUG} /W4"                    )
         set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS  )
     elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-        set(CMAKE_C_FLAGS                   "${CMAKE_C_FLAGS} -Wall -std=c11"               )
-        set(CMAKE_C_FLAGS_DEBUG             "${CMAKE_C_FLAGS_DEBUG} -g -O0 -Wall -std=c11"  )
+        set(CMAKE_C_FLAGS                   "${CMAKE_C_FLAGS} -Wall -Wextra -std=c11"               )
+        set(CMAKE_C_FLAGS_DEBUG             "${CMAKE_C_FLAGS_DEBUG} -g -O0 -Wall -Wextra -std=c11"  )
     endif(MSVC)
 else()
     #
     # UNIX
     link_libraries(m)
     link_libraries(readline)
-    set(CMAKE_C_FLAGS                       "${CMAKE_C_FLAGS} -D_GNU_SOURCE -Wall -std=c11 -rdynamic -ldl -fPIC"        )
-    set(CMAKE_C_FLAGS_DEBUG                 "${CMAKE_C_FLAGS} -D_GNU_SOURCE -g -O0 -Wall -std=c11 -rdynamic -ldl -fPIC" )
+    set(CMAKE_C_FLAGS                       "${CMAKE_C_FLAGS} -D_GNU_SOURCE -Wall -Wextra -std=c11 -rdynamic -ldl -fPIC"        )
+    set(CMAKE_C_FLAGS_DEBUG                 "${CMAKE_C_FLAGS} -D_GNU_SOURCE -g -O0 -Wall -Wextra -std=c11 -rdynamic -ldl -fPIC" )
 endif()
 
 

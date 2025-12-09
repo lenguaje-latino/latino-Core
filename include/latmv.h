@@ -108,7 +108,8 @@ typedef void (*lat_CFuncion)(lat_mv *mv);
 /* Metadata for MAKE_CLASS opcode to carry function and optional base class */
 typedef struct lat_class_meta {
   lat_objeto *func;         /* Function object containing class bytecode */
-  const char *base_name;    /* Optional base class name (may be NULL) */
+  const char *base_name;    /* Opcional clase base_name (puede ser NULL) */
+  const char *class_name;   /* Nombre de la clase (REQUERIDO) */
 } lat_class_meta;
 
 union lat_gcobjeto {

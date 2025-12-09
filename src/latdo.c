@@ -29,6 +29,10 @@ THE SOFTWARE.
 #include "latmv.h"
 #include "latobj.h"
 
+#ifndef DEPURAR_AST
+#define DEPURAR_AST 1
+#endif
+
 #define dbc(I, A, B, M, L, C, F)                                               \
   codigo[i++] = latMV_bytecode_crear(I, A, B, M, L, C, F)
 #define pn(vm, N) i = ast_analizar(vm, N, codigo, i)
@@ -72,6 +76,7 @@ static ast *transformar_caso_casos(ast *cond_izq, ast *izq) {
                           cond_izq->nlin, cond_izq->ncol);
     return cond;
   }
+  return NULL;
 }
 
 static ast *transformar_casos(ast *casos, ast *cond_izq) {
@@ -283,6 +288,7 @@ lat_objeto *obtener_contexto_global(lat_mv *mv);
 
 // analiza los nodos para crear el bytecode
 static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
+    /* debug eliminado: ast_analizar enter */
   int temp[4] = {0};
   lat_bytecode *funcion_codigo = NULL;
   int fi = 0;
@@ -315,6 +321,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
       o->marca = 0;
     }
     dbc(LOAD_CONST, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
+    /* debug eliminado: LOAD_CONST emitido */
   } break;
   case NODO_IDENTIFICADOR: {
     // nombre del identificador
@@ -322,32 +329,73 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
     o->marca = 0;
     o->esconst = nodo->valor->esconst;
     dbc(LOAD_NAME, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
+    /* debug eliminado: LOAD_NAME emitido */
   } break;
   case NODO_ASIGNACION: {
-    int num_params = 1;
-    if (nodo->der->tipo == NODO_FUNCION_PARAMETROS) {
-      num_params = contar_num_parargs(nodo->der, NODO_FUNCION_PARAMETROS);
+    /* debug eliminado: asign LHS tipo */
+    if (nodo->der && nodo->der->tipo == NODO_IDENTIFICADOR && nodo->der->valor) {
+      /* debug eliminado: asign LHS nombre */
     }
-    pn(mv, nodo->izq);
-    if (num_params > 1 || nodo->izq->tipo == NODO_FUNCION_LLAMADA) {
-      dbc(ADJUST_STACK, num_params, 0, NULL, mv->nlin, mv->ncol,
-          mv->nombre_archivo);
-    }
-    if (nodo->der->tipo == NODO_FUNCION_PARAMETROS) {
-      pn(mv, nodo->der);
+    // Para asignación simple: evaluar RHS y almacenar en el nombre LHS
+    if (nodo->izq->tipo == NODO_FUNCION_PARAMETROS) {
+      /* debug eliminado: RHS FUNCION_PARAMETROS antes de pn */
+      pn(mv, nodo->izq);
+      /* debug eliminado: despues de pn RHS FUNCION_PARAMETROS */
     } else if (nodo->der->tipo == NODO_ATRIBUTO) {
+      /* debug eliminado: LHS ATRIBUTO antes de pn */
+      pn(mv, nodo->izq);
+      /* debug eliminado: despues de pn RHS */
       pn(mv, nodo->der->izq);
+      /* debug eliminado: despues de pn ATRIBUTO objeto */
       lat_objeto *o = latC_crear_cadena(mv, nodo->der->der->valor->val.cadena);
       o->marca = 0;
       o->esconst = nodo->der->der->valor->esconst;
       dbc(STORE_ATTR, 0, 0, o, nodo->der->der->nlin, nodo->der->der->ncol,
           mv->nombre_archivo);
+      /* debug eliminado: STORE_ATTR emitido */
+    } else if (nodo->der->tipo == NODO_LISTA_OBTENER_ELEMENTO) {
+      // Desazucar: X[Y] op= Z ya viene como NODO_ASIGNACION con RHS evaluando (X[Y] op Z).
+      // Para almacenar, evaluamos RHS y luego el destino (objeto y subíndice) para emitir STORE_SUBSCR.
+      /* debug eliminado: LHS LISTA_OBTENER_ELEMENTO y RHS tipo */
+      pn(mv, nodo->izq);
+      /* debug eliminado: despues de pn RHS */
+      // En NODO_LISTA_OBTENER_ELEMENTO: izq = índice, der = objeto
+      ast *lhs = nodo->der;
+      if (lhs->der) {
+        pn(mv, lhs->der);
+        /* debug eliminado: despues de pn LHS objeto */
+      } else {
+        /* debug eliminado: LHS objeto NULL */
+      }
+      if (lhs->izq) {
+        pn(mv, lhs->izq);
+        /* debug eliminado: despues de pn LHS indice */
+      } else {
+        /* debug eliminado: LHS indice NULL */
+      }
+      dbc(STORE_SUBSCR, 0, 0, NULL, mv->nlin, mv->ncol, mv->nombre_archivo);
+      /* debug eliminado: STORE_SUBSCR emitido */
     } else {
-      lat_objeto *o = latC_crear_cadena(mv, nodo->der->valor->val.cadena);
+      // Evaluar RHS (valor a asignar) y usar nombre LHS como destino
+      /* debug eliminado: RHS tipo */
+      pn(mv, nodo->izq);
+      /* debug eliminado: despues de pn RHS */
+      /* debug eliminado: antes STORE_NAME */
+      const char *lhs_name = (nodo->der && nodo->der->valor && nodo->der->valor->val.cadena)
+                                 ? nodo->der->valor->val.cadena
+                                 : "__invalid__";
+      int lhs_nlin = nodo->der ? nodo->der->nlin : 1;
+      int lhs_ncol = nodo->der ? nodo->der->ncol : 1;
+      int lhs_esconst = (nodo->der && nodo->der->valor) ? nodo->der->valor->esconst : 0;
+      /* debug eliminado: LHS nombre NULL */
+      lat_objeto *o = latC_crear_cadena(mv, lhs_name);
+      /* debug eliminado: objeto STORE_NAME */
       o->marca = 0;
-      o->esconst = nodo->der->valor->esconst;
-      dbc(STORE_NAME, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
-          mv->nombre_archivo);
+      o->esconst = lhs_esconst;
+      /* debug eliminado: objeto STORE_NAME campos */
+      /* debug eliminado: llamando dbc STORE_NAME */
+      dbc(STORE_NAME, 0, 0, o, lhs_nlin, lhs_ncol, mv->nombre_archivo);
+      /* debug eliminado: STORE_NAME emitido */
     }
   } break;
   case NODO_GLOBAL: {
@@ -1089,19 +1137,23 @@ LATINO_API lat_objeto *latC_analizar(lat_mv *mv, ast *nodo) {
 #if DEPURAR_MEM
   printf("latC_analizar.codigo: %p\n", codigo);
 #endif
+  /* debug eliminado: latC_analizar inicio */
   int i = ast_analizar(mv, nodo, codigo, 0);
+  /* debug eliminado: latC_analizar ast_analizar completo */
   dbc(HALT, 0, 0, NULL, 0, 0, mv->nombre_archivo);
 #if DEPURAR_AST
-  mostrar_bytecode(mv, codigo);
+  /* debug deshabilitado: dump de bytecode */
 #endif
   lat_bytecode *nuevo_codigo = latM_asignar(mv, sizeof(lat_bytecode) * (i + 1));
   memcpy(nuevo_codigo, codigo, sizeof(lat_bytecode) * (i + 1));
 #if DEPURAR_MEM
   printf("latC_analizar.nuevo_codigo: %p\n", nuevo_codigo);
 #endif
+  /* debug eliminado: latC_analizar nuevo_codigo */
   latM_liberar(mv, codigo);
   lat_objeto *fun = latC_crear_funcion(mv, nuevo_codigo, i);
   fun->marca = 0;
   fun->nombre = "dummy";
+  /* debug eliminado: latC_analizar función creada */
   return fun;
 }

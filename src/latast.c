@@ -26,6 +26,7 @@ THE SOFTWARE.
 #include "latino.h"
 #include "latlex.h"
 #include "latmem.h"
+#include <string.h>
 
 int yyparse(ast **root, yyscan_t scanner);
 char *analizar_fmt(const char *s, size_t len);
@@ -111,6 +112,7 @@ ast *latA_var(const char *s, int nlin, int ncol, bool esconst) {
   a->valor = val;
   a->nlin = nlin;
   a->ncol = ncol;
+  /* debug eliminado: latA_var */
   return a;
 }
 
@@ -120,6 +122,13 @@ ast *latA_asign(ast *val, ast *sim) {
   a->izq = val;
   a->der = sim;
   a->valor = NULL;
+  /* debug eliminado: latA_asign tipos y posiciones */
+  if (sim && sim->valor) {
+    nodo_valor *v = (nodo_valor *)sim->valor;
+    if (v->tipo == VALOR_CADENA) {
+      /* debug eliminado: latA_asign LHS nombre */
+    }
+  }
   return a;
 }
 

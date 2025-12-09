@@ -35,7 +35,7 @@ THE SOFTWARE.
 #include "latmem.h"
 #include "latmv.h"
 
-#define LIB_SISTEMA_NAME "sis"
+#define LIB_SISTEMA_NOMBRE "sis"
 
 struct OS_VERSION_LAT { // estructura variable OS.Major, OS.Minor, OS.Build
   unsigned long osMayor, osMenor, osBuild;
@@ -220,7 +220,7 @@ static void latSO_avisar(lat_mv *mv) {
   };
 }
 
-static void latSO_salir(lat_mv *mv) { exit(0); }
+static void latSO_salir(lat_mv *mv) { (void)mv; exit(0); }
 
 static void latSO_cwd(lat_mv *mv) {
   char dir[1024];
@@ -292,7 +292,7 @@ void latOS_veriones(lat_mv *mv, int i) {
   latC_apilar(mv, tmp);
 }
 
-static void latSO_ver_major(lat_mv *mv) { latOS_veriones(mv, 1); }
+static void latSO_ver_mayor(lat_mv *mv) { latOS_veriones(mv, 1); }
 
 static void latSO_ver_menor(lat_mv *mv) { latOS_veriones(mv, 2); }
 
@@ -332,11 +332,11 @@ static const lat_CReg libsistema[] = {{"dormir", latSO_dormir, 1},
                                       {"usuario", latSO_usuario, 0},
                                       {"operativo", latSO_operativo, 1},
                                       {"os", latSO_operativo, 1},
-                                      {"os_version_mayor", latSO_ver_major, 0},
+                                      {"os_version_mayor", latSO_ver_mayor, 0},
                                       {"os_version_menor", latSO_ver_menor, 0},
                                       {"os_version_parche", latSO_ver_build, 0},
-                                      {NULL, NULL}};
+                                      {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_syslib(lat_mv *mv) {
-  latC_abrir_liblatino(mv, LIB_SISTEMA_NAME, libsistema);
+  latC_abrir_liblatino(mv, LIB_SISTEMA_NOMBRE, libsistema);
 }

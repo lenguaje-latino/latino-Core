@@ -131,7 +131,7 @@ static const lat_CReg libdic[] = {{"longitud", dic_longitud, 1},
                                   {"vals", dic_valores, 1},
                                   {"contiene", dic_contiene, 2},
                                   {"eliminar", dic_eliminar, 2},
-                                  {NULL, NULL}};
+    {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_diclib(lat_mv *mv) {
   latC_abrir_liblatino(mv, LIB_DIC_NAME, libdic);

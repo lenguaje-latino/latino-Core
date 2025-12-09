@@ -157,30 +157,22 @@ lat_objeto *latC_llamar_metodo(lat_mv *mv, lat_objeto *instancia,
 }
 
 void latC_llamar_super(lat_mv *mv, lat_objeto *instancia, int nargs) {
-  fprintf(stderr, "DEBUG latC_llamar_super: inicio, mv=%p, instancia=%p, nargs=%d\n", mv, instancia, nargs);
-  fflush(stderr);
   if (!instancia || instancia->tipo != T_INSTANCE) {
     latC_error(mv, "No es una instancia de clase");
     return;
   }
 
   lat_instancia *inst = (lat_instancia *)instancia->val.cpointer;
-  fprintf(stderr, "DEBUG latC_llamar_super: inst=%p\n", inst);
-  fflush(stderr);
   if (!inst || !inst->clase) {
     latC_error(mv, "Instancia inválida");
     return;
   }
-  fprintf(stderr, "DEBUG latC_llamar_super: inst->clase=%p, clase_nombre=%s\n", inst->clase, inst->clase ? inst->clase->nombre : "(null)");
-  fflush(stderr);
 
   if (!inst->clase->padre) {
     const char *clase_nombre = inst->clase && inst->clase->nombre ? inst->clase->nombre : "(sin nombre)";
     latC_error(mv, "La clase '%s' no tiene clase padre", clase_nombre);
     return;
   }
-  fprintf(stderr, "DEBUG latC_llamar_super: clase_padre=%p, padre_nombre=%s\n", inst->clase->padre, inst->clase->padre ? inst->clase->padre->nombre : "(null)");
-  fflush(stderr);
 
   if (!inst->clase->padre->constructor) {
     const char *padre_nombre = inst->clase->padre && inst->clase->padre->nombre ? inst->clase->padre->nombre : "(sin nombre)";
@@ -188,9 +180,6 @@ void latC_llamar_super(lat_mv *mv, lat_objeto *instancia, int nargs) {
                padre_nombre);
     return;
   }
-
-  fprintf(stderr, "DEBUG latC_llamar_super: instancia=%p, clase_padre=%s, ctor=%p, nargs=%d\n", instancia, inst->clase->padre->nombre, inst->clase->padre->constructor, nargs);
-  fflush(stderr);
 
   // Activar instrumentación de super() para el constructor padre
   mv->dbg_super_active = true;
@@ -207,8 +196,6 @@ void latC_llamar_super(lat_mv *mv, lat_objeto *instancia, int nargs) {
   mv->dbg_target_ctor = NULL;
   mv->dbg_super_depth = 0;
 
-  fprintf(stderr, "DEBUG latC_llamar_super: retorno de latMV_ejecutar_constructor_padre\n");
-  fflush(stderr);
 }
 
 void latC_destruir_clase(lat_mv *mv, lat_class *clase) {

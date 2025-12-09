@@ -333,3 +333,21 @@ Cualquier aportación o sugerencia es bienvenida.
 - **Documentación**: [Manual de Latino](https://manual.lenguaje-latino.org)
 - **Discord**: [Únete a nuestra comunidad](https://discord.gg/latino)
 - **GitHub**: [lenguaje-latino](https://github.com/lenguaje-latino)
+## Política de errores (listas y diccionarios)
+
+Esta sección documenta el comportamiento esperado ante operaciones inválidas y asignaciones compuestas en colecciones:
+
+- Índices fuera de rango en listas:
+  - Lectura `lista[i]` con `i` fuera de rango produce error: `Indice fuera de rango`.
+  - Asignación `lista[i] = v` con `i` fuera de rango también produce error. Para crecer una lista, use las operaciones de inserción (`agregar`, `push`).
+
+- Claves inexistentes en diccionarios:
+  - Lectura `dic["k"]` de una clave inexistente debe considerarse error (semántica estricta). Inicialice explícitamente la clave antes de leerla o use una API con valor por defecto.
+  - Asignación compuesta sobre clave inexistente `dic["k"] += v` requiere que la clave exista y tenga un valor numérico compatible. Si la clave no existe, inicialícela primero, por ejemplo: `dic["k"] = 0`.
+
+- Asignaciones compuestas sobre subíndices y atributos:
+  - Las expresiones del tipo `X[Y] op= Z` y `obj.attr op= Z` se desazucaran a una lectura del destino seguida de la operación y un almacenamiento en el mismo destino.
+  - Para `X[Y] op= Z`, el analizador evalúa `X[Y]` y `Z`, aplica `op` y emite `STORE_SUBSCR`.
+  - Para `obj.attr op= Z`, el analizador evalúa `obj` y `Z`, aplica `op` y emite `STORE_ATTR`.
+
+Estas reglas favorecen un comportamiento predecible y evitan silencios que oculten errores lógicos; los programas deben inicializar explícitamente elementos y claves antes de operar con asignaciones compuestas.

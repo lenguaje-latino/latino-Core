@@ -536,10 +536,8 @@ static char *reemplazar_lat(char *orig, char *rep, char *with, int veces) {
     }
     tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
     if (!result) {
-        free(result);
-        free(tmp);
         return NULL;
-    };
+    }
     while (count--) {
         ins = strstr(orig, rep);
         len_front = ins - orig;
@@ -549,8 +547,6 @@ static char *reemplazar_lat(char *orig, char *rep, char *with, int veces) {
     }
     strcpy(tmp, orig);
     return result;
-    free(result);
-    free(tmp);
 }
 
 void str_reemplazar(lat_mv *mv) {
@@ -633,7 +629,8 @@ void str_esalfa(lat_mv *mv) {
     lat_objeto *a = latC_desapilar(mv);
     char *cad = latC_checar_cadena(mv, a);
     bool res = true;
-    for (int i = 0; i < strlen(cad); i++) {
+    size_t len = strlen(cad);
+    for (size_t i = 0; i < len; i++) {
         if (!isalnum(cad[i])) {
             res = false;
             break;
@@ -811,7 +808,7 @@ void str_match(lat_mv *mv) {
         unsigned int offset = 0;
         lat_objeto *l_groups = latC_crear_lista(mv, latL_crear(mv));
         for (int g = 0; g < maxGroups; g++) {
-            if (groupArray[g].rm_so == (size_t)-1) {
+            if (groupArray[g].rm_so == -1) {
                 break; // No more groups
             }
             if (g == 0) {
@@ -861,9 +858,13 @@ void str_formato(lat_mv *mv) {
     char *b = calloc(1, 1024);
     while (strfrmt < strfrmt_end) {
         if (*strfrmt != '%') {
-            sprintf(b, "%s%c", b, *strfrmt++);
+            size_t blen = strlen(b);
+            b[blen] = *strfrmt++;
+            b[blen + 1] = '\0';
         } else if (*++strfrmt == '%') {
-            sprintf(b, "%s%c", b, *strfrmt++);
+            size_t blen = strlen(b);
+            b[blen] = *strfrmt++;
+            b[blen + 1] = '\0';
         } else {
 #ifdef _WIN32
             char buff[MAX_BUFFERSIZE];
@@ -900,7 +901,7 @@ void str_formato(lat_mv *mv) {
                 } break;
                 case 'e': { // sci
                     lat_objeto *sci = latL_extraer_inicio(mv, params);
-                    sprintf(buff, "%e", (int)latC_adouble(mv, sci));
+                    sprintf(buff, "%e", latC_adouble(mv, sci));
                 } break;
                 case 's': { // string
                     lat_objeto *str = latL_extraer_inicio(mv, params);
@@ -924,11 +925,12 @@ void str_char(lat_mv *mv) {
         lista *lst = latC_checar_lista(mv, arg);
         long int lng = latL_longitud(lst);
         char *str_chars = malloc(lng + 1);
-        sprintf(str_chars, "%c", 0);
+        str_chars[0] = '\0';
         for (long int i = 0; i < lng; i++) {
             lat_objeto *tmp1 = latL_obtener_elemento(mv, lst, i);
-            sprintf(str_chars, "%s%c", str_chars,
-                    (char)latC_checar_numerico(mv, tmp1));
+            size_t pos = strlen(str_chars);
+            str_chars[pos] = (char)latC_checar_numerico(mv, tmp1);
+            str_chars[pos + 1] = '\0';
         }
         latC_apilar_string(mv, str_chars);
         free(str_chars);
@@ -946,7 +948,8 @@ void str_bytes(lat_mv *mv) {
     } else {
         char *stringp = latC_checar_cadena(mv, str);
         lat_objeto *decs = latC_crear_lista(mv, latL_crear(mv));
-        for (int i = 0; i < strlen(stringp); i++) {
+        size_t len = strlen(stringp);
+        for (size_t i = 0; i < len; i++) {
             latL_agregar(mv, latC_checar_lista(mv, decs),
                          latC_crear_numerico(mv, (int)stringp[i]));
         }
@@ -986,7 +989,7 @@ static const lat_CReg libstr[] = {
     {"reemplazar", str_reemplazar, 4},
     {"subcadena", str_subcadena, 3},
     {"formato", str_formato, FUNCION_VAR_ARGS}, // para funciones var_arg
-    {NULL, NULL}};
+    {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_strlib(lat_mv *mv) {
     latC_abrir_liblatino(mv, LIB_CADENA_NAME, libstr);

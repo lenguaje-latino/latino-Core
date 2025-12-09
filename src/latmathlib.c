@@ -409,7 +409,7 @@ static const lat_CReg libmate_[] = {
     {"porciento", mate_porc, 2},
     {"porcentaje", mate_porc, 2},
     {"porc", mate_porc, 2},
-    {NULL, NULL}};
+    {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_mathlib(lat_mv *mv) {
     latC_abrir_liblatino(mv, LIB_MATE_NAME, libmate_);

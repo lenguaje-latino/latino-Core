@@ -27,6 +27,10 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_WIN32) || defined(__WIN32__)
+#include <io.h>
+#endif
+
 #include "latino.h"
 
 #define LIB_BASE_NAME ""
@@ -196,31 +200,80 @@ static void base_incluir(lat_mv *mv) {
 }
 
 static void base_leer(lat_mv *mv) {
-    char *str = calloc(1, MAX_INPUT_SIZE);
+    // Lectura robusta de línea con manejo correcto por plataforma
 #if (defined __WIN32__) || (defined _WIN32)
-    str = latC_leer_linea(str);
-#else
-    str = latC_leer_linea(NULL);
-#endif
+    char *buf = calloc(1, MAX_INPUT_SIZE);
+    if (!buf) {
+        latC_apilar(mv, latO_nulo);
+        return;
+    }
 
-    int i = strlen(str) - 1;
-    if (str[i] == '\n') {
-        str[i] = '\0';
-    }
-    char *ptr;
-    double ret;
-    ret = strtod(str, &ptr);
-    lat_objeto *tmp = NULL;
-    if (!strcmp(ptr, "")) {
-        tmp = latC_crear_numerico(mv, ret);
-        latC_apilar(mv, tmp);
+    bool ok = false;
+    // Si stdin es consola interactiva, usar ReadConsoleA; si viene por pipe, usar fgets.
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode = 0;
+    BOOL is_console = (hStdin != INVALID_HANDLE_VALUE) && GetConsoleMode(hStdin, &mode);
+    if (is_console) {
+        DWORD readChars = 0;
+        if (ReadConsoleA(hStdin, buf, MAX_INPUT_SIZE - 1, &readChars, NULL)) {
+            buf[readChars] = '\0';
+            ok = true;
+        }
     } else {
-        tmp = latC_crear_cadena(mv, str);
-        latC_apilar(mv, tmp);
+        ok = latC_leer_linea(buf) != NULL;
     }
+
+    if (!ok) {
+        free(buf);
+        latC_apilar(mv, latO_nulo);
+        return;
+    }
+
+    // Normalizar fin de línea para Windows (eliminar CRLF/ LF)
+    size_t len = strlen(buf);
+    while (len > 0 && (buf[len - 1] == '\n' || buf[len - 1] == '\r')) {
+        buf[--len] = '\0';
+    }
+
+    char *endptr = NULL;
+    double ret = strtod(buf, &endptr);
+    lat_objeto *tmp = NULL;
+    // Si toda la cadena es numérica y no está vacía, regresar número; de lo contrario, cadena.
+    if (endptr && *endptr == '\0' && buf[0] != '\0') {
+        tmp = latC_crear_numerico(mv, ret);
+    } else {
+        tmp = latC_crear_cadena(mv, buf);
+    }
+    latC_apilar(mv, tmp);
+    free(buf);
+#else
+    char *line = latC_leer_linea(NULL);
+    if (!line) {
+        latC_apilar(mv, latO_nulo);
+        return;
+    }
+    size_t len = strlen(line);
+    if (len > 0 && line[len - 1] == '\n') {
+        line[len - 1] = '\0';
+    }
+
+    char *endptr = NULL;
+    double ret = strtod(line, &endptr);
+    lat_objeto *tmp = NULL;
+    if (endptr && *endptr == '\0' && line[0] != '\0') {
+        tmp = latC_crear_numerico(mv, ret);
+    } else {
+        tmp = latC_crear_cadena(mv, line);
+    }
+    latC_apilar(mv, tmp);
+    free(line);
+#endif
 }
 
-static void base_limpiar(lat_mv *mv) { system(latC_clear); }
+static void base_limpiar(lat_mv *mv) {
+    (void)mv;
+    system(latC_clear);
+}
 
 static void base_tipo(lat_mv *mv) {
     lat_objeto *a = latC_desapilar(mv);
@@ -260,6 +313,7 @@ static void base_error(lat_mv *mv) {
 }
 
 static void base_beep(lat_mv *mv) {
+    (void)mv;
     fprintf(stderr, "\x7");
     fflush(stderr);
 }
@@ -278,7 +332,7 @@ static const lat_CReg libbase[] = {
     {"imprimirf", base_imprimirf, FUNCION_VAR_ARGS},
     {"error", base_error, FUNCION_VAR_ARGS},
     {"beep", base_beep, 0},
-    {NULL, NULL}};
+    {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_baselib(lat_mv *mv) {
     latC_abrir_liblatino(mv, LIB_BASE_NAME, libbase);

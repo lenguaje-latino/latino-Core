@@ -7,6 +7,7 @@ visualstudio/
 msvc/
 CMakeFiles/
 dist/
+Documentos/
 codeblocks/doxygen/
 Testing/
 test/
@@ -16,6 +17,7 @@ test/
 Testing/
 codeblocks/
 codelite/
+Pruebas/
 mingw/
 visualstudio/
 Img-Orig/

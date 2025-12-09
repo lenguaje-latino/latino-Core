@@ -49,9 +49,6 @@ void latO_asignar_ctx(lat_mv *mv, lat_objeto *ns, const char *name,
   if (ns->tipo != T_CONTEXT) {
     latC_error(mv, "Objeto no es un contexto");
   } else {
-    fprintf(stderr, "DEBUG latO_asignar_ctx: asignando '%s' (tipo=%d) en contexto\n", 
-            name, o ? o->tipo : -1);
-    fflush(stderr);
     hash_map *h = getCtx(ns);
     if (strlen(name) > MAX_ID_LENGTH) {
       latC_error(mv, "Nombre de id mayor a %i caracteres", MAX_ID_LENGTH);

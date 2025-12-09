@@ -112,6 +112,7 @@ int main(int argc, char *argv[]) {
         }
     }
     lat_mv *mv = latC_crear_mv();
+    /* debug eliminado: MV creada */
     if (pe) {
         /* Ejecuta una cadena de codigo */
         if (argc != 3) {
@@ -121,11 +122,14 @@ int main(int argc, char *argv[]) {
         char *cmd = malloc(MAX_INPUT_SIZE);
         strcpy(cmd, argv[2]);
         latC_apilar(mv, latC_crear_cadena(mv, cmd));
+        /* debug eliminado: Ejecutando cadena -e */
         str_ejecutar(mv);
+        /* debug eliminado: Cadena ejecutada */
         free(cmd);
     } else if (argc > 1 && pf) {
         /* Ejecuta un archivo de codigo */
         infile = argv[1];
+        /* debug eliminado: Archivo de entrada */
         mv->nombre_archivo = infile;
         mv->global->REPL = false;
         mv->global->argc = argc - 1;
@@ -134,9 +138,13 @@ int main(int argc, char *argv[]) {
                          latC_crear_cadena(mv, argv[j]));
         }
         int status;
+        /* debug eliminado: Iniciando parseo */
         ast *nodo = latA_analizar_arch(infile, &status);
+        /* debug eliminado: Parseo terminado */
         if (status == 0 && nodo != NULL) {
+            /* debug eliminado: Analizando AST a bytecode */
             lat_objeto *main_func = latC_analizar(mv, nodo);
+            /* debug eliminado: Función principal creada */
             if (mv->global->menu) {
                 // inicio instrucciones para llamar a menu
                 lat_funcion *fval = (lat_funcion *)main_func->val.gc;
@@ -162,16 +170,21 @@ int main(int argc, char *argv[]) {
                 lat_objeto *new_main = latC_crear_funcion(mv, bc, ninst + 2);
                 new_main->es_vararg = 0;
                 new_main->nparams = 2;
+                /* debug eliminado: Ejecutando menú */
                 status = latC_llamar_funcion(mv, new_main);
+                /* debug eliminado: Menú finalizado */
                 latO_destruir(mv, new_main);
             } else {
+                /* debug eliminado: Ejecutando función principal */
                 status = latC_llamar_funcion(mv, main_func);
+                /* debug eliminado: Ejecución finalizada */
             }
             latO_destruir(mv, main_func);
         }
         latA_destruir(nodo);
     } else {
         lat_version();
+        /* debug eliminado: Iniciando REPL */
         latR_REPL(mv);
     }
     latC_destruir_mv(mv);

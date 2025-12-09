@@ -199,15 +199,16 @@ void lista_separar(lat_mv *mv) {
                       // cadena + 1
             texto = realloc(
                 texto, mem); // asigno la memoria nuevamente sin borrar su valor
-            sprintf(texto, "%s%s%s", texto, sep_elegido,
-                    latC_checar_cadena(
-                        mv, tmp1)); // imprimo el contenido que ya tiene texto
-                                    // en su misma variable con el separador
+            strcat(texto, sep_elegido);
+            strcat(texto, latC_checar_cadena(mv, tmp1));
         } else if (tmp1->tipo == T_NUMERIC) {
-            sprintf(texto, "%s%s%.16g", texto, sep_elegido,
-                    latC_checar_numerico(
-                        mv, tmp1)); // si es número, no reservo más memoria y
-                                    // sigo metiendo el valor
+            double val = latC_checar_numerico(mv, tmp1);
+            char numbuf[64];
+            snprintf(numbuf, sizeof(numbuf), "%.16g", val);
+            mem += strlen(sep_elegido) + strlen(numbuf) + 1;
+            texto = realloc(texto, mem);
+            strcat(texto, sep_elegido);
+            strcat(texto, numbuf);
         }
     }
     if (*texto == '\0') { // ahora regreso al valor de texto, y lo comparo con
@@ -234,7 +235,7 @@ static const lat_CReg liblist[] = {
     {"concatenar", lista_concatenar, 2},
     {"crear", lista_crear, 1},
     {"separar", lista_separar, 2},
-    {NULL, NULL}};
+    {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_listlib(lat_mv *mv) {
     latC_abrir_liblatino(mv, LIB_LISTA_NAME, liblist);
