@@ -526,8 +526,11 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
   } break;
   case NODO_SI: {
     nodo_si *nIf = ((nodo_si *)nodo);
-    if (nIf->entonces->izq->tipo == NODO_ASIGNACION &&
-        nIf->entonces->izq->der == NULL) {
+    // Validar que la condición no sea una asignación accidental ('=')
+    // En caso de que la condición sea un NODO_ASIGNACION sin lado derecho,
+    // es probable que se haya usado '=' en lugar de '==' en la condición.
+    if (nIf->cond && nIf->cond->tipo == NODO_ASIGNACION &&
+        nIf->cond->der == NULL) {
       latC_error(mv, "Se esta haciendo una asignacion '=', en lugar "
                      "de una comparacion '=='");
     }

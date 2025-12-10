@@ -144,6 +144,7 @@ int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
  *
  */
 %right '='
+%right '?' ':'
 %right CONCATENAR
 %left CONCATENAR_IGUAL
 %left Y_LOGICO O_LOGICO
@@ -520,8 +521,17 @@ dict_items
     ;
 
 dict_item
-    : { /* empty */ $$ = NULL; }
-    | expression ':' expression { $$ = latA_nodo(NODO_DICC_ELEMENTO, $1, $3, @1.first_line, @1.first_column); }
+: { /* empty */ $$ = NULL; }
+| IDENTIFICADOR ':' expression {
+    /* Ajustar sintaxis para claves de diccionario sin comillas:
+       { clave: valor } -> clave se trata como cadena literal. */
+    ast *clave_id = $1;
+    ast *clave_str = latA_cadena(clave_id->valor->val.cadena, @1.first_line, @1.first_column);
+    /* Liberar el identificador original para evitar fuga menor */
+    latA_destruir(clave_id);
+    $$ = latA_nodo(NODO_DICC_ELEMENTO, clave_str, $3, @1.first_line, @1.first_column);
+  }
+| expression ':' expression { $$ = latA_nodo(NODO_DICC_ELEMENTO, $1, $3, @1.first_line, @1.first_column); }
     ;
 
 clase_propiedad
