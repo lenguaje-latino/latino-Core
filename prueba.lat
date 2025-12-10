@@ -55,3 +55,8 @@ escribir(carro2.modelo)
 // 8) Mezcla de claves con y sin comillas
 info = { nombre: "Jorge", "edad": 30 }
 escribir(info.nombre .. " (" .. info.edad .. ")")
+
+escribir("Ingrese su nombre")
+nombre = leer()
+
+escribir (nombre)
