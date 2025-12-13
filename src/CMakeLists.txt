@@ -97,6 +97,8 @@ set(SRC_LIB
     latstrlib.c
     latsyslib.c
     latino.c
+    linenoise/utf8.c
+    linenoise/linenoise.c
 )
 
 if(WIN32)
@@ -108,6 +110,12 @@ if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
     target_link_libraries(${PROJECT_NAME} LINK_PUBLIC regex2 linenoise)
 endif()
+
+if(MSVC)
+    add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
+else()
+    add_executable(${PROJECT_NAME} ${SRC_LIB})
+endif(MSVC)
 
 if(NOT WIN32)
     target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})
