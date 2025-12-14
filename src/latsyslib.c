@@ -177,6 +177,13 @@ static void latSO_fecha(lat_mv *mv) {
     tmp = latC_crear_numerico(mv, tipo->tm_yday + 1); // día del año, empieza en 0
   } else if (!strcmp(num, "horario_de_verano")) {
     tmp = latC_crear_logico(mv, tipo->tm_isdst); 
+  } else if (!strcmp(num, "iso")) {
+    char fechaIsoBuffer[21];
+    struct tm *tipo_utc;
+    tipo_utc = gmtime(&raw);
+    
+    strftime(fechaIsoBuffer, sizeof(fechaIsoBuffer), "%Y-%m-%dT%H:%M:%SZ", tipo_utc);
+    tmp = latC_crear_cadena(mv, fechaIsoBuffer); // fecha en formato ISO 8601 UTC
   } else {
     latC_error(mv, "El formato de tiempo indicado no existe");
   }
