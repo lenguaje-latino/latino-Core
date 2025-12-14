@@ -163,15 +163,20 @@ static void latSO_fecha(lat_mv *mv) {
   } else if (!strcmp(num, "d_mes")) {
     tmp = latC_crear_numerico(mv, tipo->tm_mday); // dia del mes
   } else if (!strcmp(num, "mes")) {
-    tmp = latC_crear_numerico(mv, tipo->tm_mon);
+    tmp = latC_crear_numerico(mv, tipo->tm_mon + 1); // número de mes, empiezan en 0
+  } else if (!strcmp(num, "sem")) {
+    char semanaBuffer[3];
+    strftime(semanaBuffer, sizeof(semanaBuffer), "%V", tipo);
+    int numSemana = atoi(semanaBuffer);
+    tmp = latC_crear_numerico(mv, numSemana); // número de semana en el año
   } else if (!strcmp(num, "año")) {
-    tmp = latC_crear_numerico(mv, tipo->tm_year + 1900);
+    tmp = latC_crear_numerico(mv, tipo->tm_year + 1900); // los años empiezan en 1900
   } else if (!strcmp(num, "d_sem")) {
-    tmp = latC_crear_numerico(mv, tipo->tm_wday); // día de la sem.
+    tmp = latC_crear_numerico(mv, tipo->tm_wday + 1); // día de la semana, empiezan en 0
   } else if (!strcmp(num, "d_año")) {
-    tmp = latC_crear_numerico(mv, tipo->tm_yday); // día del año
-  } else if (!strcmp(num, "estacion")) {
-    tmp = latC_crear_numerico(mv, tipo->tm_isdst); // verano/inv
+    tmp = latC_crear_numerico(mv, tipo->tm_yday + 1); // día del año, empieza en 0
+  } else if (!strcmp(num, "horario_de_verano")) {
+    tmp = latC_crear_logico(mv, tipo->tm_isdst); 
   } else {
     latC_error(mv, "El formato de tiempo indicado no existe");
   }
