@@ -63,11 +63,11 @@ THE SOFTWARE.
 #define LAT_stringize(x) LAT_STRINGIZE(x)
 
 /** Version mayor de Latino */
-#define LAT_VERSION_MAYOR 1
+#define LAT_VERSION_MAYOR   1
 /** Version menor de Latino */
-#define LAT_VERSION_MENOR 4
+#define LAT_VERSION_MENOR   5
 /** Version de correcion de errores */
-#define LAT_VERSION_PARCHE 4
+#define LAT_VERSION_PARCHE  0
 /** Version de Latino */
 #define LAT_CURRENT_YEAR 2025
 #define LAT_VERSION                                                            \

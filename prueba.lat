@@ -1,0 +1,62 @@
+nombre = "Ñato"
+escribir("El número ingresado es ".. nombre)
+
+escribir("Número decimal: "..12.855)
+
+// OPERADOR TERNARIO
+
+escribir("== Pruebas operador ternario ==")
+
+// 1) Condición simple verdadera
+escribir((1 < 2) ? "ok" : "ko")
+
+// 2) Asignación con ternario y concatenación (con paréntesis)
+numero = -5
+mensaje = ((numero < 0) ? " es negativo" : " es positivo")
+escribir("El número " .. numero .. mensaje)
+
+// 3) Ternario sin paréntesis dentro de concatenación
+mensaje2 = (numero % 2 == 0) ? " par" : " impar"
+escribir("Paridad:" .. mensaje2)
+
+// 4) Ternario anidado
+nivel = 15
+etiqueta = (nivel < 0) ? "negativo" : (nivel < 10 ? "bajo" : "alto")
+escribir("Nivel " .. nivel .. " es " .. etiqueta)
+
+// 5) Precedencia en concatenación (con paréntesis)
+x = "X" .. ((1 > 0) ? "T" : "F")
+escribir("Concatenación ternario: " .. x)
+
+// 6) Precedencia en concatenación (sin paréntesis en el ternario)
+y = "Y" .. (1 < 0 ? "T" : "F")
+escribir("Concatenación sin paréntesis: " .. y)
+
+// DICCIONARIOS
+
+carro = {
+  "marca"  : "Toyota",
+  "modelo" : "Camry",
+  "anio"   : 2011,
+  "color"  : "Blanco"
+}
+
+escribir(carro.anio)
+
+// 7) Diccionario con claves sin comillas (azúcar sintáctica)
+carro2 = {
+  marca  : "Toyota",
+  modelo : "Camry",
+  anio   : 2011,
+  color  : "Blanco"
+}
+escribir(carro2.modelo)
+
+// 8) Mezcla de claves con y sin comillas
+info = { nombre: "Jorge", "edad": 30 }
+escribir(info.nombre .. " (" .. info.edad .. ")")
+
+escribir("Ingrese su nombre")
+nombre = leer()
+
+escribir (nombre)

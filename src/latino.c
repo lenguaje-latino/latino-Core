@@ -85,11 +85,17 @@ int main(int argc, char *argv[]) {
     SetConsoleCP(CP_UTF8);
     SetConsoleOutputCP(CP_UTF8);
     #endif
-    setlocale(LC_ALL, "C.UTF-8");
-    setlocale(LC_CTYPE, "C.UTF-8");
-    /* para numeros decimales */
-    // setlocale(LC_NUMERIC, "es_MX");
-    // setlocale(LC_MONETARY, "es_MX");
+    if (!setlocale(LC_ALL, "C.UTF-8")) {
+        if (!setlocale(LC_ALL, "C")) {
+            setlocale(LC_ALL, "");
+        }
+    }
+    if (!setlocale(LC_CTYPE, "C.UTF-8")) {
+        if (!setlocale(LC_CTYPE, "C")) {
+            setlocale(LC_CTYPE, "");
+        }
+    }
+    setlocale(LC_NUMERIC, "C");
     int i;
     char *infile = NULL;
     int pe = false;

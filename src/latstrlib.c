@@ -617,7 +617,7 @@ void str_recortar(lat_mv *mv) {
 void str_es_numerico(lat_mv *mv) {
     lat_objeto *a = latC_desapilar(mv);
     char *ptr;
-    strtod(latC_checar_cadena(mv, a), &ptr);
+  latC_strtod_c(latC_checar_cadena(mv, a), &ptr);
     if (!strcmp(ptr, "")) {
         latC_apilar(mv, latO_verdadero);
     } else {

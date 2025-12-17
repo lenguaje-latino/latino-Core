@@ -148,4 +148,7 @@ char *_strdup(const char *str);
                    1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec));                      \
   }
 
+/* Conversión robusta de cadena a double usando locale numérico "C" */
+double latC_strtod_c(const char *nptr, char **endptr);
+
 #endif /*_LATINO_COMPAT_H_*/

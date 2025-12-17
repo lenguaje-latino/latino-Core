@@ -2137,8 +2137,6 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func)
       break;
       case MAKE_CLASS:
       {
-        // Mostrar el stack
-        fprintf(stderr, "  Stack: %d\n", mv->ptrpila);
         /* MAKE_CLASS inicio (sin logs) */
 
         lat_class_meta *cm = (lat_class_meta *)cur.meta;
@@ -2147,10 +2145,7 @@ int latMV_funcion_correr(lat_mv *mv, lat_objeto *func)
           latC_error(mv, "MAKE_CLASS: metadatos de clase inválidos");
         }
 
-        // Mostrar el nombre de la clase y la clase base si existe
-        fprintf(stderr, "  class_name=%s, base_name=%s\n",
-                cm->class_name ? cm->class_name : "(null)",
-                cm->base_name ? cm->base_name : "(null)");
+        /* Logs de clase deshabilitados: class_name/base_name */
 
         // 1. Guardar contexto actual
         lat_objeto *saved_ctx = obtener_contexto(mv);

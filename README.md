@@ -1,6 +1,19 @@
 # Latino Core
 
+![Build Installers](https://github.com/lenguaje-latino/latino-Core/actions/workflows/release.yml/badge.svg)
+
 Núcleo del lenguaje de programación Latino.
+
+## 📥 Descargas
+
+Puedes descargar la última versión compilada para tu sistema operativo desde la sección de [Releases](https://github.com/lenguaje-latino/latino-Core/releases/latest).
+
+| Sistema Operativo | Instalador |
+|-------------------|------------|
+| **Windows**       | `.exe` (Instalador con asistente) |
+| **macOS**         | `.dmg` (Imagen de disco) |
+| **Linux (Debian/Ubuntu)** | `.deb` |
+| **Linux (Fedora/RHEL)**   | `.rpm` |
 
 ## ¿Qué contiene?
 

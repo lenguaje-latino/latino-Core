@@ -20,14 +20,28 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
- */
+*/
 
-#ifndef _LATINO_REPL_H_
-#define _LATINO_REPL_H_
+#include <stdlib.h>
+#include <string.h>
+#include <locale.h>
 
-#include "latino.h"
-#include "linenoise.h"
+#include "latcompat.h"
 
-void latR_REPL(lat_mv *mv);
-
-#endif /* _LATINO_REPL_H_ */
+double latC_strtod_c(const char *nptr, char **endptr) {
+  /* Fuerza LC_NUMERIC="C" durante la conversión y restaura luego. */
+  const char *oldloc = setlocale(LC_NUMERIC, NULL);
+  char oldbuf[64];
+  if (oldloc) {
+    strncpy(oldbuf, oldloc, sizeof(oldbuf) - 1);
+    oldbuf[sizeof(oldbuf) - 1] = '\0';
+  } else {
+    oldbuf[0] = '\0';
+  }
+  setlocale(LC_NUMERIC, "C");
+  double v = strtod(nptr, endptr);
+  if (oldbuf[0] != '\0') {
+    setlocale(LC_NUMERIC, oldbuf);
+  }
+  return v;
+}

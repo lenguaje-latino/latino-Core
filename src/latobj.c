@@ -700,7 +700,7 @@ LATINO_API double latC_adouble(lat_mv *mv, lat_objeto *o) {
   case T_STR: {
     char *ptr;
     double ret;
-    ret = strtod(latC_checar_cadena(mv, o), &ptr);
+    ret = latC_strtod_c(latC_checar_cadena(mv, o), &ptr);
     if (!strcmp(ptr, "")) {
       return ret;
     } else {
@@ -739,7 +739,7 @@ LATINO_API int latC_aint(lat_mv *mv, lat_objeto *o) {
   case T_STR: {
     char *ptr;
     double ret;
-    ret = strtod(latC_checar_cadena(mv, o), &ptr);
+    ret = latC_strtod_c(latC_checar_cadena(mv, o), &ptr);
     if (!strcmp(ptr, "")) {
       return ret;
     } else {
@@ -781,7 +781,7 @@ LATINO_API char latC_achar(lat_mv *mv, lat_objeto *o) {
   case T_STR: {
     char *ptr;
     double ret;
-    ret = strtod(latC_checar_cadena(mv, o), &ptr);
+    ret = latC_strtod_c(latC_checar_cadena(mv, o), &ptr);
     if (!strcmp(ptr, "")) {
       return ret;
     } else {
