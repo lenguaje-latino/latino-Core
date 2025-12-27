@@ -126,7 +126,7 @@ EXP ([Ee][-+]?[0-9]+)
 "cierto"|"verdadero"                            { return VERDADERO; }
 "falso"                                         { return FALSO; }
 "nulo"                                          { return NULO; }
-"retorno"|"retornar"|"ret"                      { return RETORNO; }
+"retornar"|"regresar"|"devolver"|"ret"          { return RETORNO; }
 "elegir"                                        { return ELEGIR; }
 "caso"                                          { return CASO; }
 "otro"|"defecto"                                { return DEFECTO; }
