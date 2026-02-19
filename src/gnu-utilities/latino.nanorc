@@ -18,7 +18,7 @@ color red "^[[:upper:]]+"
 ##################################################################
 
 # Palabras clave
-color magenta "\<(si|osi|sino|fin|romper|continuar|mientras|hacer|cuando|desde|nulo|retorno|caso|defecto|repetir|global|retornar)\>"
+color magenta "\<(si|osi|sino|fin|romper|continuar|mientras|hacer|cuando|desde|nulo|caso|defecto|repetir|global|retornar|regresar|devolver|ret)\>"
 color brightblue "funcion"
 color green "\<(verdadero|cierto|falso)\>"
 color brightmagenta "[[:space:]]+menu"
