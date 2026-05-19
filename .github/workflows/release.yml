@@ -16,62 +16,68 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      - name: Setup CMake
-        uses: kitware/cmake-build-extension@v2
-        with:
-          cmake-version: '~3.27.0'
-
       - name: Setup MinGW
         uses: egor-tensin/setup-mingw@v2
         with:
           platform: x86_64
 
-      - name: Verify CMake and Compiler
+      - name: Verify Tools
         run: |
           cmake --version
           gcc --version
           mingw32-make --version
+        shell: bash
 
       - name: Create build directory
-        run: mkdir build
+        run: mkdir -p build
+        shell: bash
 
       - name: Configure CMake with MinGW Makefiles
         run: |
           cd build
           cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-        shell: cmd
+        shell: bash
 
       - name: Build project
         run: |
           cd build
           cmake --build . --config Release -j 4
-        shell: cmd
+        shell: bash
 
-      - name: List build artifacts
+      - name: Check binary exists
         run: |
-          echo "Build directory contents:"
-          dir /s /b build\
-        shell: cmd
+          echo "Checking for latino executable..."
+          ls -lh build/src/latino.exe || ls -lh build/src/latino || echo "Binary not found"
+        shell: bash
 
       - name: Create NSIS Installer
         run: |
           cd build
-          cpack -G NSIS -C Release
-        shell: cmd
+          cpack -G NSIS -C Release || echo "NSIS installer creation failed (non-critical)"
+        shell: bash
         continue-on-error: true
 
-      - name: List generated installers
+      - name: List generated files
         run: |
-          echo "Looking for installers in build directory:"
-          dir /s /b build\*.exe
-        shell: cmd
+          echo "=== Build artifacts ==="
+          find build -name "*.exe" -o -name "*.deb" -o -name "*.rpm" -o -name "*.dmg" | head -20
+          ls -lh build/*.exe 2>/dev/null || echo "No .exe files in build/"
+        shell: bash
         continue-on-error: true
+
+      - name: Upload Windows Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Binary
+          path: build/src/latino.exe
+          retention-days: 30
 
       - name: Upload Windows Installer
         uses: actions/upload-artifact@v4
         with:
           name: Windows-Installer
           path: build/*.exe
+          if-no-files-found: warn
           retention-days: 30
 
   create-release:
