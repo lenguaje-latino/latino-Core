@@ -69,7 +69,7 @@ THE SOFTWARE.
 /** Version de correcion de errores */
 #define LAT_VERSION_PARCHE  0
 /** Version de Latino */
-#define LAT_CURRENT_YEAR 2025
+#define LAT_CURRENT_YEAR 2026
 #define LAT_VERSION                                                            \
   "Latino " LAT_stringize(LAT_VERSION_MAYOR) "." LAT_stringize(                \
       LAT_VERSION_MENOR) "." LAT_stringize(LAT_VERSION_PARCHE)
