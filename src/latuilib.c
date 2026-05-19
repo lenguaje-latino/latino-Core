@@ -89,7 +89,7 @@ static const lat_CReg libui[] = {
     {"ventana", ui_winProc, 0},
     {"mensaje", ui_messagebox, 4},
     {"flash", ui_flash, 0},
-    {NULL, NULL}};
+    {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_uilib(lat_mv *mv) {
     latC_abrir_liblatino(mv, LIB_UI_NAME, libui);

@@ -95,67 +95,101 @@ typedef void (*lat_CFuncion)(lat_mv *mv);
 #define STORE_LABEL 49
 #define MAKE_CLASS 50
 
+/* Opcodes para operaciones con clases (51-56) */
+#define NEW_INSTANCE                                                           \
+  51                   /* Crear nueva instancia de clase: obj = nueva Clase() */
+#define LOAD_METHOD 52 /* Cargar método de una instancia: obj.metodo */
+#define CALL_METHOD 53 /* Llamar método con contexto de instancia */
+#define LOAD_SUPER 54  /* Cargar y llamar constructor de clase padre: super()  \
+                        */
+#define STORE_PROPERTY 55 /* Asignar propiedad de instancia: mi.x = valor */
+#define LOAD_PROPERTY 56  /* Obtener propiedad de instancia: valor = mi.x */
+
+/* Metadata for MAKE_CLASS opcode to carry function and optional base class */
+typedef struct lat_class_meta {
+  lat_objeto *func;         /* Function object containing class bytecode */
+  const char *base_name;    /* Opcional clase base_name (puede ser NULL) */
+  const char *class_name;   /* Nombre de la clase (REQUERIDO) */
+} lat_class_meta;
+
 union lat_gcobjeto {
-    lat_gcheader gch;
-    union lat_cadena cadena;
-    struct lista lista;
-    struct hash_map dic;
-    struct lat_funcion fun;
-    struct lat_class class;
-    lat_CFuncion *cfun;
-    void *ptr;
+  lat_gcheader gch;
+  union lat_cadena cadena;
+  struct lista lista;
+  struct hash_map dic;
+  struct lat_funcion fun;
+  struct lat_class class;
+  lat_CFuncion *cfun;
+  void *ptr;
 };
 
 typedef struct lat_proto {
-    int nparams;
-    int ninst;
-    char *nombre;
-    lat_bytecode *codigo;
-    lista *locals;
+  int nparams;
+  int ninst;
+  char *nombre;
+  lat_bytecode *codigo;
+  lista *locals;
 } lat_proto;
 
 typedef struct stringtable {
-    lat_gcobjeto **hash;
-    unsigned int nuse;
-    int size;
+  lat_gcobjeto **hash;
+  unsigned int nuse;
+  int size;
 } stringtable;
 
 typedef struct lat_global {
-    int argc;
-    lat_objeto *argv;
-    lat_objeto *gc_objetos;
-    stringtable strt;
-    bool menu;
-    bool REPL;
+  int argc;
+  lat_objeto *argv;
+  lat_objeto *gc_objetos;
+  stringtable strt;
+  bool menu;
+  bool REPL;
 } lat_global;
+
+/* Variable lookup cache for improved performance */
+#define VAR_CACHE_SIZE 16
+
+typedef struct var_cache_entry {
+  const char *name;  /* Variable name (not owned, points to interned string) */
+  lat_objeto *value; /* Cached value */
+  int ctx_level;     /* Context level where variable was found */
+  unsigned int hash; /* Hash of the name for quick comparison */
+} var_cache_entry;
 
 /**\brief Define la maquina virtual (MV) */
 typedef struct lat_mv {
-    lat_global *global;
-    lat_objeto *pila;
-    lat_objeto *tope;
-    lat_objeto *base;
-    lat_objeto *actfun;
-    lat_objeto *contexto[256];
-    lat_objeto *contexto_actual;
-    lat_objeto *label_ctx;
-    int ptrctx;
-    int ptrpila;
-    int ptrprevio;
-    int prev_args;
-    int numejec;
-    size_t memoria_usada;
-    size_t gc_limite;
-    char *nombre_archivo;
-    int nlin;
-    int ncol;
-    int status;
-    struct lat_longjmp *error;
-    int enBucle;
-    bool enClase;
-    int goto_break[256];    // FIXME: Validar memoria utilizada
-    int goto_continue[256]; // FIXME: Validar memoria utilizada
-    int goto_goto[256];
+  lat_global *global;
+  lat_objeto *pila;
+  lat_objeto *tope;
+  lat_objeto *base;
+  lat_objeto *actfun;
+  lat_objeto *contexto[256];
+  lat_objeto *contexto_actual;
+  lat_objeto *label_ctx;
+  int ptrctx;
+  int ptrpila;
+  int ptrprevio;
+  int prev_args;
+  int numejec;
+  size_t memoria_usada;
+  size_t gc_limite;
+  char *nombre_archivo;
+  int nlin;
+  int ncol;
+  int status;
+  struct lat_longjmp *error;
+  int enBucle;
+  bool enClase;
+  int goto_break[256];    // FIXME: Validar memoria utilizada
+  int goto_continue[256]; // FIXME: Validar memoria utilizada
+  int goto_goto[256];
+  /* Variable lookup cache */
+  var_cache_entry var_cache[VAR_CACHE_SIZE];
+  int var_cache_next; /* Next slot to use (circular buffer) */
+  /* Instrumentación: seguimiento de constructor padre (super) */
+  bool dbg_super_active;         /* Instrumentación activa para super() */
+  lat_objeto *dbg_target_ctor;   /* Constructor padre objetivo */
+  int dbg_super_depth;           /* Profundidad de ejecución del ctor padre */
 } lat_mv;
 
 #define lati_numUmin(a) (-(a))
@@ -170,12 +204,12 @@ typedef struct lat_mv {
 #define lati_numLe(a, b) ((a) <= (b))
 
 #define arith_op(op)                                                           \
-    {                                                                          \
-        lat_objeto *b = latC_desapilar(mv);                                    \
-        lat_objeto *a = latC_desapilar(mv);                                    \
-        setNumerico(mv->tope, op(latC_adouble(mv, a), latC_adouble(mv, b)));   \
-        inc_pila(mv);                                                          \
-    }
+  {                                                                            \
+    lat_objeto *b = latC_desapilar(mv);                                        \
+    lat_objeto *a = latC_desapilar(mv);                                        \
+    setNumerico(mv->tope, op(latC_adouble(mv, a), latC_adouble(mv, b)));       \
+    inc_pila(mv);                                                              \
+  }
 
 const char *latMV_bytecode_nombre(int inst);
 
@@ -185,5 +219,7 @@ lat_bytecode latMV_bytecode_crear(int i, int a, int b, void *meta,
                                   long int nlin, long int ncol,
                                   char *nombre_archivo);
 int latMV_funcion_correr(lat_mv *mv, lat_objeto *func);
+void latMV_ejecutar_constructor_padre(lat_mv *mv, lat_objeto *constructor,
+                                       lat_objeto *instancia, int nargs);
 
 #endif // _LATINO_MV_H_

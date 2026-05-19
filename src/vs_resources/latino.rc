@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "winres.h"
+#include <windows.h>
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -25,8 +25,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,4,0
- PRODUCTVERSION 1,4,4,0
+ FILEVERSION 1,5,0,0
+ PRODUCTVERSION 1,5,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -43,12 +43,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "lenguajelatino.org"
             VALUE "FileDescription", "Lenguaje de programacion con sintaxis en Espanol"
-            VALUE "FileVersion", "1.4.4.0"
+            VALUE "FileVersion", "1.5.0.0"
             VALUE "InternalName", "latino.exe"
-            VALUE "LegalCopyright", "Copyleft (C) 2015-2023"
+            VALUE "LegalCopyright", "Copyleft (C) 2015-2026"
             VALUE "OriginalFilename", "latino.exe"
             VALUE "ProductName", "Latino"
-            VALUE "ProductVersion", "1.4.4.0"
+            VALUE "ProductVersion", "1.5.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -66,7 +66,7 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 
-IDI_ICON1               ICON                    "D:\\Users\\melvi\\source\\repos\\Lenguaje Latino\\latino-core\\logo\\icon_build.ico"
+IDI_ICON1               ICON                    "..\\..\\logo\\icon_build.ico"
 
 #endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""winres.h""\r\n"
+    "#include <windows.h>\r\n"
     "\0"
 END
 

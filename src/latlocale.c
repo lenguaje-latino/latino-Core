@@ -20,37 +20,28 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
- */
-
-#ifndef _LATINO_DIC_H_
-#define _LATINO_DIC_H_
+*/
 
 #include <stdlib.h>
+#include <string.h>
+#include <locale.h>
 
-#include "latlist.h"
+#include "latcompat.h"
 
-typedef struct _lat_objeto lat_objeto;
-typedef struct lat_mv lat_mv;
-
-/**\brief Valor hash */
-typedef struct hash_val {
-  char llave[64];
-  lat_objeto *valor;
-} hash_val;
-
-/* Hash table configuration constants */
-#define HASH_INITIAL_CAPACITY 256
-#define HASH_LOAD_FACTOR 0.75
-
-/**\brief Mapa de valores hash */
-typedef struct hash_map {
-  lista **buckets; /* Dynamic array of buckets */
-  size_t capacity; /* Current capacity (number of buckets) */
-  size_t longitud; /* Number of elements */
-} hash_map;
-
-#define latH_longitud(hm) (hm)->longitud
-
-int latH_hash(const char *key);
-
-#endif /* !_LATINO_DIC_H_ */
+double latC_strtod_c(const char *nptr, char **endptr) {
+  /* Fuerza LC_NUMERIC="C" durante la conversión y restaura luego. */
+  const char *oldloc = setlocale(LC_NUMERIC, NULL);
+  char oldbuf[64];
+  if (oldloc) {
+    strncpy(oldbuf, oldloc, sizeof(oldbuf) - 1);
+    oldbuf[sizeof(oldbuf) - 1] = '\0';
+  } else {
+    oldbuf[0] = '\0';
+  }
+  setlocale(LC_NUMERIC, "C");
+  double v = strtod(nptr, endptr);
+  if (oldbuf[0] != '\0') {
+    setlocale(LC_NUMERIC, oldbuf);
+  }
+  return v;
+}

@@ -1,10 +1,13 @@
 #ignora directorios
 bin/
 build/
+backup/
+.cache/
 visualstudio/
 msvc/
 CMakeFiles/
 dist/
+Documentos/
 codeblocks/doxygen/
 Testing/
 test/
@@ -14,6 +17,7 @@ test/
 Testing/
 codeblocks/
 codelite/
+Pruebas/
 mingw/
 visualstudio/
 Img-Orig/
@@ -51,3 +55,8 @@ compiling_error.txt
 <scratch>
 src/latino
 src/liblatino.so
+test_clases.lat
+comando.md
+build_config.log
+build_log.txt
+build_output.log

@@ -26,6 +26,9 @@ THE SOFTWARE.
 #define _LATINO_REPL_H_
 
 #include "latino.h"
+#ifdef snprintf
+#undef snprintf
+#endif
 #include "linenoise.h"
 
 void latR_REPL(lat_mv *mv);

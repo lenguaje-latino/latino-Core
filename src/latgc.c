@@ -92,7 +92,7 @@ void gc_checar(lat_mv *mv) {
 static void gc_mostrar(lat_mv *mv) { ; }
 
 static const lat_CReg libgc[] = {
-    {"mostrar", gc_mostrar, 0}, {"limpiar", gc_checar, 0}, {NULL, NULL}};
+    {"mostrar", gc_mostrar, 0}, {"limpiar", gc_checar, 0}, {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_gc(lat_mv *mv) { latC_abrir_liblatino(mv, LIB_GC_NAME, libgc); }
 

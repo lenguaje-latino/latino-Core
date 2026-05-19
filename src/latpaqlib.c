@@ -116,7 +116,7 @@ static void latP_cargar(lat_mv *mv) {
     }
 }
 
-static const lat_CReg libpaq[] = {{"cargar", latP_cargar, 2}, {NULL, NULL}};
+static const lat_CReg libpaq[] = {{"cargar", latP_cargar, 2}, {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_paqlib(lat_mv *mv) {
     latC_abrir_liblatino(mv, LIB_PAQ_NAME, libpaq);

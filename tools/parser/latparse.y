@@ -111,15 +111,6 @@ int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
     MODULO_IGUAL
     REGEX
     GLOBAL
-
-/* Soporte para clases */
-%token
-    CLASE
-
-%type <node> expression relational_expression
-%type <node> logical_not_expression logical_and_expression logical_or_expression equality_expression
-%type <node> multiplicative_expression additive_expression concat_expression
-%type <node> statement statement_list unary_expression ternary_expression incdec_statement
 %type <node> iteration_statement jump_statement function_definition function_anonymous jump_loop
 %type <node> argument_expression_list declaration primary_expression
 %type <node> constant_expression function_call selection_statement parameter_list
@@ -128,9 +119,22 @@ int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 %type <node> labeled_statements labeled_statement_case labeled_statement_case_case labeled_statement_default
 %type <node> variable_access field_designator
 %type <node> osi_statements osi_statement global_declaration goto_etiqueta
+%type <node> expression unary_expression multiplicative_expression additive_expression
+%type <node> relational_expression equality_expression logical_not_expression
+%type <node> logical_and_expression logical_or_expression ternary_expression concat_expression
+%type <node> program statement_list statement incdec_statement
+%type <node> clase_propiedad clase_propiedades clase_funcion clase_funciones
+%type <node> clase_constructor clase_metodo_estatico clase_sentencia clase_sentencias clase_declaracion
 
 /* Soporte para clases */
-%type <node> clase_propiedad clase_propiedades clase_funcion clase_funciones clase_sentencia clase_sentencias clase_declaracion
+%token
+    CLASE
+    CONSTRUCTOR
+    HEREDA
+    SUPER
+    MI
+    ESTATICO
+    NUEVA
 
 /*
  * precedencia de operadores
@@ -140,6 +144,7 @@ int yylex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
  *
  */
 %right '='
+%right '?' ':'
 %right CONCATENAR
 %left CONCATENAR_IGUAL
 %left Y_LOGICO O_LOGICO
@@ -264,6 +269,10 @@ expression
     | ternary_expression
     | incdec_statement
     | VAR_ARGS { $$ = latA_nodo(NODO_LOAD_VAR_ARGS , NULL, NULL, 0, 0); }
+    | SUPER '(' argument_expression_list ')' { $$ = latA_super($3, @1.first_line, @1.first_column); }
+    | SUPER '(' ')' { $$ = latA_super(NULL, @1.first_line, @1.first_column); }
+    | NUEVA IDENTIFICADOR '(' argument_expression_list ')' { $$ = latA_nodo(NODO_FUNCION_LLAMADA, $2, $4, @1.first_line, @1.first_column); }
+    | NUEVA IDENTIFICADOR '(' ')' { $$ = latA_nodo(NODO_FUNCION_LLAMADA, $2, NULL, @1.first_line, @1.first_column); }
     ;
 
 program
@@ -299,6 +308,8 @@ statement
     | jump_loop
     | goto_etiqueta
     | clase_declaracion
+    | SUPER '(' argument_expression_list ')' { $$ = latA_super($3, @1.first_line, @1.first_column); }
+    | SUPER '(' ')' { $$ = latA_super(NULL, @1.first_line, @1.first_column); }
     ;
 
 incdec_statement
@@ -308,6 +319,7 @@ incdec_statement
 
 variable_access
     : IDENTIFICADOR
+    | MI { $$ = latA_var("mi", @1.first_line, @1.first_column, false); }
     | field_designator
     | function_call
     ;
@@ -509,8 +521,17 @@ dict_items
     ;
 
 dict_item
-    : { /* empty */ $$ = NULL; }
-    | expression ':' expression { $$ = latA_nodo(NODO_DICC_ELEMENTO, $1, $3, @1.first_line, @1.first_column); }
+: { /* empty */ $$ = NULL; }
+| IDENTIFICADOR ':' expression {
+    /* Ajustar sintaxis para claves de diccionario sin comillas:
+       { clave: valor } -> clave se trata como cadena literal. */
+    ast *clave_id = $1;
+    ast *clave_str = latA_cadena(clave_id->valor->val.cadena, @1.first_line, @1.first_column);
+    /* Liberar el identificador original para evitar fuga menor */
+    latA_destruir(clave_id);
+    $$ = latA_nodo(NODO_DICC_ELEMENTO, clave_str, $3, @1.first_line, @1.first_column);
+  }
+| expression ':' expression { $$ = latA_nodo(NODO_DICC_ELEMENTO, $1, $3, @1.first_line, @1.first_column); }
     ;
 
 clase_propiedad
@@ -551,9 +572,30 @@ clase_funciones
     | error statement_list { yyerrok; yyclearin;}
     ;
 
+clase_constructor
+    : CONSTRUCTOR '(' parameter_list ')' statement_list FIN {
+        $$ = latA_funcion(latA_var("constructor", @1.first_line, @1.first_column, false), $3, $5, @1.first_line, @1.first_column);
+    }
+    | CONSTRUCTOR '(' ')' statement_list FIN {
+        $$ = latA_funcion(latA_var("constructor", @1.first_line, @1.first_column, false), NULL, $4, @1.first_line, @1.first_column);
+    }
+    ;
+
+clase_metodo_estatico
+    : ESTATICO FUNCION IDENTIFICADOR '(' parameter_list ')' statement_list FIN {
+        $$ = latA_funcion($3, $5, $7, @3.first_line, @3.first_column);
+    }
+    | ESTATICO FUNCION IDENTIFICADOR '(' ')' statement_list FIN {
+        $$ = latA_funcion($3, NULL, $6, @3.first_line, @3.first_column);
+    }
+    ;
+
 clase_sentencia
-    : clase_propiedades
+    : clase_constructor
+    | clase_metodo_estatico
+    | clase_propiedades
     | clase_funciones
+    | declaration
     | RETORNO expression { $$ = latA_nodo(NODO_RETORNO, $2, NULL, @1.first_line, @1.first_column); }
     | RETORNO argument_expression_list { $$ = latA_nodo(NODO_RETORNO, $2, NULL, @1.first_line, @1.first_column); }
     ;
@@ -573,8 +615,12 @@ clase_sentencias
     ;
 
 clase_declaracion
-    : CLASE IDENTIFICADOR clase_sentencias FIN {
-        $$ = latA_clase($2, NULL, $3, @2.first_line, @2.first_column); }
+    : CLASE IDENTIFICADOR HEREDA IDENTIFICADOR clase_sentencias FIN {
+        $$ = latA_clase($2, $4, $5, @2.first_line, @2.first_column);
+    }
+    | CLASE IDENTIFICADOR clase_sentencias FIN {
+        $$ = latA_clase($2, NULL, $3, @2.first_line, @2.first_column);
+    }
     ;
 
 %%

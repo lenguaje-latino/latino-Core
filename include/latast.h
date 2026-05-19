@@ -34,11 +34,11 @@ extern char *filename;
 
 /** Interface con flex */
 typedef struct YYLTYPE {
-    int first_line;
-    int first_column;
-    int last_line;
-    int last_column;
-    char *file_name;
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+  char *file_name;
 } YYLTYPE;
 
 /** Establece que se definio una interface con Flex */
@@ -50,165 +50,187 @@ typedef struct YYLTYPE {
 /** \brief Tipos de nodos en arbol abstracto de sintaxis (Abstract Syntax Tree)
  */
 typedef enum {
-    NODO_NULO, /* 0 */
-    NODO_VALOR,
-    NODO_MAS_UNARIO,
-    NODO_MENOS_UNARIO,
-    NODO_INC,
-    NODO_DEC, /* 5 */
-    NODO_SUMA,
-    NODO_RESTA,
-    NODO_POTENCIA,
-    NODO_MULTIPLICACION,
-    NODO_DIVISION, /* 10 */
-    NODO_MODULO,
-    NODO_MAYOR_QUE,
-    NODO_MAYOR_IGUAL,
-    NODO_MENOR_QUE,
-    NODO_MENOR_IGUAL, /* 15 */
-    NODO_IGUALDAD,
-    NODO_DESIGUALDAD,
-    NODO_Y,
-    NODO_O,
-    NODO_NO, /* 20 */
-    NODO_IDENTIFICADOR,
-    NODO_BLOQUE,
-    NODO_ASIGNACION,
-    NODO_SI,
-    NODO_ELEGIR, /* 25 */
-    NODO_CASO,
-    NODO_DEFECTO,
-    NODO_CASOS,
-    NODO_MIENTRAS,
-    NODO_REPETIR, /* 30 */
-    NODO_DESDE,
-    NODO_FUNCION_PARAMETROS,
-    NODO_FUNCION_ARGUMENTOS,
-    NODO_FUNCION_LLAMADA,
-    NODO_FUNCION_USUARIO, /* 35 */
-    NODO_RETORNO,
-    NODO_CONCATENAR,
-    NODO_LISTA,
-    NODO_LISTA_ASIGNAR_ELEMENTO,
-    NODO_LISTA_AGREGAR_ELEMENTO, /* 40 */
-    NODO_LISTA_OBTENER_ELEMENTO,
-    NODO_DICCIONARIO,
-    NODO_DICC_AGREGAR_ELEMENTO,
-    NODO_DICC_ELEMENTO,
-    NODO_ATRIBUTO, /* 45 */
-    NODO_GLOBAL,
-    NODO_REGEX,
-    NODO_VAR_ARGS,
-    NODO_LOAD_VAR_ARGS,
-    NODO_RANGO, /* 50 */
-    NODO_ROMPER,
-    NODO_CONTINUAR,
-    NODO_IR,
-    NODO_ETIQUETA,
-    NODO_CLASE /* 55 */
+  NODO_NULO, /* 0 */
+  NODO_VALOR,
+  NODO_MAS_UNARIO,
+  NODO_MENOS_UNARIO,
+  NODO_INC,
+  NODO_DEC, /* 5 */
+  NODO_SUMA,
+  NODO_RESTA,
+  NODO_POTENCIA,
+  NODO_MULTIPLICACION,
+  NODO_DIVISION, /* 10 */
+  NODO_MODULO,
+  NODO_MAYOR_QUE,
+  NODO_MAYOR_IGUAL,
+  NODO_MENOR_QUE,
+  NODO_MENOR_IGUAL, /* 15 */
+  NODO_IGUALDAD,
+  NODO_DESIGUALDAD,
+  NODO_Y,
+  NODO_O,
+  NODO_NO, /* 20 */
+  NODO_IDENTIFICADOR,
+  NODO_BLOQUE,
+  NODO_ASIGNACION,
+  NODO_SI,
+  NODO_ELEGIR, /* 25 */
+  NODO_CASO,
+  NODO_DEFECTO,
+  NODO_CASOS,
+  NODO_MIENTRAS,
+  NODO_REPETIR, /* 30 */
+  NODO_DESDE,
+  NODO_FUNCION_PARAMETROS,
+  NODO_FUNCION_ARGUMENTOS,
+  NODO_FUNCION_LLAMADA,
+  NODO_FUNCION_USUARIO, /* 35 */
+  NODO_RETORNO,
+  NODO_CONCATENAR,
+  NODO_LISTA,
+  NODO_LISTA_ASIGNAR_ELEMENTO,
+  NODO_LISTA_AGREGAR_ELEMENTO, /* 40 */
+  NODO_LISTA_OBTENER_ELEMENTO,
+  NODO_DICCIONARIO,
+  NODO_DICC_AGREGAR_ELEMENTO,
+  NODO_DICC_ELEMENTO,
+  NODO_ATRIBUTO, /* 45 */
+  NODO_GLOBAL,
+  NODO_REGEX,
+  NODO_VAR_ARGS,
+  NODO_LOAD_VAR_ARGS,
+  NODO_RANGO, /* 50 */
+  NODO_ROMPER,
+  NODO_CONTINUAR,
+  NODO_IR,
+  NODO_ETIQUETA,
+  NODO_CLASE, /* 55 - Definición de clase */
+  NODO_NUEVA, /* 56 - Instanciación: nueva Clase() */
+  NODO_MI,    /* 57 - Referencia a instancia actual: mi.propiedad */
+  NODO_SUPER  /* 58 - Llamada a clase padre: super() */
 } nodo_tipo;
 
 /** \brief Tipos de dato */
 typedef enum {
-    VALOR_NULO,
-    VALOR_LOGICO,
-    VALOR_NUMERICO,
-    VALOR_CADENA
+  VALOR_NULO,
+  VALOR_LOGICO,
+  VALOR_NUMERICO,
+  VALOR_CADENA
 } nodo_tipo_valor;
 
 #define AST_COMUN                                                              \
-    nodo_tipo tipo;                                                            \
-    int nlin;                                                                  \
-    int ncol;
+  nodo_tipo tipo;                                                              \
+  int nlin;                                                                    \
+  int ncol;
 
 /** \brief Valores del dato */
 typedef struct {
-    nodo_tipo_valor tipo;
-    bool esconst;
-    union val {
-        bool logico;
-        double numerico;
-        char *cadena;
-    } val;
+  nodo_tipo_valor tipo;
+  bool esconst;
+  union val {
+    bool logico;
+    double numerico;
+    char *cadena;
+  } val;
 } nodo_valor;
 
 /** \brief Nodos en arbol abstacto de sintaxis (Abstract Syntax Tree).
  *
  * Todos los nodos son inicializados con un tipo de nodo */
 typedef struct ast {
-    AST_COMUN
-    nodo_valor *valor;
-    struct ast *izq;
-    struct ast *der;
+  AST_COMUN
+  nodo_valor *valor;
+  struct ast *izq;
+  struct ast *der;
 } ast;
 
 /** \brief Estado del analizador lexico */
 typedef struct lex_state {
-    int insert;
+  int insert;
 } lex_state;
 
 /** \brief Tipo de dato que se envia al analizador lexico */
 typedef union YYSTYPE {
-    int token;
-    ast *node;
+  int token;
+  ast *node;
 } YYSTYPE;
 
 /** \brief Nodo para representar un ast SI (if).
  *
  * si (cond) [stmts] sino [stmts] fin */
 typedef struct {
-    AST_COMUN
-    struct ast *cond;
-    struct ast *entonces;
-    struct ast *_sino;
+  AST_COMUN
+  struct ast *cond;
+  struct ast *entonces;
+  struct ast *_sino;
 } nodo_si;
 
 /** \brief Nodo para representar un ast RANGO (range).
  *
  * para id en (ini, fin, inc) [stmts] fin */
 typedef struct {
-    AST_COMUN
-    struct ast *id;
-    struct ast *ini;
-    struct ast *fin;
-    struct ast *inc;
-    struct ast *stmts;
+  AST_COMUN
+  struct ast *id;
+  struct ast *ini;
+  struct ast *fin;
+  struct ast *inc;
+  struct ast *stmts;
 } nodo_rango;
 
 /** \brief Nodo para representar una fun.
  *
  * fun [nombre] (params) stmts fin */
 typedef struct {
-    AST_COMUN
-    struct ast *nombre;
-    struct ast *params;
-    struct ast *stmts;
+  AST_COMUN
+  struct ast *nombre;
+  struct ast *params;
+  struct ast *stmts;
 } nodo_funcion;
 
 /** \brief Nodo para representar una clase.
  *
  * clase [nombre] stmts fin */
 typedef struct {
-    AST_COMUN
-    struct ast *nombre;
-    struct ast *base;
-    struct ast *stmts;
+  AST_COMUN
+  struct ast *nombre;
+  struct ast *base;
+  struct ast *stmts;
 } nodo_clase;
+
+/** \brief Nodo para representar instanciación de clase.
+ *
+ * nueva [nombre] (args)
+ *
+ * Este nodo se crea cuando se usa la palabra clave 'nueva' para
+ * crear una instancia de una clase. Por ejemplo:
+ *   p = nueva Persona("Juan", 25)
+ *
+ * Campos:
+ * - nombre: AST del identificador de la clase a instanciar
+ * - args: AST de los argumentos para pasar al constructor (puede ser NULL si no
+ * hay argumentos)
+ */
+typedef struct {
+  AST_COMUN
+  struct ast *nombre; /* Nombre de la clase a instanciar */
+  struct ast *args;   /* Argumentos para el constructor */
+} nodo_nueva;
 
 /** \brief Nodo para el elemento de una lista */
 typedef struct {
-    AST_COMUN
-    struct ast *exp;
-    struct ast *id;
-    struct ast *pos;
+  AST_COMUN
+  struct ast *exp;
+  struct ast *id;
+  struct ast *pos;
 } nodo_lista_elem;
 
 /** \brief Nodo para el elemento de un diccionario */
 typedef struct {
-    AST_COMUN
-    struct ast *exp;
-    struct ast *id;
-    struct ast *llave;
+  AST_COMUN
+  struct ast *exp;
+  struct ast *id;
+  struct ast *llave;
 } nodo_dicc_elem;
 
 ast *latA_nodo(nodo_tipo tipo, ast *l, ast *r, int nlin, int ncol);
@@ -225,9 +247,17 @@ ast *latA_si(ast *cond, ast *th, ast *el);
 ast *latA_mientras(ast *cond, ast *stmts);
 ast *latA_hacer(ast *cond, ast *stmts);
 ast *latA_desde(ast *dec, ast *cond, ast *inc, ast *stmts);
-ast *latA_para(ast *identificador, ast *inicio, ast *fin, ast *incremento, ast *sentencias);
+ast *latA_para(ast *identificador, ast *inicio, ast *fin, ast *incremento,
+               ast *sentencias);
 ast *latA_funcion(ast *nombre, ast *params, ast *stmts, int nlin, int ncol);
 ast *latA_clase(ast *nombre, ast *base, ast *stmts, int nlin, int ncol);
+
+/* Funciones para crear nodos de operaciones con clases */
+ast *latA_nueva(ast *nombre, ast *args, int nlin,
+                int ncol);        /* Crear instancia: nueva Clase() */
+ast *latA_mi(int nlin, int ncol); /* Referencia a instancia: mi */
+ast *latA_super(ast *args, int nlin,
+                int ncol); /* Llamada a clase padre: super() */
 
 ast *latA_analizar_exp(char *expr, int *status);
 ast *latA_analizar_arch(char *ruta, int *status);

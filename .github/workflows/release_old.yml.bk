@@ -1,0 +1,106 @@
+name: Build Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/
+        
+      - name: Build
+        run: cmake --build build --config Release -j 4
+        
+      - name: Create Installer
+        run: |
+          cd build
+          cpack -G NSIS -C Release
+          
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Installer
+          path: build/*.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: brew install cmake
+        
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        
+      - name: Build
+        run: cmake --build build --config Release -j $(sysctl -n hw.ncpu)
+        
+      - name: Create Installer
+        run: |
+          cd build
+          cpack -G DragNDrop -C Release
+          
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-Installer
+          path: build/*.dmg
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential rpm
+          
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+        
+      - name: Build
+        run: cmake --build build --config Release -j $(nproc)
+        
+      - name: Create Installers
+        run: |
+          cd build
+          cpack -G "DEB;RPM" -C Release
+          
+      - name: Upload Installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux-Installers
+          path: |
+            build/*.deb
+            build/*.rpm
+
+  create-release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/Windows-Installer/*.exe
+            artifacts/macOS-Installer/*.dmg
+            artifacts/Linux-Installers/*.deb
+            artifacts/Linux-Installers/*.rpm
+          draft: false
+          prerelease: false

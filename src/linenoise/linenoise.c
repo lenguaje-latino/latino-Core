@@ -108,9 +108,15 @@
 #define USE_WINCONSOLE
 #ifdef __MINGW32__
 #define HAVE_UNISTD_H
+/* MinGW: map POSIX strdup to MSVCRT _strdup */
+#ifndef strdup
+#define strdup _strdup
+#endif
 #else
 /* Microsoft headers don't like old POSIX names */
+#ifndef strdup
 #define strdup _strdup
+#endif
 #endif
 #else
 #include <sys/ioctl.h>

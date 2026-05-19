@@ -227,30 +227,49 @@ static void mate_ldexp(lat_mv *mv) {
 //     latC_apilar(mv, tmp);
 // }
 
+static int rand_inicializado = 0;
+
 static void mate_random(lat_mv *mv) {
+    // 1. Inicializar la semilla (Solo ocurre en la primera llamada)
+    if (!rand_inicializado) {
+        srand(time(NULL));
+        rand_inicializado = 1;
+    }
+
     lat_objeto *o = latC_desapilar(mv);
-    int res=0, vlmx=0, cant = (int)latC_checar_numerico(mv, o);
+    int res = 0, vlmx = 0, cant = (int)latC_checar_numerico(mv, o);
+
     if (cant <= 0) {
         res = (rand() % 2);
     } else if (cant == 1) {
         vlmx = (int)latC_checar_numerico(mv, latC_desapilar(mv));
         res = (rand() % (vlmx + 1));
     } else if (cant == 2) {
-        int vlmn = (int)latC_checar_numerico(mv, latC_desapilar(mv));
-        vlmx = (int)latC_checar_numerico(mv, latC_desapilar(mv));
-        if (vlmn <= vlmx) {
-            vlmx = vlmx + 1;
-        } else {
-            // Se intercambian los valores
-            vlmn = vlmn - vlmx;
-            vlmx = vlmn + vlmx;
-            vlmn = vlmx - vlmn;
-            vlmx = vlmx + 1;
+        // 2. Extraer de la pila (LIFO: Último en entrar, primero en salir)
+        // El argumento 2 (máximo) se desapila primero, luego el argumento 1 (mínimo)
+        int arg2 = (int)latC_checar_numerico(mv, latC_desapilar(mv));
+        int arg1 = (int)latC_checar_numerico(mv, latC_desapilar(mv));
+        
+        int vlmn = arg1;
+        vlmx = arg2;
+
+        // 3. Ordenar correctamente los valores (min y max) usando variable temporal
+        if (vlmn > vlmx) {
+            int temp = vlmn;
+            vlmn = vlmx;
+            vlmx = temp;
         }
-        res = (rand() % (vlmx - vlmn)) + vlmn;
+
+        // 4. Prevenir Crash de la VM por Módulo 0 (Ej: si piden aleatorio(5, 5))
+        if (vlmn == vlmx) {
+            res = vlmn;
+        } else {
+            res = (rand() % ((vlmx + 1) - vlmn)) + vlmn;
+        }
     } else {
         latC_error(mv, "Numero invalido de argumentos");
     }
+
     lat_objeto *tmp = latC_crear_numerico(mv, res);
     latC_apilar(mv, tmp);
 }
@@ -409,7 +428,7 @@ static const lat_CReg libmate_[] = {
     {"porciento", mate_porc, 2},
     {"porcentaje", mate_porc, 2},
     {"porc", mate_porc, 2},
-    {NULL, NULL}};
+    {NULL, NULL, 0}};
 
 void latC_abrir_liblatino_mathlib(lat_mv *mv) {
     latC_abrir_liblatino(mv, LIB_MATE_NAME, libmate_);

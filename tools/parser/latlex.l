@@ -126,7 +126,7 @@ EXP ([Ee][-+]?[0-9]+)
 "cierto"|"verdadero"                            { return VERDADERO; }
 "falso"                                         { return FALSO; }
 "nulo"                                          { return NULO; }
-"retorno"|"retornar"|"ret"                      { return RETORNO; }
+"retorno"|"retornar"|"regresar"|"devolver"|"ret"          { return RETORNO; }
 "elegir"                                        { return ELEGIR; }
 "caso"                                          { return CASO; }
 "otro"|"defecto"                                { return DEFECTO; }
@@ -136,11 +136,17 @@ EXP ([Ee][-+]?[0-9]+)
 "rango"                                         { return RANGO; }
 "ir"                                            { return IR; }
 "clase"                                         { return CLASE; }
+"constructor"                                   { return CONSTRUCTOR; }
+"hereda"                                        { return HEREDA; }
+"super"                                         { return SUPER; }
+"mi"                                            { return MI; }
+"estatico"                                      { return ESTATICO; }
+"nueva"                                         { return NUEVA; }
 
  /* names */
 [_A-Z]*                                         { yylval->node = latA_var(yytext, yylloc->first_line, yylloc->first_column, 1); return IDENTIFICADOR; }
 [_a-zA-Z][_a-zA-Z0-9]*                          { yylval->node = latA_var(yytext, yylloc->first_line, yylloc->first_column, 0); return IDENTIFICADOR; }
-[0-9]+|[0-9]+("."[0-9])?{EXP}?|"."[0-9]+?{EXP}? { yylval->node = latA_numerico(strtod(yytext, NULL), yylloc->first_line, yylloc->first_column); return NUMERICO; }
+([0-9]+(\.[0-9]+)?|\.[0-9]+){EXP}?              { yylval->node = latA_numerico(strtod(yytext, NULL), yylloc->first_line, yylloc->first_column); return NUMERICO; }
 \"([^\\\"]|\\.)*\"                              { yytext[strlen(yytext) - 1] = '\0'; yylval->node = latA_cadena(yytext+1, yylloc->first_line, yylloc->first_column); return CADENA; }
 '([^\\\']|\\.)*'                                { yytext[strlen(yytext) - 1] = '\0'; yylval->node = latA_literal(yytext+1, yylloc->first_line, yylloc->first_column); return CADENA; }
 "#".*                                           { ; }  /* comentario de una linea estilo python */
