@@ -22,9 +22,18 @@ message(STATUS "INSTALL_INCLUDE:         ${INSTALL_INCLUDE}")
 message(STATUS "INSTALL_LIB:             ${INSTALL_LIB}")
 
 # Set the output folder where your program will be created
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+if(MSVC)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/src)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/src)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/src)
+else()
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+endif()
 
 #
 # Sistemas Operativos
@@ -109,13 +118,10 @@ if(WIN32)
     # Incluir recursos de Windows (icono de la aplicación)
     # Esto compila src/vs_resources/latino.rc y embebe el icono en latino.exe
     add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
-    # Allow multiple definitions (temporary workaround)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
     target_link_libraries(${PROJECT_NAME} LINK_PUBLIC regex2 linenoise)
     
     SET ( CMAKE_SHARED_LINKER_FLAGS /MANIFEST:NO )
     message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
-    link_directories("${CMAKE_CURRENT_BINARY_DIR}/../latino-regex/src/${CMAKE_BUILD_TYPE}")
     set(LATINO_DEF latino.def)
 else()
     add_executable(${PROJECT_NAME} ${SRC_LIB})
