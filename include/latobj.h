@@ -154,15 +154,9 @@ typedef struct lat_funcion {
 
 // lat_class is now defined in latclass.h
 
-#ifdef WIN32
-__declspec(dllexport) lat_objeto latO_nulo_;
-__declspec(dllexport) lat_objeto latO_verdadero_;
-__declspec(dllexport) lat_objeto latO_falso_;
-#else
 extern lat_objeto latO_nulo_;
 extern lat_objeto latO_verdadero_;
 extern lat_objeto latO_falso_;
-#endif
 
 /* macros para asignar valores */
 #define setNulo(obj, v)                                                        \
