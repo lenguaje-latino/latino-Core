@@ -18,20 +18,9 @@ jobs:
           submodules: recursive
           
       - name: Configure CMake
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DCMAKE_CONFIGURATION_TYPES=Release
         
-      - name: Build libraries first
-        run: cmake --build build --config Release --target linenoise --target regex2 -j 4
-        
-      - name: Copy .lib files to root
-        run: |
-          Get-ChildItem -Path build -Recurse -Filter "*.lib" | ForEach-Object {
-            Copy-Item $_.FullName -Destination "build/" -Force
-            Write-Host "Copied: $($_.FullName) -> build/$($_.Name)"
-          }
-        shell: pwsh
-        
-      - name: Build main project
+      - name: Build
         run: cmake --build build --config Release -j 4
         
       - name: Create Installer
