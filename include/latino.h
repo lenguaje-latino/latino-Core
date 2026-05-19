@@ -68,11 +68,19 @@ THE SOFTWARE.
 #define LAT_VERSION_MENOR   5
 /** Version de correcion de errores */
 #define LAT_VERSION_PARCHE  0
+/** Es una version prelanzamiento */
+#define LAT_VERSION_PRELANZAMIENTO 1
 /** Version de Latino */
 #define LAT_CURRENT_YEAR 2026
+#if LAT_VERSION_PRELANZAMIENTO
+#define LAT_VERSION                                                            \
+  "Latino " LAT_stringize(LAT_VERSION_MAYOR) "." LAT_stringize(                \
+      LAT_VERSION_MENOR) "." LAT_stringize(LAT_VERSION_PARCHE) " - Desarrollo"
+#else
 #define LAT_VERSION                                                            \
   "Latino " LAT_stringize(LAT_VERSION_MAYOR) "." LAT_stringize(                \
       LAT_VERSION_MENOR) "." LAT_stringize(LAT_VERSION_PARCHE)
+#endif 
 /** Derechos de Latino */
 #define LAT_DERECHOS                                                           \
   LAT_VERSION                                                                  \
