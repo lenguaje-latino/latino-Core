@@ -1,3 +1,7 @@
 [submodule "latino-regex"]
 	path = src/latino-regex
 	url = https://github.com/lenguaje-latino/latino-regex
+
+[submodule "latino-curses"]
+	path = src/latino-curses
+	url = https://github.com/MelvinG24/Latino-Curses
