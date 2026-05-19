@@ -53,7 +53,7 @@ jobs:
           ls -lh build/ 2>/dev/null | grep -i latino || echo "No latino files in build/"
         shell: bash
 
-      - name: Locate and prepare binary
+      - name: Locate and prepare binary with dependencies
         run: |
           # Find latino.exe in any subdirectory
           LATINO_BIN=$(find build -name "latino.exe" -type f 2>/dev/null | head -1)
@@ -64,19 +64,35 @@ jobs:
             exit 1
           fi
           
-          echo "Found: $LATINO_BIN"
-          mkdir -p build/release
-          cp "$LATINO_BIN" build/release/latino.exe
-          ls -lh build/release/latino.exe
+          echo "Found executable: $LATINO_BIN"
+          
+          # Create release directory
+          mkdir -p build/release/Latino-Release
+          
+          # Copy executable
+          cp "$LATINO_BIN" build/release/Latino-Release/latino.exe
+          echo "Copied: latino.exe"
+          
+          # Find and copy all DLLs
+          echo "Searching for DLLs..."
+          find build -name "*.dll" -type f 2>/dev/null | while read dll; do
+            echo "Found DLL: $dll"
+            cp "$dll" build/release/Latino-Release/
+          done
+          
+          # List what we have
+          echo "=== Release contents ==="
+          ls -lh build/release/Latino-Release/
         shell: bash
 
       - name: Create ZIP package
         run: |
           cd build/release
           mkdir -p Latino-Release
-          mv latino.exe Latino-Release/
           cp -r ../../resources Latino-Release/ 2>/dev/null || true
           7z a Latino.zip Latino-Release/
+          echo "=== ZIP contents ==="
+          7z l Latino.zip
           ls -lh Latino.zip
         shell: bash
         continue-on-error: true
