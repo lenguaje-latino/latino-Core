@@ -100,26 +100,28 @@ set(SRC_LIB
 if(WIN32)
     message(STATUS "CURRENT PATH WIN32....... ${CMAKE_CURRENT_SOURCE_DIR}")
     include_directories(latino-regex/src)
+    
+    # Forzar ruta de output para regex2 ANTES de add_subdirectory
+    set_target_properties(regex2 PROPERTIES 
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     add_subdirectory(latino-regex)
+    
+    # Forzar ruta de output para linenoise
+    set_target_properties(linenoise PROPERTIES 
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    add_subdirectory(linenoise)
+    
     # Incluir recursos de Windows (icono de la aplicación)
     # Esto compila src/vs_resources/latino.rc y embebe el icono en latino.exe
     add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
     
     SET ( CMAKE_SHARED_LINKER_FLAGS /MANIFEST:NO )
     message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
-    # Forzar que las librerías se creen en el directorio raíz del build
-    if(TARGET linenoise)
-        set_target_properties(linenoise PROPERTIES 
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-    endif()
-    if(TARGET regex2)
-        set_target_properties(regex2 PROPERTIES 
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-    endif()
+    
     target_link_libraries(${PROJECT_NAME} LINK_PUBLIC regex2 linenoise)
     set(LATINO_DEF latino.def)
 else()
