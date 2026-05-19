@@ -1,4 +1,4 @@
-name: Build Installers
+name: Build Windows Release
 
 on:
   push:
@@ -16,10 +16,11 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      - name: Setup MinGW
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x86_64
+      - name: Install MinGW and CMake
+        run: |
+          choco install mingw cmake -y
+          refreshenv
+        shell: powershell
 
       - name: Verify Tools
         run: |
@@ -50,18 +51,20 @@ jobs:
           ls -lh build/src/latino.exe || ls -lh build/src/latino || echo "Binary not found"
         shell: bash
 
-      - name: Create NSIS Installer
+      - name: Create ZIP package
         run: |
           cd build
-          cpack -G NSIS -C Release || echo "NSIS installer creation failed (non-critical)"
+          mkdir -p Latino-Release
+          cp src/latino.exe Latino-Release/
+          cp -r ../resources Latino-Release/ || true
+          7z a Latino.zip Latino-Release/
         shell: bash
         continue-on-error: true
 
-      - name: List generated files
+      - name: List artifacts
         run: |
           echo "=== Build artifacts ==="
-          find build -name "*.exe" -o -name "*.deb" -o -name "*.rpm" -o -name "*.dmg" | head -20
-          ls -lh build/*.exe 2>/dev/null || echo "No .exe files in build/"
+          find build -name "*.exe" -o -name "*.zip" | head -20
         shell: bash
         continue-on-error: true
 
@@ -72,11 +75,11 @@ jobs:
           path: build/src/latino.exe
           retention-days: 30
 
-      - name: Upload Windows Installer
+      - name: Upload Windows Release Package
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-Installer
-          path: build/*.exe
+          name: Windows-Release-Package
+          path: build/Latino.zip
           if-no-files-found: warn
           retention-days: 30
 
@@ -101,7 +104,9 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: artifacts/Windows-Installer/*.exe
+          files: |
+            artifacts/Windows-Binary/latino.exe
+            artifacts/Windows-Release-Package/Latino.zip
           draft: false
           prerelease: false
         env:
