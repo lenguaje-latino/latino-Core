@@ -21,20 +21,6 @@ message(STATUS "INSTALL_BIN:             ${INSTALL_BIN}")
 message(STATUS "INSTALL_INCLUDE:         ${INSTALL_INCLUDE}")
 message(STATUS "INSTALL_LIB:             ${INSTALL_LIB}")
 
-# Set the output folder where your program will be created
-if(MSVC)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/src)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/src)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/src)
-else()
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-endif()
-
 #
 # Sistemas Operativos
     # ---
@@ -118,10 +104,23 @@ if(WIN32)
     # Incluir recursos de Windows (icono de la aplicación)
     # Esto compila src/vs_resources/latino.rc y embebe el icono en latino.exe
     add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
-    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC regex2 linenoise)
     
     SET ( CMAKE_SHARED_LINKER_FLAGS /MANIFEST:NO )
     message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+    # Forzar que las librerías se creen en el directorio raíz del build
+    if(TARGET linenoise)
+        set_target_properties(linenoise PROPERTIES 
+            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    endif()
+    if(TARGET regex2)
+        set_target_properties(regex2 PROPERTIES 
+            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    endif()
+    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC regex2 linenoise)
     set(LATINO_DEF latino.def)
 else()
     add_executable(${PROJECT_NAME} ${SRC_LIB})
