@@ -69,7 +69,7 @@ THE SOFTWARE.
 /** Version de correcion de errores */
 #define LAT_VERSION_PARCHE  0
 /** Es una version prelanzamiento */
-#define LAT_VERSION_PRELANZAMIENTO 1
+#define LAT_VERSION_PRELANZAMIENTO 0
 /** Version de Latino */
 #define LAT_CURRENT_YEAR 2026
 #if LAT_VERSION_PRELANZAMIENTO
