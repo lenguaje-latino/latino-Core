@@ -105,23 +105,39 @@ set(SRC_LIB
 if(WIN32)
     message(STATUS "CURRENT PATH WIN32....... ${CMAKE_CURRENT_SOURCE_DIR}")
     include_directories(latino-regex/src)
-    add_subdirectory(latino-regex)
+    add_subdirectory(latino-regex/src)
     # Incluir recursos de Windows (icono de la aplicación)
     # Esto compila src/vs_resources/latino.rc y embebe el icono en latino.exe
     add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
     # Allow multiple definitions (temporary workaround)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
     target_link_libraries(${PROJECT_NAME} LINK_PUBLIC regex2 linenoise)
-    
+else()
+    if(MSVC)
+        add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
+    else()
+        add_executable(${PROJECT_NAME} ${SRC_LIB})
+    endif(MSVC)
+endif(WIN32)
+
+if(NOT WIN32)
+    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})
+endif()
+
+if(MSVC)
     SET ( CMAKE_SHARED_LINKER_FLAGS /MANIFEST:NO )
+
     message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
     link_directories("${CMAKE_CURRENT_BINARY_DIR}/../latino-regex/src/${CMAKE_BUILD_TYPE}")
+    target_link_libraries(${PROJECT_NAME} regex2)
+    link_libraries(regex2)
     set(LATINO_DEF latino.def)
-else()
-    add_executable(${PROJECT_NAME} ${SRC_LIB})
-    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})
-    set(LATINO_DEF "")
-endif(WIN32)
+
+    # add_custom_command(TARGET latino POST_BUILD COMMAND
+    #     "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\latino_os_version.manifest\"
+    #     -outputresource:\"${CMAKE_CURRENT_BINARY_DIR}\\${CMAKE_BUILD_TYPE}\\latino.dll\"\;\#2
+    #     COMMENT "Adding custom manifest containing MSVCRT80 dependency...")
+endif(MSVC)
 
 # Create dynamic library
 add_library(liblatino SHARED ${SRC_LIB} ${LATINO_DEF})
@@ -159,12 +175,10 @@ install(TARGETS     linenoise
         LIBRARY DESTINATION     ${INSTALL_LIB}
         ARCHIVE DESTINATION     ${INSTALL_LIB}                      )
 
-if(WIN32)
-    install(TARGETS     regex2
-            RUNTIME DESTINATION     ${INSTALL_BIN}
-            LIBRARY DESTINATION     ${INSTALL_LIB}
-            ARCHIVE DESTINATION     ${INSTALL_LIB}                      )
-endif()
+install(TARGETS     regex2
+        RUNTIME DESTINATION     ${INSTALL_BIN}
+        LIBRARY DESTINATION     ${INSTALL_LIB}
+        ARCHIVE DESTINATION     ${INSTALL_LIB}                      )
 
 if(UNIX)
     install(FILES       man/latino.1.gz                 DESTINATION     ${INSTALL_SHARE}/man/man1           )
