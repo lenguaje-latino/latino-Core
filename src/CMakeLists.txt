@@ -68,7 +68,7 @@ message(STATUS "TARGET_ARCH: ........... ${TARGET_ARCH}")
 #
 # librerias
 add_definitions(-D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DLATINO_CORE)
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/linenoise)
 add_subdirectory(linenoise)
 
@@ -121,7 +121,8 @@ else()
 endif(MSVC)
 
 if(NOT WIN32)
-    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})
+add_executable(${PROJECT_NAME} ${SRC_LIB})
+    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS} linenoise)
 endif()
 
 if(MSVC)
