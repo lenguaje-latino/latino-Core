@@ -52,3 +52,5 @@ EXPORTS
   latH_destruir
   latH_obtener
   latH_clonar
+  latF_leer_texto_seguro
+  latF_escribir_atomico

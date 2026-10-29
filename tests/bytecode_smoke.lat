@@ -1,0 +1,12 @@
+funcion doble(n)
+    retorno n * 2
+fin
+funcion calcular()
+    retorno doble(21)
+fin
+i = 0
+mientras i < 500
+    resultado = calcular()
+    i = i + 1
+fin
+escribir(resultado)

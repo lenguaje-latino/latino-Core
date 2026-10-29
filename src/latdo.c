@@ -306,7 +306,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
       o = latO_nulo;
     }
     if (nodo->valor->tipo == VALOR_NUMERICO) {
-      o = latC_crear_numerico(mv, nodo->valor->val.numerico);
+      o = latO_retener_constante(mv, latC_crear_numerico(mv, nodo->valor->val.numerico));
 #if DEPURAR_MEM
       printf("NODO_VALOR.VALOR_NUMERICO:%p, %.16g\n", o,
              nodo->valor->val.numerico);
@@ -314,7 +314,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
       o->marca = 0;
     }
     if (nodo->valor->tipo == VALOR_CADENA) {
-      o = latC_crear_cadena(mv, nodo->valor->val.cadena);
+      o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->valor->val.cadena));
 #if DEPURAR_MEM
       printf("NODO_VALOR.VALOR_CADENA:%p, %s\n", o, nodo->valor->val.cadena);
 #endif
@@ -325,7 +325,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
   } break;
   case NODO_IDENTIFICADOR: {
     // nombre del identificador
-    lat_objeto *o = latC_crear_cadena(mv, nodo->valor->val.cadena);
+    lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->valor->val.cadena));
     o->marca = 0;
     o->esconst = nodo->valor->esconst;
     dbc(LOAD_NAME, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
@@ -347,7 +347,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
       /* debug eliminado: despues de pn RHS */
       pn(mv, nodo->der->izq);
       /* debug eliminado: despues de pn ATRIBUTO objeto */
-      lat_objeto *o = latC_crear_cadena(mv, nodo->der->der->valor->val.cadena);
+      lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->der->der->valor->val.cadena));
       o->marca = 0;
       o->esconst = nodo->der->der->valor->esconst;
       dbc(STORE_ATTR, 0, 0, o, nodo->der->der->nlin, nodo->der->der->ncol,
@@ -388,7 +388,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
       int lhs_ncol = nodo->der ? nodo->der->ncol : 1;
       int lhs_esconst = (nodo->der && nodo->der->valor) ? nodo->der->valor->esconst : 0;
       /* debug eliminado: LHS nombre NULL */
-      lat_objeto *o = latC_crear_cadena(mv, lhs_name);
+      lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, lhs_name));
       /* debug eliminado: objeto STORE_NAME */
       o->marca = 0;
       o->esconst = lhs_esconst;
@@ -412,13 +412,13 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
         mv->nombre_archivo);
   } break;
   case NODO_INC: {
-    lat_objeto *o = latC_crear_cadena(mv, nodo->izq->valor->val.cadena);
+    lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->izq->valor->val.cadena));
     o->marca = 0;
     o->esconst = nodo->izq->valor->esconst;
     dbc(OP_INC, 0, 0, o, nodo->izq->nlin, nodo->izq->ncol, mv->nombre_archivo);
   } break;
   case NODO_DEC: {
-    lat_objeto *o = latC_crear_cadena(mv, nodo->izq->valor->val.cadena);
+    lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->izq->valor->val.cadena));
     o->marca = 0;
     o->esconst = nodo->izq->valor->esconst;
     dbc(OP_DEC, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
@@ -644,13 +644,13 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
   //         mv->nombre_archivo);
   // } break;
   case NODO_ETIQUETA: {
-    lat_objeto *o = latC_crear_cadena(mv, nodo->izq->valor->val.cadena);
+    lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->izq->valor->val.cadena));
     o->nombre = nodo->izq->valor->val.cadena;
     o->tipo = T_LABEL;
     o->jump_label = i; // hacia qué instruccion vamos a saltar
     // dbc(STORE_LABEL, 0, 0, o, nodo->nlin, nodo->ncol,
     // mv->nombre_archivo);
-    lat_objeto *val = latO_clonar(mv, o);
+    lat_objeto *val = latO_retener_constante(mv, latO_clonar(mv, o));
     // latMV_set_symbol(mv, o, val);
     lat_objeto *ctx = mv->label_ctx;
     char *str_name = latC_checar_cadena(mv, o);
@@ -662,7 +662,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
   } break;
   case NODO_IR: {
     // if (si no encuentra etiqueta) {}
-    lat_objeto *o = latC_crear_cadena(mv, nodo->izq->valor->val.cadena);
+    lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->izq->valor->val.cadena));
     o->nombre = nodo->izq->valor->val.cadena;
     dbc(JUMP_LABEL, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
   } break;
@@ -676,7 +676,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
   } break;
   case NODO_ATRIBUTO: {
     pn(mv, nodo->izq);
-    lat_objeto *o = latC_crear_cadena(mv, nodo->der->valor->val.cadena);
+    lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->der->valor->val.cadena));
     o->marca = 0;
     o->esconst = nodo->der->valor->esconst;
     dbc(LOAD_ATTR, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
@@ -689,7 +689,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
         dbc(OP_VAR_ARGS, (num_params - 1), 0, NULL, mv->nlin, mv->ncol,
             mv->nombre_archivo);
       } else {
-        lat_objeto *o = latC_crear_cadena(mv, nodo->izq->valor->val.cadena);
+        lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, nodo->izq->valor->val.cadena));
         o->marca = 0;
         o->esconst = nodo->izq->valor->esconst;
         dbc(STORE_NAME, 0, 0, o, nodo->izq->nlin, nodo->izq->ncol,
@@ -718,21 +718,23 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
     fpn(mv, fun->stmts);
     fdbc(RETURN_VALUE, 0, 0, latO_nulo, fun->nombre->nlin, fun->nombre->ncol,
          mv->nombre_archivo);
-    lat_objeto *f = latC_crear_funcion(mv, funcion_codigo, fi + 1);
+    lat_objeto *f = latO_retener_constante(mv, latC_crear_funcion(mv, funcion_codigo, fi + 1));
     f->marca = 0;
     f->es_vararg = es_vararg;
     dbc(MAKE_FUNCTION, fi + 1, 0, f, fun->nombre->nlin, fun->nombre->ncol,
         mv->nombre_archivo);
     funcion_codigo = NULL;
     fi = 0;
-    lat_objeto *o = latC_crear_cadena(mv, fun->nombre->valor->val.cadena);
+    lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, fun->nombre->valor->val.cadena));
     o->marca = 0;
     f->nparams = contar_num_parargs(fun->params, NODO_FUNCION_PARAMETROS);
-    f->nombre = strdup(fun->nombre->valor->val.cadena);
+    getFun(f)->nombre = strdup(fun->nombre->valor->val.cadena);
+    if (!getFun(f)->nombre) latC_error(mv, "Memoria virtual agotada");
+    f->nombre = getFun(f)->nombre;
     dbc(STORE_NAME, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
     if (mv->enClase) {
       // Insertar el método en el diccionario de clase __clase_dict__
-      lat_objeto *dict_var = latC_crear_cadena(mv, "__clase_dict__");
+      lat_objeto *dict_var = latO_retener_constante(mv, latC_crear_cadena(mv, "__clase_dict__"));
       dict_var->marca = 0;
       dict_var->esconst = false;
       // 1) Cargar el diccionario en la pila
@@ -742,7 +744,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
       dbc(LOAD_NAME, 0, 0, o, nodo->der->nlin, nodo->der->ncol,
           mv->nombre_archivo);
       // 3) Cargar la clave (nombre del método) como constante en la pila
-      lat_objeto *clave = latO_clonar(mv, o);
+      lat_objeto *clave = latO_retener_constante(mv, latO_clonar(mv, o));
       clave->marca = 0;
       dbc(LOAD_CONST, 0, 0, clave, nodo->der->nlin, nodo->der->ncol,
           mv->nombre_archivo);
@@ -751,7 +753,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
           mv->nombre_archivo);
     }
     if (!strcmp(f->nombre, "anonima")) {
-      lat_objeto *anon = latO_clonar(mv, o);
+      lat_objeto *anon = latO_retener_constante(mv, latO_clonar(mv, o));
       anon->marca = 0;
       dbc(LOAD_NAME, 0, 0, anon, nodo->nlin, nodo->ncol, mv->nombre_archivo);
     }
@@ -849,7 +851,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
     // crear diccionario vacio para métodos ANTES de procesar sentencias
     // (para que NODO_FUNCION_USUARIO pueda insertar métodos en __clase_dict__)
     dbc(BUILD_MAP, 0, 0, NULL, mv->nlin, mv->ncol, mv->nombre_archivo);
-    lat_objeto *dict_var = latC_crear_cadena(mv, "__clase_dict__");
+    lat_objeto *dict_var = latO_retener_constante(mv, latC_crear_cadena(mv, "__clase_dict__"));
     dict_var->marca = 0;
     dict_var->esconst = false;
     dbc(STORE_NAME, 0, 0, dict_var, nodo->der->nlin, nodo->der->ncol,
@@ -862,7 +864,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
     dbc(LOAD_NAME, 0, 0, dict_var, nodo->nlin, nodo->ncol, mv->nombre_archivo);
     fdbc(RETURN_VALUE, 1, 0, dict_var, fun->nombre->nlin, fun->nombre->ncol,
          mv->nombre_archivo);
-    lat_objeto *f = latC_crear_funcion(mv, funcion_codigo, fi + 1);
+    lat_objeto *f = latO_retener_constante(mv, latC_crear_funcion(mv, funcion_codigo, fi + 1));
     f->marca = 0;
     f->es_vararg = es_vararg;
     /* Attach class name and optional base name via meta */
@@ -878,10 +880,12 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
         mv->nombre_archivo);
     funcion_codigo = NULL;
     fi = 0;
-    lat_objeto *o = latC_crear_cadena(mv, fun->nombre->valor->val.cadena);
+    lat_objeto *o = latO_retener_constante(mv, latC_crear_cadena(mv, fun->nombre->valor->val.cadena));
     o->marca = 0;
     f->es_clase = true;
-    f->nombre = strdup(fun->nombre->valor->val.cadena);
+    getFun(f)->nombre = strdup(fun->nombre->valor->val.cadena);
+    if (!getFun(f)->nombre) latC_error(mv, "Memoria virtual agotada");
+    f->nombre = getFun(f)->nombre;
     dbc(STORE_NAME, 0, 0, o, nodo->nlin, nodo->ncol, mv->nombre_archivo);
     mv->enClase = false;
   } break;
@@ -892,7 +896,7 @@ static int ast_analizar(lat_mv *mv, ast *nodo, lat_bytecode *codigo, int i) {
     // Cargar referencia a la instancia actual (equivalente a 'this' o 'self')
     // Dentro de un método de clase, 'mi' se refiere a la instancia actual
     // Se carga como una variable del contexto actual
-    lat_objeto *mi_str = latC_crear_cadena(mv, "mi");
+    lat_objeto *mi_str = latO_retener_constante(mv, latC_crear_cadena(mv, "mi"));
     mi_str->marca = 0;
     mi_str->esconst = false;
     dbc(LOAD_NAME, 0, 0, mi_str, nodo->nlin, nodo->ncol, mv->nombre_archivo);
@@ -1099,29 +1103,40 @@ void latD_lanzar(lat_mv *mv, int errcode) {
   }
 }
 
-LATINO_API void latC_error(lat_mv *mv, const char *fmt, ...) {
-  char buffer[MAX_INPUT_SIZE];
-  va_list args;
-  va_start(args, fmt);
-  vsprintf(buffer, fmt, args);
-  va_end(args);
-  char *info = malloc(MAX_INPUT_SIZE);
-  if (strstr(buffer, "%") != NULL) {
-    snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT, mv->nombre_archivo, mv->nlin,
-             mv->ncol);
-    latC_apilar(mv, latC_crear_cadena(mv, info));
-    latC_apilar(mv, latC_crear_cadena(mv, buffer));
-    str_concatenar(mv);
-    lat_objeto *err = latC_desapilar(mv);
-    fprintf(stderr, "%s\n", latC_astring(mv, err));
-  } else {
-    snprintf(info, MAX_INPUT_SIZE, LAT_ERROR_FMT, mv->nombre_archivo, mv->nlin,
-             mv->ncol, buffer);
-    fprintf(stderr, "%s\n", info);
-  }
-  // FIXME: Si esta en REPL que no finalice
-  latD_lanzar(mv, LAT_ERRRUN);
+
+LATINO_API void latC_error(lat_mv *mv, const char *fmt, ...)
+{
+    char buffer[MAX_INPUT_SIZE];
+    va_list args;
+
+    if (mv == NULL) {
+        fputs("Latino-Core: error sin maquina virtual\n", stderr);
+        abort();
+    }
+
+    if (fmt == NULL) {
+        fmt = "Error de ejecucion sin descripcion";
+    }
+
+    va_start(args, fmt);
+    int resultado = vsnprintf(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+
+    if (resultado < 0) {
+        snprintf(buffer, sizeof(buffer),
+                 "%s", "Error al formatear diagnostico");
+    }
+
+    const char *archivo = mv->nombre_archivo
+                        ? mv->nombre_archivo
+                        : "<desconocido>";
+
+    fprintf(stderr, LAT_ERROR_FMT,
+            archivo, mv->nlin, mv->ncol, buffer);
+
+    latD_lanzar(mv, LAT_ERRRUN);
 }
+
 
 LATINO_API int latC_llamar_funcion(lat_mv *mv, lat_objeto *func) {
   // printf("latC_llamar_funcion\n");

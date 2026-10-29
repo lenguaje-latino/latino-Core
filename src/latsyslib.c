@@ -129,22 +129,57 @@ static void latSO_dormir(lat_mv *mv) {
   latC_sleep(latC_checar_numerico(mv, mili_segundos));
 }
 
-static void latSO_pipe(lat_mv *mv) {
-  lat_objeto *cmd = latC_desapilar(mv);
-  FILE *fp = latC_popen(mv, latC_checar_cadena(mv, cmd), "r");
-  if (fp == NULL) {
-    latC_error(mv, "Error! No se encontro el archivo");
-  }
-  char *p = latM_asignar(mv, MAX_STR_LENGTH);
-  fread(p, sizeof(char), MAX_STR_LENGTH, fp);
-  int rlen = strlen(p);
-  p[rlen - 1] = '\0'; // elimina el ultimo '\n'
-  lat_objeto *tmp = latC_crear_cadena(mv, p);
-  latC_apilar(mv, tmp);
-  latC_pclose(mv, fp);
-  latM_liberar(mv, p);
-  fflush(fp);
+
+static void latSO_pipe(lat_mv *mv)
+{
+    lat_objeto *cmd = latC_desapilar(mv);
+    const char *comando = latC_checar_cadena(mv, cmd);
+
+    FILE *fp = latC_popen(mv, comando, "r");
+
+    if (fp == NULL) {
+        latC_error(mv, "No se pudo ejecutar el comando");
+        return;
+    }
+
+    if (MAX_STR_LENGTH < 2) {
+        latC_pclose(mv, fp);
+        latC_error(mv, "Capacidad de lectura insuficiente");
+        return;
+    }
+
+    char *p = latM_asignar(mv, MAX_STR_LENGTH);
+
+    size_t leidos = fread(
+        p, 1, MAX_STR_LENGTH - 1, fp
+    );
+
+    int error_lectura = ferror(fp);
+
+    p[leidos] = '\0';
+
+    /* Eliminar un salto final solo si existe. */
+    if (leidos > 0 && p[leidos - 1] == '\n') {
+        p[--leidos] = '\0';
+        if (leidos > 0 && p[leidos - 1] == '\r') {
+            p[--leidos] = '\0';
+        }
+    }
+
+    int estado_cierre = latC_pclose(mv, fp);
+
+    if (error_lectura || estado_cierre == -1) {
+        latM_liberar(mv, p);
+        latC_error(mv, "Error al leer o cerrar la tuberia");
+        return;
+    }
+
+    lat_objeto *tmp = latC_crear_cadena(mv, p);
+    latM_liberar(mv, p);
+
+    latC_apilar(mv, tmp);
 }
+
 
 static void latSO_fecha(lat_mv *mv) {
   lat_objeto *tiempo = latC_desapilar(mv);
@@ -236,9 +271,8 @@ static void latSO_salir(lat_mv *mv) { (void)mv; exit(0); }
 
 static void latSO_cwd(lat_mv *mv) {
   char dir[1024];
-  getcwd(dir, sizeof(dir));
-  if (dir != NULL) {
-    latC_apilar(mv, latC_crear_cadena(mv, dir));
+  if (getcwd(dir, sizeof(dir)) != NULL) {
+    latC_apilar_string(mv, dir);
   } else {
     latC_apilar(mv, latO_nulo);
   };
@@ -286,7 +320,7 @@ static void latSO_operativo(lat_mv *mv) {
 }
 
 void latOS_veriones(lat_mv *mv, int i) {
-  unsigned long n;
+  unsigned long n = 0;
   Struct os_version;
   os_version = buscar_os_version();
   switch (i) {
@@ -299,9 +333,11 @@ void latOS_veriones(lat_mv *mv, int i) {
   case 3:
     n = os_version.osBuild;
     break;
+  default:
+    latC_apilar(mv, latO_nulo);
+    return;
   }
-  lat_objeto *tmp = latC_crear_numerico(mv, n);
-  latC_apilar(mv, tmp);
+  latC_apilar_double(mv, (double)n);
 }
 
 static void latSO_ver_mayor(lat_mv *mv) { latOS_veriones(mv, 1); }

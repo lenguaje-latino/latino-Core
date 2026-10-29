@@ -44,10 +44,8 @@ if(WIN32)
 else()
     #
     # UNIX
-    link_libraries(m)
-    link_libraries(readline)
-    set(CMAKE_C_FLAGS                       "${CMAKE_C_FLAGS} -D_GNU_SOURCE -Wall -Wextra -std=c11 -rdynamic -ldl -fPIC"        )
-    set(CMAKE_C_FLAGS_DEBUG                 "${CMAKE_C_FLAGS} -D_GNU_SOURCE -g -O0 -Wall -Wextra -std=c11 -rdynamic -ldl -fPIC" )
+    set(CMAKE_C_FLAGS                       "${CMAKE_C_FLAGS} -D_GNU_SOURCE -Wall -Wextra -std=c11 -rdynamic -fPIC"        )
+    set(CMAKE_C_FLAGS_DEBUG                 "${CMAKE_C_FLAGS} -D_GNU_SOURCE -g -O0 -Wall -Wextra -std=c11 -rdynamic -fPIC" )
 endif()
 
 
@@ -109,28 +107,20 @@ if(WIN32)
     # Incluir recursos de Windows (icono de la aplicación)
     # Esto compila src/vs_resources/latino.rc y embebe el icono en latino.exe
     add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
-    # Allow multiple definitions (temporary workaround)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
-    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC regex2 linenoise)
-endif()
-
-if(MSVC)
-    add_executable(${PROJECT_NAME} ${SRC_LIB} vs_resources/latino.rc)
+    # Compatibilidad heredada: esta opcion pertenece al enlazador de MinGW.
+    if(MINGW)
+        target_link_options(${PROJECT_NAME} PRIVATE -Wl,--allow-multiple-definition)
+    endif()
 else()
     add_executable(${PROJECT_NAME} ${SRC_LIB})
-endif(MSVC)
-
-if(NOT WIN32)
-    target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${CMAKE_DL_LIBS})
 endif()
+
 
 if(MSVC)
     SET ( CMAKE_SHARED_LINKER_FLAGS /MANIFEST:NO )
 
     message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
     link_directories("${CMAKE_CURRENT_BINARY_DIR}/../latino-regex/src/${CMAKE_BUILD_TYPE}")
-    target_link_libraries(${PROJECT_NAME} regex2)
-    link_libraries(regex2)
     set(LATINO_DEF latino.def)
 
     # add_custom_command(TARGET latino POST_BUILD COMMAND
@@ -145,16 +135,23 @@ set_target_properties(liblatino PROPERTIES OUTPUT_NAME latino CLEAN_DIRECT_OUTPU
 
 # message(STATUS "LATINO_BUILD_AS_DLL: ${LATINO_BUILD_AS_DLL}")
 if(LATINO_BUILD_AS_DLL)
-    if(WIN32)
-        target_link_libraries (liblatino regex2 linenoise)
-    endif()
     set_target_properties (liblatino PROPERTIES COMPILE_DEFINITIONS LATINO_BUILD_AS_DLL)
 endif ()
 
+
 #Create static library
 add_library(liblatino_static STATIC ${SRC_LIB})
-target_link_libraries(liblatino_static ${LIBS})
-
+# Dependencias explicitas para las tres salidas.
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE regex2 linenoise)
+    target_link_libraries(liblatino PRIVATE regex2 linenoise)
+    target_link_libraries(liblatino_static PUBLIC ${LIBS} regex2 linenoise)
+else()
+    # linenoise.c y utf8.c ya estan incluidos en SRC_LIB.
+    target_link_libraries(${PROJECT_NAME} PRIVATE m readline ${CMAKE_DL_LIBS})
+    target_link_libraries(liblatino PRIVATE m readline ${CMAKE_DL_LIBS})
+    target_link_libraries(liblatino_static PUBLIC ${LIBS} m readline ${CMAKE_DL_LIBS})
+endif()
 
 #
 # Ubicacion de archivos en UNIX
@@ -169,16 +166,20 @@ install(TARGETS     liblatino
 install(TARGETS     liblatino_static
         ARCHIVE DESTINATION     ${INSTALL_LIB}                      )
 
-# Dependencias en Windows: linenoise y regex2 (DLL + import/lib)
-install(TARGETS     linenoise
-        RUNTIME DESTINATION     ${INSTALL_BIN}
-        LIBRARY DESTINATION     ${INSTALL_LIB}
-        ARCHIVE DESTINATION     ${INSTALL_LIB}                      )
 
-install(TARGETS     regex2
-        RUNTIME DESTINATION     ${INSTALL_BIN}
-        LIBRARY DESTINATION     ${INSTALL_LIB}
-        ARCHIVE DESTINATION     ${INSTALL_LIB}                      )
+# Dependencias en Windows: linenoise y regex2 (DLL + import/lib)
+if(WIN32)
+    install(TARGETS     linenoise
+            RUNTIME DESTINATION     ${INSTALL_BIN}
+            LIBRARY DESTINATION     ${INSTALL_LIB}
+            ARCHIVE DESTINATION     ${INSTALL_LIB}                      )
+
+    install(TARGETS     regex2
+            RUNTIME DESTINATION     ${INSTALL_BIN}
+            LIBRARY DESTINATION     ${INSTALL_LIB}
+            ARCHIVE DESTINATION     ${INSTALL_LIB}                      )
+endif()
+
 
 if(UNIX)
     install(FILES       man/latino.1.gz                 DESTINATION     ${INSTALL_SHARE}/man/man1           )

@@ -23,6 +23,8 @@ THE SOFTWARE.
  */
 
 #include "latino.h"
+#include "latgc.h"
+#include "latmem.h"
 
 #define LIB_CADENA_NAME "cadena"
 
@@ -343,22 +345,15 @@ char *mayusculas(const char *str) {
 }
 
 char *quitar_espacios(const char *str) {
-    char *start;
-    char *end;
-    for (start = (char *)str; *start; start++) {
-        if (!isspace((unsigned char)start[0]))
-            break;
-    }
-    for (end = start + strlen(start); end > start + 1; end--) {
-        if (!isspace((unsigned char)end[-1]))
-            break;
-    }
-    char *ret = malloc((end - start));
-    *end = 0;
-    if (start > str) {
-        memcpy(ret, start, (end - start) + 1);
-    } else {
-        memcpy(ret, str, strlen(str));
+    const char *start = str;
+    while (*start && isspace((unsigned char)*start)) start++;
+    const char *end = start + strlen(start);
+    while (end > start && isspace((unsigned char)end[-1])) end--;
+    size_t len = (size_t)(end - start);
+    char *ret = malloc(len + 1);
+    if (ret) {
+        memcpy(ret, start, len);
+        ret[len] = '\0';
     }
     return ret;
 }
@@ -500,15 +495,11 @@ void str_esta_vacia(lat_mv *mv) {
 
 void str_longitud(lat_mv *mv) {
     lat_objeto *a = latC_desapilar(mv);
-    lat_objeto *tmp = NULL;
-    if (a->tipo == T_STR) {
-        tmp = latC_crear_numerico(mv, strlen(latC_checar_cadena(mv, a)));
-    } else if (a->tipo == T_DIC) {
-        tmp = latC_crear_numerico(mv, latH_longitud(latC_checar_dic(mv, a)));
-    } else {
-        tmp = latC_crear_numerico(mv, 0);
-    }
-    latC_apilar(mv, tmp);
+    size_t len = 0;
+    if (a->tipo == T_STR) len = strlen(latC_checar_cadena(mv, a));
+    else if (a->tipo == T_DIC) len = latH_longitud(latC_checar_dic(mv, a));
+    /* Conserva el contrato por bytes, sin reservar un objeto temporal. */
+    latC_apilar_double(mv, (double)len);
 }
 
 static char *reemplazar_lat(char *orig, char *rep, char *with, int veces) {
@@ -609,9 +600,10 @@ void str_mayusculas(lat_mv *mv) {
 
 void str_recortar(lat_mv *mv) {
     lat_objeto *a = latC_desapilar(mv);
-    lat_objeto *tmp =
-        latC_crear_cadena(mv, quitar_espacios(latC_checar_cadena(mv, a)));
-    latC_apilar(mv, tmp);
+    char *rec = quitar_espacios(latC_checar_cadena(mv, a));
+    if (!rec) { latC_error(mv, "Memoria virtual agotada"); return; }
+    latC_apilar_string(mv, rec);
+    free(rec);
 }
 
 void str_es_numerico(lat_mv *mv) {
@@ -646,27 +638,37 @@ void str_esalfa(lat_mv *mv) {
 void str_separar(lat_mv *mv) {
     lat_objeto *b = latC_desapilar(mv);
     lat_objeto *a = latC_desapilar(mv);
-    char *sep = " "; // separador default
+    const char *sep = " ";
     if (b->tipo != T_NULL) {
         sep = latC_checar_cadena(mv, b);
-        if (strlen(sep) == 0) {
-            sep = " ";
-        }
+        if (!*sep) sep = " ";
     }
-    char *str = latC_checar_cadena(mv, a);
+    const char *str = latC_checar_cadena(mv, a);
+    char *copia = malloc(strlen(str) + 1);
+    if (!copia) { latC_error(mv, "Memoria virtual agotada"); return; }
+    strcpy(copia, str);
     lista *lst = latL_crear(mv);
-    char *tok = strtok(str, sep);
-    if (tok) {
-        latL_agregar(mv, lst, latC_crear_cadena(mv, tok));
+    /* Semantica historica: conjunto de bytes separadores, sin tokens vacios.
+       strspn/strcspn son C estandar y no tienen estado global como strtok. */
+    char *p = copia;
+    while (*p) {
+        p += strspn(p, sep);
+        if (!*p) break;
+        size_t len = strcspn(p, sep);
+        char *fin = p + len;
+        char siguiente = *fin;
+        *fin = '\0';
+        latL_agregar(mv, lst, latC_crear_cadena(mv, p));
+        if (!siguiente) break;
+        p = fin + 1;
     }
-    while (tok != NULL) {
-        tok = strtok(NULL, sep);
-        if (tok) {
-            latL_agregar(mv, lst, latC_crear_cadena(mv, tok));
-        }
-    }
+    free(copia);
     lat_objeto *tmp = latC_crear_lista(mv, lst);
     latC_apilar(mv, tmp);
+#if !HABILITAR_GC
+    /* La pila recibe una copia; la lista no se destruye aqui. */
+    latM_liberar(mv, tmp);
+#endif
 }
 
 void str_invertir(lat_mv *mv) {

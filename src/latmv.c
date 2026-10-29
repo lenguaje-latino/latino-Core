@@ -144,11 +144,20 @@ static void igualdad(lat_mv *mv)
   break;
   case T_STR:
   {
+    /* Dos cadenas internadas se comparan sin convertir ni reservar buffers.
+       latC_astring usa strdup; liberar esa copia con latM_liberar descontaba
+       memoria que nunca se habia sumado al contador de la VM. */
+    if (b->tipo == T_STR) {
+      r = strcmp(latC_checar_cadena(mv, a), latC_checar_cadena(mv, b)) == 0
+              ? latO_verdadero : latO_falso;
+      latC_apilar(mv, r);
+      return;
+    }
     buffer = latC_astring(mv, b);
     r = strcmp(latC_checar_cadena(mv, a), buffer) == 0 ? latO_verdadero
                                                        : latO_falso;
     latC_apilar(mv, r);
-    latM_liberar(mv, buffer);
+    free(buffer);
     return;
   }
   break;
@@ -158,8 +167,8 @@ static void igualdad(lat_mv *mv)
     buffer2 = latC_astring(mv, b);
     r = !strcmp(buffer, buffer2) ? latO_verdadero : latO_falso;
     latC_apilar(mv, r);
-    latM_liberar(mv, buffer);
-    latM_liberar(mv, buffer2);
+    free(buffer);
+    free(buffer2);
     return;
   }
   }
@@ -194,10 +203,19 @@ static void diferente(lat_mv *mv)
   break;
   case T_STR:
   {
+    /* Dos cadenas internadas se comparan sin convertir ni reservar buffers.
+       latC_astring usa strdup; liberar esa copia con latM_liberar descontaba
+       memoria que nunca se habia sumado al contador de la VM. */
+    if (b->tipo == T_STR) {
+      r = strcmp(latC_checar_cadena(mv, a), latC_checar_cadena(mv, b)) != 0
+              ? latO_verdadero : latO_falso;
+      latC_apilar(mv, r);
+      return;
+    }
     buffer = latC_astring(mv, b);
     r = strcmp(latC_checar_cadena(mv, a), buffer) ? latO_verdadero : latO_falso;
     latC_apilar(mv, r);
-    latM_liberar(mv, buffer);
+    free(buffer);
     return;
   }
   break;
@@ -207,8 +225,8 @@ static void diferente(lat_mv *mv)
     buffer2 = latC_astring(mv, b);
     r = strcmp(buffer, buffer2) ? latO_verdadero : latO_falso;
     latC_apilar(mv, r);
-    latM_liberar(mv, buffer);
-    latM_liberar(mv, buffer2);
+    free(buffer);
+    free(buffer2);
     return;
   }
   }
@@ -294,7 +312,13 @@ static void y_logico(lat_mv *mv)
   {
     r = a;
   }
-  latC_apilar(mv, latO_clonar(mv, r));
+  lat_objeto *copia = latO_clonar(mv, r);
+  latC_apilar(mv, copia);
+#if !HABILITAR_GC
+  /* Se mantiene la semantica de clonado del operando seleccionado.
+     La pila copia el valor; el envoltorio temporal no tiene otro propietario. */
+  latM_liberar(mv, copia);
+#endif
 }
 
 static void o_logico(lat_mv *mv)
@@ -310,7 +334,13 @@ static void o_logico(lat_mv *mv)
   {
     r = b;
   }
-  latC_apilar(mv, latO_clonar(mv, r));
+  lat_objeto *copia = latO_clonar(mv, r);
+  latC_apilar(mv, copia);
+#if !HABILITAR_GC
+  /* Se mantiene la semantica de clonado del operando seleccionado.
+     La pila copia el valor; el envoltorio temporal no tiene otro propietario. */
+  latM_liberar(mv, copia);
+#endif
 }
 
 static void no_logico(lat_mv *mv)
@@ -324,9 +354,13 @@ static lat_objeto *obtener_contexto(lat_mv *mv) { return mv->contexto_actual; }
 
 lat_objeto *obtener_contexto_global(lat_mv *mv) { return mv->contexto[0]; }
 
+static void latMV_cache_invalidate(lat_mv *mv);
+
 static void apilar_contexto(lat_mv *mv, lat_objeto *ctx)
 {
-  if (mv->ptrctx >= MAX_STACK_CONTEXT_SIZE)
+  if (mv->ptrctx < 0 ||
+      (size_t)mv->ptrctx >=
+          sizeof(mv->contexto) / sizeof(mv->contexto[0]) - 1)
   {
     printf(LAT_ERROR_FMT, mv->nombre_archivo, mv->nlin, mv->ncol,
            "Desborde de la pila de contextos");
@@ -335,6 +369,8 @@ static void apilar_contexto(lat_mv *mv, lat_objeto *ctx)
   mv->contexto[mv->ptrctx + 1] = latO_clonar(mv, mv->contexto[mv->ptrctx]);
   mv->ptrctx++;
   mv->contexto_actual = mv->contexto[mv->ptrctx];
+  /* La profundidad puede reutilizarse para un contexto diferente. */
+  latMV_cache_invalidate(mv);
 }
 
 static void desapilar_contexto(lat_mv *mv)
@@ -345,7 +381,11 @@ static void desapilar_contexto(lat_mv *mv)
            "Pila de contextos vacia");
     exit(EXIT_FAILURE);
   }
-  latO_destruir(mv, mv->contexto[mv->ptrctx--]);
+  /* El cache contiene punteros prestados a los envoltorios del contexto. */
+  latMV_cache_invalidate(mv);
+  latO_destruir(mv, mv->contexto[mv->ptrctx]);
+  mv->contexto[mv->ptrctx] = NULL;
+  mv->ptrctx--;
   mv->contexto_actual = mv->contexto[mv->ptrctx];
 }
 
@@ -421,14 +461,23 @@ LATINO_API void latC_abrir_liblatino(lat_mv *mv, const char *nombre_lib,
       cfun->nombre = funs->nombre;
       cfun->nparams = funs->nparams;
       latO_asignar_ctx(mv, ctx, funs->nombre, cfun);
+#if !HABILITAR_GC
+      /* La tabla guarda su propio envoltorio; nombre/cfun son prestados. */
+      latM_liberar(mv, cfun);
+#endif
     }
   }
   else
   {
     lat_objeto *mod = latO_obtener_contexto(mv, ctx, nombre_lib);
-    if (mod == NULL)
+    bool modulo_nuevo = mod == NULL;
+    if (modulo_nuevo)
     {
       mod = latC_crear_dic(mv, latH_crear(mv));
+#if !HABILITAR_GC
+      /* Los contextos copian el envoltorio, no la tabla del modulo. */
+      latH_registrar_modulo(mv, getDic(mod));
+#endif
       mod->marca = 0;
     }
     for (; funs->nombre; funs++)
@@ -437,8 +486,16 @@ LATINO_API void latC_abrir_liblatino(lat_mv *mv, const char *nombre_lib,
       cfun->nombre = funs->nombre;
       cfun->nparams = funs->nparams;
       latH_asignar(mv, latC_checar_dic(mv, mod), funs->nombre, cfun);
+#if !HABILITAR_GC
+      latM_liberar(mv, cfun);
+#endif
     }
     latO_asignar_ctx(mv, ctx, nombre_lib, mod);
+#if !HABILITAR_GC
+    /* Solo el temporal creado aqui; un modulo existente es prestado.
+       No destruir el diccionario, compartido con la entrada del contexto. */
+    if (modulo_nuevo) latM_liberar(mv, mod);
+#endif
   }
 }
 
@@ -446,6 +503,9 @@ LATINO_API lat_mv *latC_crear_mv()
 {
   lat_mv *mv = (lat_mv *)malloc(sizeof(lat_mv));
   mv->memoria_usada = 0;
+  mv->funciones_propias = NULL;
+  mv->modulos_propios = NULL;
+  mv->constantes_propias = NULL;
 #if DEPURAR_MEM
   printf("------------------------------------------------------------\n");
   printf("inicio latC_crear_mv.mv->memoria_usada: %zu\n", mv->memoria_usada);
@@ -471,7 +531,7 @@ LATINO_API lat_mv *latC_crear_mv()
   mv->ptrprevio = 1;
   mv->prev_args = 0;
   mv->numejec = 0;
-  memset(mv->contexto, 0, 256);
+  memset(mv->contexto, 0, sizeof(mv->contexto));
   mv->contexto[0] = latO_contexto_crear(mv);
   mv->label_ctx = latO_contexto_crear(mv);
   mv->contexto[0]->marca = 0;
@@ -518,6 +578,14 @@ LATINO_API void latC_destruir_mv(lat_mv *mv)
   latO_destruir(mv, mv->global->gc_objetos);
 #endif
   latO_destruir(mv, mv->contexto[0]);
+  /* Contexto independiente creado junto con el contexto global. Su limpieza
+     libera los envoltorios, conservando los recursos compartidos. */
+  latO_destruir(mv, mv->label_ctx);
+  mv->label_ctx = NULL;
+  latH_liberar_modulos(mv);
+  latO_liberar_funciones(mv);
+  latO_liberar_constantes(mv);
+  latS_liberar_cadenas(mv);
   latM_liberar(mv, mv->global->strt.hash);
   latM_liberar(mv, mv->global);
 #if DEPURAR_MEM
@@ -650,7 +718,12 @@ LATINO_API void latC_apilar_char(lat_mv *mv, char c)
 
 LATINO_API void latC_apilar_string(lat_mv *mv, const char *str)
 {
-  setCadena(mv->tope, getCadena(latC_crear_cadena(mv, str)));
+  lat_objeto *temporal = latC_crear_cadena(mv, str);
+  setCadena(mv->tope, getCadena(temporal));
+#if !HABILITAR_GC
+  /* La cadena internada pertenece a la VM; solo se libera el envoltorio. */
+  latM_liberar(mv, temporal);
+#endif
   inc_pila(mv);
   checar_pila(mv);
 }
@@ -664,6 +737,8 @@ LATINO_API lat_objeto *latC_crear_funcion(lat_mv *mv, lat_bytecode *inslist,
   printf("latC_crear_funcion.fval: %p\n", fval);
 #endif
   fval->codigo = inslist;
+  fval->ninst = ninst;
+  latO_registrar_funcion(mv, fval);
   setFun(ret, fval);
   ret->ninst = ninst;
   return ret;

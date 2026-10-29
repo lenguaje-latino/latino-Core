@@ -23,6 +23,14 @@ THE SOFTWARE.
  */
 
 #include "latino.h"
+#include "latgc.h"
+#include "latmem.h"
+#include <stdint.h>
+#ifdef __linux__
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 // Define en donde el comando Escribir escribira
 #define _inicio 0
@@ -30,93 +38,214 @@ THE SOFTWARE.
 
 #define LIB_ARCHIVO_NAME "archivo"
 
-static size_t file_leerlinea(char **lineptr, size_t *n, FILE *stream) {
-    static char line[256];
-    char *ptr;
-    size_t len;
-    if (lineptr == NULL || n == NULL) {
-        errno = EINVAL;
-        return -1;
+/* Operaciones de texto: maximo 8 MiB por lectura, sin NUL embebido.
+   Todos los errores de E/S cierran el descriptor antes de volver a Latino. */
+#define LAT_FILE_MAX_TEXTO (8u * 1024u * 1024u)
+/* estado: -1 error, 0 no existe, 1 lectura completa. */
+static char *file_leer_texto_estado(const char *path, int *estado) {
+    if (estado) *estado = -1;
+    FILE *fp = fopen(path, "rb");
+    if (!fp) {
+        if (estado && errno == ENOENT) *estado = 0;
+        return NULL;
     }
-    if (ferror(stream)) {
-        return -1;
+    size_t usados = 0, capacidad = 4096;
+    char *buf = malloc(capacidad + 1);
+    if (!buf) { fclose(fp); return NULL; }
+    for (;;) {
+        size_t n = fread(buf + usados, 1, capacidad - usados, fp);
+        if (memchr(buf + usados, '\0', n)) goto error;
+        usados += n;
+        if (ferror(fp)) goto error;
+        if (feof(fp)) break;
+        if (usados == capacidad) {
+            if (capacidad == LAT_FILE_MAX_TEXTO) {
+                int c = fgetc(fp);
+                if (c != EOF || ferror(fp)) goto error;
+                break;
+            }
+            size_t nueva = capacidad * 2;
+            char *tmp = realloc(buf, nueva + 1);
+            if (!tmp) goto error;
+            buf = tmp;
+            capacidad = nueva;
+        }
     }
-    if (feof(stream)) {
-        return -1;
+    if (fclose(fp) != 0) { free(buf); return NULL; }
+    buf[usados] = '\0';
+    if (estado) *estado = 1;
+    return buf;
+error:
+    fclose(fp);
+    free(buf);
+    return NULL;
+}
+
+static char *file_leer_texto(const char *path) {
+    return file_leer_texto_estado(path, NULL);
+}
+
+#ifdef __linux__
+static int file_sincronizar(int fd) {
+    int r;
+    do { r = fsync(fd); } while (r < 0 && errno == EINTR);
+    return r;
+}
+#endif
+
+/* Linux, directorio privado/estable y sistema de archivos local.
+   0: fallo antes del reemplazo; 1: reemplazo y fsync confirmados;
+   2: reemplazado, pero no se confirmo el cierre/sync del directorio;
+  -1: plataforma no implementada. No hay fallback con truncado. */
+static int file_guardar_atomico(const char *path, const char *texto) {
+#ifdef __linux__
+    if (!path || !*path || !texto || strlen(texto) > LAT_FILE_MAX_TEXTO) return 0;
+    const char *barra = strrchr(path, '/');
+    const char *nombre = barra ? barra + 1 : path;
+    if (!*nombre || !strcmp(nombre, ".") || !strcmp(nombre, "..")) return 0;
+    struct stat st;
+    if (lstat(path, &st) == 0) {
+        if (!S_ISREG(st.st_mode)) return 0; /* no seguir enlaces ni dispositivos */
+    } else if (errno != ENOENT) return 0;
+
+    size_t ndir = barra ? (size_t)(barra - path) : 1;
+    if (barra == path) ndir = 1;
+    static const char sufijo[] = "/.latino-XXXXXX";
+    if (ndir > SIZE_MAX - sizeof(sufijo)) return 0;
+    char *directorio = malloc(ndir + 1);
+    char *temporal = malloc(ndir + sizeof(sufijo));
+    if (!directorio || !temporal) { free(directorio); free(temporal); return 0; }
+    if (barra) memcpy(directorio, path, ndir);
+    else directorio[0] = '.';
+    directorio[ndir] = '\0';
+    memcpy(temporal, directorio, ndir);
+    memcpy(temporal + ndir, sufijo, sizeof(sufijo));
+    int dirfd = open(directorio, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    int fd = -1;
+    bool creado = false;
+    int resultado = 0;
+    if (dirfd < 0) goto salir;
+    fd = mkostemp(temporal, O_CLOEXEC); /* exclusivo, permisos 0600 */
+    if (fd < 0) goto salir;
+    creado = true;
+    size_t n = strlen(texto), usados = 0;
+    while (usados < n) {
+        ssize_t escritos = write(fd, texto + usados, n - usados);
+        if (escritos < 0 && errno == EINTR) continue;
+        if (escritos <= 0) goto salir;
+        usados += (size_t)escritos;
     }
-    fgets(line, 256, stream);
-    ptr = strchr(line, '\n');
-    if (ptr) {
-        *ptr = '\0';
-    } else {
-        return -1;
-    }
-    len = strlen(line);
-    if ((len + 1) < 256) {
-        ptr = realloc(*lineptr, 256);
-        *lineptr = ptr;
-        *n = 256;
-    }
-    strcpy(*lineptr, line);
-    return (len);
+    if (file_sincronizar(fd) < 0) goto salir;
+    int cierre = close(fd);
+    fd = -1; /* en Linux no reintentar close tras un error */
+    if (cierre < 0) goto salir;
+    if (rename(temporal, path) < 0) goto salir;
+    creado = false;
+    resultado = file_sincronizar(dirfd) == 0 ? 1 : 2;
+salir:
+    if (fd >= 0) (void)close(fd);
+    if (creado) (void)unlink(temporal);
+    if (dirfd >= 0 && close(dirfd) < 0 && resultado == 1) resultado = 2;
+    free(temporal);
+    free(directorio);
+    return resultado;
+#else
+    (void)path; (void)texto;
+    return -1;
+#endif
+}
+
+/* API C compartida con los consumidores; conserva exactamente el motor de
+   Entrega11. El llamador libera con free() la lectura completa. */
+LATINO_API char *latF_leer_texto_seguro(const char *path, int *estado) {
+    if (estado) *estado = -1;
+    if (!path || !*path) return NULL;
+    return file_leer_texto_estado(path, estado);
+}
+
+LATINO_API int latF_escribir_atomico(const char *path, const char *texto) {
+    return file_guardar_atomico(path, texto);
+}
+
+static void file_leer_texto_seguro(lat_mv *mv) {
+    const char *path = latC_checar_cadena(mv, latC_desapilar(mv));
+    int estado;
+    char *buf = latF_leer_texto_seguro(path, &estado);
+    if (buf) { latC_apilar_string(mv, buf); free(buf); }
+    else latC_apilar(mv, estado == 0 ? latO_nulo : latO_falso);
+}
+
+static void file_escribir_atomico(lat_mv *mv) {
+    lat_objeto *valor = latC_desapilar(mv);
+    lat_objeto *ruta = latC_desapilar(mv);
+    const char *path = latC_checar_cadena(mv, ruta);
+    const char *texto = latC_checar_cadena(mv, valor);
+    int resultado = latF_escribir_atomico(path, texto);
+    if (resultado == 2)
+        fprintf(stderr, "Latino: '%s' reemplazado; no se confirmo la sincronizacion/cierre del directorio.\n", path);
+    latC_apilar_double(mv, (double)resultado);
+}
+
+static bool file_escribir_texto(const char *path, const char *texto,
+                                const char *modo) {
+    FILE *fp = fopen(path, modo);
+    if (!fp) return false;
+    size_t n = strlen(texto);
+    bool ok = fwrite(texto, 1, n, fp) == n;
+    /* fclose tambien puede informar un error de escritura diferida. */
+    if (fclose(fp) != 0) ok = false;
+    return ok;
 }
 
 static void file_lineas(lat_mv *mv) {
-    lat_objeto *o = latC_desapilar(mv);
-    FILE *fp;
-    char *buf = NULL;
-    size_t len = 0;
-    char *path = latC_checar_cadena(mv, o);
-    fp = fopen(path, "r");
-    if (fp == NULL) {
-        latC_error(mv, "No se pudo abrir el archivo '%s'", path);
+    const char *path = latC_checar_cadena(mv, latC_desapilar(mv));
+    char *buf = file_leer_texto(path);
+    if (!buf) {
+        latC_error(mv, "No se pudo leer el archivo '%s'", path);
+        return;
     }
-    lat_objeto *lineas = latC_crear_lista(mv, latL_crear(mv));
-    while ((len = file_leerlinea(&buf, &len, fp)) != (size_t)-1) {
-        latL_agregar(mv, latC_checar_lista(mv, lineas),
-                     latC_crear_cadena(mv, buf));
+    lista *lst = latL_crear(mv);
+    char *p = buf;
+    while (*p) {
+        char *fin = strchr(p, '\n');
+        if (fin) *fin = '\0';
+        latL_agregar(mv, lst, latC_crear_cadena(mv, p));
+        if (!fin) break;
+        p = fin + 1;
     }
-    fclose(fp);
+    free(buf);
+    lat_objeto *lineas = latC_crear_lista(mv, lst);
     latC_apilar(mv, lineas);
+#if !HABILITAR_GC
+    latM_liberar(mv, lineas);
+#endif
 }
 
 static void file_leer(lat_mv *mv) {
+    const char *path = latC_checar_cadena(mv, latC_desapilar(mv));
+    char *buf = file_leer_texto(path);
+    if (!buf) { latC_apilar(mv, latO_falso); return; }
+    latC_apilar_string(mv, buf);
+    free(buf);
+}
+
+/* API optativa: los fallos operativos devuelven falso, sin longjmp.
+   Los errores de tipos siguen siendo errores de programacion. */
+static void file_intentar_escribir(lat_mv *mv) {
+    lat_objeto *s = latC_desapilar(mv);
     lat_objeto *o = latC_desapilar(mv);
-    FILE *archivo = fopen(latC_checar_cadena(mv, o), "r");
-    if (archivo == NULL) {
-        latC_apilar(mv, latO_falso);
-        return;
-    }
-    char *final;
-    size_t n = 0;
-    int c;
-    fseek(archivo, 0, SEEK_END);
-    long f_size = ftell(archivo);
-    fseek(archivo, 0, SEEK_SET);
-    final = malloc(f_size + 1);
-    while ((c = fgetc(archivo)) != EOF) {
-        final[n++] = (char)c;
-    }
-    final[n] = '\0';
-    fclose(archivo);
-    latC_apilar(mv, latC_crear_cadena(mv, final));
-    free(final);
+    const char *path = latC_checar_cadena(mv, o);
+    const char *cad = latC_checar_cadena(mv, s);
+    latC_apilar(mv, file_escribir_texto(path, cad, "wb") ? latO_verdadero : latO_falso);
 }
 
 static void file_escribir(lat_mv *mv) {
     lat_objeto *s = latC_desapilar(mv);
     lat_objeto *o = latC_desapilar(mv);
-    if (o->tipo == T_STR) {
-        FILE *fp;
-        fp = fopen(latC_checar_cadena(mv, o), "w");
-        const char *cad = latC_checar_cadena(mv, s);
-        size_t lon = strlen(cad);
-        fwrite(cad, 1, lon, fp);
-        fclose(fp);
-    } else {
-        latC_error(mv, "No se pudo poner en el archivo '%s'",
-                   latC_checar_cadena(mv, o));
-    }
+    const char *path = latC_checar_cadena(mv, o);
+    const char *cad = latC_checar_cadena(mv, s);
+    if (!file_escribir_texto(path, cad, "w"))
+        latC_error(mv, "No se pudo escribir el archivo '%s'", path);
 }
 
 static void file_ejecutar(lat_mv *mv) {
@@ -189,42 +318,39 @@ static void file_eliminar(lat_mv *mv) {
 }
 
 static void file_crear(lat_mv *mv) {
-    lat_objeto *a = latC_desapilar(mv);
-    FILE *archivo;
-    archivo = fopen(latC_checar_cadena(mv, a), "r");
-    if (archivo == NULL) {
-        archivo = fopen(latC_checar_cadena(mv, a), "wb");
-        latC_apilar(mv, latO_verdadero);
-    } else {
-        latC_apilar(mv, latO_falso);
-    }
-    fclose(archivo);
+    const char *path = latC_checar_cadena(mv, latC_desapilar(mv));
+    FILE *fp = fopen(path, "rb");
+    if (fp) { fclose(fp); latC_apilar(mv, latO_falso); return; }
+    /* C11: "x" evita truncar un archivo creado entre ambas aperturas. */
+    fp = fopen(path, "wbx");
+    bool ok = fp != NULL;
+    if (fp && fclose(fp) != 0) ok = false;
+    latC_apilar(mv, ok ? latO_verdadero : latO_falso);
 }
 
 static void file_renombrar(lat_mv *mv) {
     lat_objeto *b = latC_desapilar(mv);
     lat_objeto *a = latC_desapilar(mv);
-    char *nuevo = (char *)malloc(MAX_ID_LENGTH);
-    strcpy(nuevo, "");
-    strcpy(nuevo, latC_checar_cadena(mv, b));
-    bool ret = rename(latC_checar_cadena(mv, a), nuevo);
-    if (!ret) {
-        latC_apilar(mv, latC_crear_cadena(mv, nuevo));
-    } else {
-        latC_apilar(mv, latO_falso);
-    }
-    free(nuevo);
+    const char *origen = latC_checar_cadena(mv, a);
+    const char *nuevo = latC_checar_cadena(mv, b);
+    if (rename(origen, nuevo) == 0) latC_apilar_string(mv, nuevo);
+    else latC_apilar(mv, latO_falso);
 }
 
 static void file_anexar(lat_mv *mv) {
     lat_objeto *b = latC_desapilar(mv);
     lat_objeto *a = latC_desapilar(mv);
-    FILE *archivo = fopen(latC_checar_cadena(mv, a), "a");
-    fprintf(archivo, "%s", latC_checar_cadena(mv, b));
-    fclose(archivo);
+    const char *path = latC_checar_cadena(mv, a);
+    const char *texto = latC_checar_cadena(mv, b);
+    if (!file_escribir_texto(path, texto, "a"))
+        latC_error(mv, "No se pudo anexar al archivo '%s'", path);
 }
 
 static const lat_CReg libfile[] = {{"leer", file_leer, 1},
+                                   {"leer_texto_seguro", file_leer_texto_seguro, 1},
+                                   {"escribir_atomico", file_escribir_atomico, 2},
+                                   {"intentar_leer", file_leer, 1},
+                                   {"intentar_escribir", file_intentar_escribir, 2},
                                    {"lineas", file_lineas, 1},
                                    {"ejecutar", file_ejecutar, 1},
                                    {"escribir", file_escribir, 2},

@@ -221,6 +221,7 @@ LATINO_API bool latC_abool(lat_mv *mv, lat_objeto *o);
 LATINO_API double latC_adouble(lat_mv *mv, lat_objeto *o);
 LATINO_API int latC_aint(lat_mv *mv, lat_objeto *o);
 LATINO_API char latC_achar(lat_mv *mv, lat_objeto *o);
+/* Cadena propia, liberar con free(). Representacion acotada; no es serializacion. */
 LATINO_API char *latC_astring(lat_mv *mv, lat_objeto *o);
 
 /* funciones para el manejo de listas */
@@ -248,6 +249,13 @@ LATINO_API void latH_limpiar(lat_mv *mv, hash_map *dic);
 LATINO_API void latH_destruir(lat_mv *mv, hash_map *dic);
 LATINO_API void *latH_obtener(hash_map *m, const char *key);
 LATINO_API hash_map *latH_clonar(lat_mv *mv, hash_map *m);
+
+/* E/S de texto sin VM: lectura malloc/free, maximo 8 MiB, sin NUL embebido.
+   estado de lectura: -1 error, 0 ausente, 1 completo. Guardado: -1 plataforma
+   no implementada, 0 no reemplazado, 1 confirmado, 2 reemplazado con aviso.
+   Mismo motor que archivo.leer_texto_seguro/escribir_atomico de Entrega11. */
+LATINO_API char *latF_leer_texto_seguro(const char *path, int *estado);
+LATINO_API int latF_escribir_atomico(const char *path, const char *texto);
 
 /* funciones para el manejo de librerias dinamicas */
 LATINO_API void latC_abrir_liblatino(lat_mv *mv, const char *nombre_lib,

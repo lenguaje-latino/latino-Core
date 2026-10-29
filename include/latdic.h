@@ -53,4 +53,8 @@ typedef struct hash_map {
 
 int latH_hash(const char *key);
 
+/* Propiedad interna de modulos FFI creados por esta VM. */
+void latH_registrar_modulo(lat_mv *mv, hash_map *dic);
+void latH_liberar_modulos(lat_mv *mv);
+
 #endif /* !_LATINO_DIC_H_ */

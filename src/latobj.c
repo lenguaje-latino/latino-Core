@@ -23,6 +23,7 @@ THE SOFTWARE.
  */
 
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 
 #include "latdic.h"
@@ -32,7 +33,97 @@ THE SOFTWARE.
 #include "latmem.h"
 #include "latobj.h"
 
+/* Los envoltorios de T_FUN se copian sin contar referencias. Por ello el
+   payload se conserva hasta el cierre de la VM, no hasta destruir una copia.
+   Este registro NO es un GC de objetos ni recorre metadatos del bytecode. */
+struct lat_funcion_registro {
+  lat_funcion *funcion;
+  struct lat_funcion_registro *siguiente;
+};
+
+static bool funcion_registrada(lat_mv *mv, lat_funcion *fun) {
+  if (!mv) return false;
+  for (struct lat_funcion_registro *r = mv->funciones_propias; r; r = r->siguiente)
+    if (r->funcion == fun) return true;
+  return false;
+}
+
+void latO_registrar_funcion(lat_mv *mv, lat_funcion *fun) {
+  if (!mv || !fun || funcion_registrada(mv, fun)) return;
+  struct lat_funcion_registro *r = latM_asignar(mv, sizeof(*r));
+  r->funcion = fun;
+  r->siguiente = mv->funciones_propias;
+  mv->funciones_propias = r;
+}
+
+void latO_liberar_funciones(lat_mv *mv) {
+  if (!mv) return;
+  struct lat_funcion_registro *r = mv->funciones_propias;
+  mv->funciones_propias = NULL;
+  while (r) {
+    struct lat_funcion_registro *siguiente = r->siguiente;
+    /* nombre se reserva con strdup en el compilador (no latM_asignar). */
+    free(r->funcion->nombre);
+    latM_liberar(mv, r->funcion->codigo);
+    latM_liberar(mv, r->funcion);
+    latM_liberar(mv, r);
+    r = siguiente;
+  }
+}
+
 lat_objeto latO_nulo_ = {{NULL}, T_NULL};
+/* Los metadatos del compilador se comparten con instrucciones y contextos.
+   Solo sus envoltorios pertenecen a este registro (GC desactivado). */
+struct lat_constante_registro {
+  lat_objeto *objeto;
+  struct lat_constante_registro *siguiente;
+};
+
+static bool constante_registrada(lat_mv *mv, lat_objeto *o) {
+  if (!mv) return false;
+  for (struct lat_constante_registro *r = mv->constantes_propias; r; r = r->siguiente)
+    if (r->objeto == o) return true;
+  return false;
+}
+
+lat_objeto *latO_retener_constante(lat_mv *mv, lat_objeto *o) {
+#if !HABILITAR_GC
+  if (mv && o && o != latO_nulo && o != latO_verdadero && o != latO_falso &&
+      !constante_registrada(mv, o)) {
+    struct lat_constante_registro *r = latM_asignar(mv, sizeof(*r));
+    r->objeto = o;
+    r->siguiente = mv->constantes_propias;
+    mv->constantes_propias = r;
+  }
+#endif
+  return o;
+}
+
+void latO_liberar_constantes(lat_mv *mv) {
+  if (!mv) return;
+  while (mv->constantes_propias) {
+    struct lat_constante_registro *r = mv->constantes_propias;
+    mv->constantes_propias = r->siguiente;
+    latM_liberar(mv, r->objeto);
+    latM_liberar(mv, r);
+  }
+}
+
+void latS_liberar_cadenas(lat_mv *mv) {
+#if !HABILITAR_GC
+  stringtable *tb = &mv->global->strt;
+  for (int i = 0; i < tb->size; ++i) {
+    lat_gcobjeto *p = tb->hash[i];
+    while (p) {
+      lat_gcobjeto *siguiente = p->gch.next;
+      latM_liberar(mv, p);
+      p = siguiente;
+    }
+    tb->hash[i] = NULL;
+  }
+  tb->nuse = 0;
+#endif
+}
 lat_objeto latO_verdadero_ = {.val.logico = 1, .tipo = T_BOOL};
 lat_objeto latO_falso_ = {.val.logico = 0, .tipo = T_BOOL};
 
@@ -162,6 +253,7 @@ lat_objeto *latO_crear_cfuncion(lat_mv *mv) {
 void latO_destruir(lat_mv *mv, lat_objeto *o) {
   if (o == NULL)
     return;
+  if (constante_registrada(mv, o)) return;
   switch (o->tipo) {
   case T_CONTEXT:
     latH_limpiar(mv, getCtx(o));
@@ -182,15 +274,23 @@ void latO_destruir(lat_mv *mv, lat_objeto *o) {
   case T_DIC:
     latH_destruir(mv, latC_checar_dic(mv, o));
     break;
+#if !HABILITAR_GC
+  case T_LABEL:
+#endif
   case T_STR: {
+#if HABILITAR_GC
     lat_cadena *str = (lat_cadena *)getCadena(o);
     latM_liberar(mv, str);
+#endif
+    /* Sin GC, las cadenas internadas pertenecen a strt hasta cerrar la VM. */
   } break;
   case T_FUN: {
     lat_funcion *fun = getFun(o);
-    lat_bytecode *inslist = fun->codigo;
-    latM_liberar(mv, inslist);
-    latM_liberar(mv, fun);
+    if (!funcion_registrada(mv, fun)) {
+      /* Compatibilidad con payloads externos no registrados. */
+      latM_liberar(mv, fun->codigo);
+      latM_liberar(mv, fun);
+    }
   } break;
   case T_CFUN: {
     ;
@@ -331,90 +431,142 @@ RESPUESTA:
   return res;
 }
 
-char *latL_acadena(lat_mv *mv, lista *list) {
-  // return strdup("latL_acadena");
-  char *valor = calloc(1, MAX_STR_LENGTH);
-  strcat(valor, "[");
-  if (list->longitud > 0) {
-    LIST_FOREACH(list, primero, siguiente, cur) {
-      if (cur->valor != NULL) {
-        lat_objeto *o = ((lat_objeto *)cur->valor);
-        if (o != NULL) {
-          char *tmp = latC_astring(mv, o);
-          if (o->tipo == T_STR) {
-            if (strstr(latC_checar_cadena(mv, o), "\"") != NULL) {
-              strcat(valor, "'");
-            } else {
-              strcat(valor, "\"");
-            }
-          }
-          strcat(valor, tmp);
-          // free(tmp);
-          if (o->tipo == T_STR) {
-            if (strstr(latC_checar_cadena(mv, o), "\"") != NULL) {
-              strcat(valor, "'");
-            } else {
-              strcat(valor, "\"");
-            }
-          }
-          if (cur != list->ultimo) {
-            strcat(valor, ", ");
-          }
-        }
+/* Representacion de objetos: buffer propio de libc, nunca contabilizado por
+   latM. No es un formato de persistencia (el orden hash no es estable). */
+typedef struct {
+  char *datos;
+  size_t usados, capacidad;
+  const void *ruta[64];
+  int tipos[64];
+  size_t profundidad;
+  const char *error;
+} lat_texto_objeto;
+
+static bool texto_agregar(lat_texto_objeto *t, const char *s, size_t n) {
+  if (n > (size_t)MAX_STR_LENGTH - 1 - t->usados) {
+    t->error = "Representacion de objeto demasiado larga";
+    return false;
+  }
+  size_t necesaria = t->usados + n + 1;
+  if (necesaria > t->capacidad) {
+    size_t nueva = t->capacidad ? t->capacidad : 128;
+    while (nueva < necesaria)
+      nueva = nueva > (size_t)MAX_STR_LENGTH / 2 ? MAX_STR_LENGTH : nueva * 2;
+    char *p = realloc(t->datos, nueva);
+    if (!p) { t->error = "Memoria agotada al representar objeto"; return false; }
+    t->datos = p;
+    t->capacidad = nueva;
+  }
+  if (n) memcpy(t->datos + t->usados, s, n);
+  t->usados += n;
+  t->datos[t->usados] = '\0';
+  return true;
+}
+
+static bool texto_literal(lat_texto_objeto *t, const char *s) {
+  return texto_agregar(t, s, strlen(s));
+}
+
+static bool texto_citado(lat_texto_objeto *t, const char *s) {
+  if (!texto_literal(t, "\"")) return false;
+  for (const unsigned char *p = (const unsigned char *)s; *p; ++p) {
+    const char *escape = *p == '"' ? "\\\"" : *p == '\\' ? "\\\\" :
+                         *p == '\n' ? "\\n" : *p == '\r' ? "\\r" :
+                         *p == '\t' ? "\\t" : NULL;
+    if (escape) { if (!texto_literal(t, escape)) return false; }
+    else if (!texto_agregar(t, (const char *)p, 1)) return false;
+  }
+  return texto_literal(t, "\"");
+}
+
+static bool texto_objeto(lat_texto_objeto *t, const lat_objeto *o, bool citar) {
+  if (!o || o->tipo == T_NULL) return texto_literal(t, "nulo");
+  if (o->tipo == T_STR || o->tipo == T_LABEL) {
+    const char *s = getstr(getCadena(o));
+    return citar ? texto_citado(t, s) : texto_literal(t, s);
+  }
+  char numero[64];
+  switch (o->tipo) {
+  case T_BOOL: return texto_literal(t, getLogico(o) ? "verdadero" : "falso");
+  case T_NUMERIC:
+    snprintf(numero, sizeof numero, LAT_NUMERIC_FMT, getNumerico(o));
+    return texto_literal(t, numero);
+  case T_INTEGER: {
+    double n = getEntero(o);
+    if (!isfinite(n) || n < INT_MIN || n > INT_MAX) {
+      t->error = "Entero fuera de rango al representar objeto"; return false;
+    }
+    snprintf(numero, sizeof numero, "%i", (int)n);
+    return texto_literal(t, numero);
+  }
+  case T_CHAR:
+    numero[0] = getCaracter(o); numero[1] = '\0';
+    return texto_literal(t, numero);
+  case T_CONTEXT: return texto_literal(t, "contexto");
+  case T_FUN: return texto_literal(t, "fun");
+  case T_CFUN: return texto_literal(t, "cfun");
+  case T_CLASS: return texto_literal(t, "clase");
+  case T_LIST:
+  case T_DIC: break;
+  default: return texto_literal(t, "");
+  }
+  const void *recurso = o->tipo == T_LIST ? (void *)getLista(o) : (void *)getDic(o);
+  if (!recurso) { t->error = "Contenedor nulo al representar objeto"; return false; }
+  if (t->profundidad == sizeof t->ruta / sizeof *t->ruta) {
+    t->error = "Anidamiento excesivo al representar objeto"; return false;
+  }
+  for (size_t i = 0; i < t->profundidad; ++i)
+    if (t->ruta[i] == recurso && t->tipos[i] == o->tipo) {
+      t->error = "Referencia circular al representar objeto"; return false;
+    }
+  t->ruta[t->profundidad] = recurso;
+  t->tipos[t->profundidad++] = o->tipo;
+  bool primero = true;
+  if (!texto_literal(t, o->tipo == T_LIST ? "[" : "{")) return false;
+  if (o->tipo == T_LIST) {
+    for (nodo_lista *cur = getLista(o)->primero; cur; cur = cur->siguiente) {
+      if (!primero && !texto_literal(t, ", ")) return false;
+      primero = false;
+      if (!texto_objeto(t, cur->valor, true)) return false;
+    }
+  } else {
+    const hash_map *m = getDic(o);
+    for (size_t i = 0; i < m->capacity; ++i) {
+      const lista *l = m->buckets[i];
+      for (nodo_lista *cur = l ? l->primero : NULL; cur; cur = cur->siguiente) {
+        const hash_val *hv = cur->valor;
+        if (!hv) continue;
+        if (!primero && !texto_literal(t, ", ")) return false;
+        primero = false;
+        if (!texto_citado(t, hv->llave) || !texto_literal(t, ": ") ||
+            !texto_objeto(t, hv->valor, true)) return false;
       }
     }
   }
-  strcat(valor, "]");
-  valor[strlen(valor)] = '\0';
-  return valor;
+  t->profundidad--;
+  return texto_literal(t, o->tipo == T_LIST ? "]" : "}");
+}
+
+static char *objeto_a_texto(lat_mv *mv, const lat_objeto *o) {
+  lat_texto_objeto t = {0};
+  if (!texto_objeto(&t, o, false)) {
+    free(t.datos);
+    latC_error(mv, "%s", t.error ? t.error : "Error al representar objeto");
+    return NULL;
+  }
+  return t.datos;
+}
+
+char *latL_acadena(lat_mv *mv, lista *list) {
+  lat_objeto o = {0};
+  setLista(&o, list);
+  return objeto_a_texto(mv, &o);
 }
 
 char *latH_acadena(lat_mv *mv, hash_map *m) {
-  char *valor = calloc(1, MAX_STR_LENGTH);
-  strcat(valor, "{");
-  int i;
-  for (i = 0; i < 256; i++) {
-    lista *list = m->buckets[i];
-    if (list != NULL) {
-
-      LIST_FOREACH(list, primero, siguiente, cur) {
-        if (cur->valor != NULL) {
-          strcat(valor, "\"");
-          strcat(valor, ((hash_val *)cur->valor)->llave);
-          strcat(valor, "\"");
-          lat_objeto *val = (lat_objeto *)((hash_val *)cur->valor)->valor;
-          strcat(valor, ": ");
-          if (val == NULL) {
-            strcat(valor, "\"nulo\"");
-          } else {
-            if (val->tipo == T_STR) {
-              if (strstr(latC_checar_cadena(mv, val), "\"") != NULL) {
-                strcat(valor, "'");
-              } else {
-                strcat(valor, "\"");
-              }
-            }
-            char *tmp = latC_astring(mv, val);
-            strcat(valor, tmp);
-            free(tmp);
-            if (val->tipo == T_STR) {
-              if (strstr(latC_checar_cadena(mv, val), "\"") != NULL) {
-                strcat(valor, "'");
-              } else {
-                strcat(valor, "\"");
-              }
-            }
-          }
-          strcat(valor, ", ");
-        }
-      }
-    }
-  }
-  strcat(valor, "}");
-  char *tmp = reemplazar(valor, ", }", "}"); // elimina la ultima coma
-  tmp[strlen(tmp)] = '\0';
-  free(valor);
-  return tmp;
+  lat_objeto o = {0};
+  setDic(&o, m);
+  return objeto_a_texto(mv, &o);
 }
 
 void latL_modificar_elemento(lat_mv *mv, lista *list, void *data, int pos) {
@@ -473,16 +625,17 @@ int latL_obtener_indice(lat_mv *mv, lista *list, void *data) {
 
 void latO_imprimir(lat_mv *mv, lat_objeto *o, bool fmt) {
   char *tmp = latC_astring(mv, o);
-  char *tmp2 = NULL;
-  if (fmt) {
-    tmp2 = analizar_fmt(tmp, strlen(tmp));
-    printf("%s", tmp2);
-  } else {
-    tmp2 = analizar(tmp, strlen(tmp));
-    printf("%s", tmp2);
+  /* Sin formato, el texto es literal: no volver a analizar las barras de
+     datos externos. El modo formateado conserva su decodificador existente. */
+  char *salida = fmt ? analizar_fmt(tmp, strlen(tmp)) : tmp;
+  if (!salida) {
+    free(tmp);
+    latC_error(mv, "Memoria agotada al imprimir objeto");
+    return;
   }
-  latM_liberar(mv, tmp);
-  latM_liberar(mv, tmp2);
+  printf("%s", salida);
+  if (salida != tmp) free(salida);
+  free(tmp);
 }
 
 void latS_resize(lat_mv *mv, int newsize) {
@@ -656,6 +809,15 @@ LATINO_API void *latC_checar_cptr(lat_mv *mv, lat_objeto *o) {
   return NULL;
 }
 
+static bool texto_igual_ascii(const char *s, const char *palabra) {
+  while (*s && *palabra) {
+    unsigned char c = (unsigned char)*s++;
+    if (c >= 'A' && c <= 'Z') c = (unsigned char)(c + ('a' - 'A'));
+    if (c != (unsigned char)*palabra++) return false;
+  }
+  return !*s && !*palabra;
+}
+
 LATINO_API bool latC_abool(lat_mv *mv, lat_objeto *o) {
   switch (o->tipo) {
   case T_NULL:
@@ -667,14 +829,11 @@ LATINO_API bool latC_abool(lat_mv *mv, lat_objeto *o) {
   case T_NUMERIC:
     return latC_checar_numerico(mv, o) == 0 ? false : true;
     break;
-  case T_STR:
-    return !strcmp(latC_checar_cadena(mv, o), "") ||
-                   !strcmp(latC_checar_cadena(mv, o), "0") ||
-                   !strcmp(minusculas(latC_astring(mv, o)), "falso") ||
-                   !strcmp(minusculas(latC_astring(mv, o)), "false")
-               ? false
-               : true;
-    break;
+  case T_STR: {
+    const char *s = latC_checar_cadena(mv, o);
+    return *s && strcmp(s, "0") && !texto_igual_ascii(s, "falso") &&
+           !texto_igual_ascii(s, "false");
+  }
   case T_LIST:
     return latL_longitud(latC_checar_lista(mv, o)) == 0 ? false : true;
   case T_DIC:
@@ -802,33 +961,14 @@ LATINO_API char latC_achar(lat_mv *mv, lat_objeto *o) {
   return 0;
 }
 
+/* El llamador libera siempre con free(), tambien para T_CHAR. */
 LATINO_API char *latC_astring(lat_mv *mv, lat_objeto *o) {
-  if (o == NULL || o->tipo == T_NULL) {
-    return strdup("nulo");
-  } else if (o->tipo == T_BOOL) {
-    return logico_acadena(latC_checar_logico(mv, o));
-  } else if (o->tipo == T_CONTEXT) {
-    return strdup("contexto");
-  } else if (o->tipo == T_NUMERIC) {
-    return decimal_acadena(getNumerico(o));
-  } else if (o->tipo == T_INTEGER) {
-    return entero_acadena(getEntero(o));
-  } else if (o->tipo == T_CHAR) {
-    return &getCaracter(o);
-  } else if (o->tipo == T_STR) {
-    return strdup(latC_checar_cadena(mv, o));
-  } else if (o->tipo == T_LABEL) {
-    return strdup(latC_checar_cadena(mv, o));
-  } else if (o->tipo == T_FUN) {
-    return strdup("fun");
-  } else if (o->tipo == T_CFUN) {
-    return strdup("cfun");
-  } else if (o->tipo == T_CLASS) {
-    return strdup("clase");
-  } else if (o->tipo == T_LIST) {
-    return latL_acadena(mv, latC_checar_lista(mv, o));
-  } else if (o->tipo == T_DIC) {
-    return latH_acadena(mv, latC_checar_dic(mv, o));
+  /* Conservar el contrato de cadenas escalares: copiar su longitud completa.
+     El limite agregado corresponde a la representacion de contenedores. */
+  if (o && (o->tipo == T_STR || o->tipo == T_LABEL)) {
+    char *s = strdup(latC_checar_cadena(mv, o));
+    if (!s) latC_error(mv, "Memoria agotada al representar objeto");
+    return s;
   }
-  return strdup("");
+  return objeto_a_texto(mv, o);
 }

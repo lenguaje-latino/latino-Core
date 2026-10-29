@@ -60,3 +60,4 @@ comando.md
 build_config.log
 build_log.txt
 build_output.log
+build-*/

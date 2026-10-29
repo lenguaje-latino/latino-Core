@@ -27,6 +27,38 @@ THE SOFTWARE.
 #include "latino.h"
 #include "latmem.h"
 #include <string.h>
+#include <stdint.h>
+
+struct lat_modulo_registro {
+  hash_map *dic;
+  struct lat_modulo_registro *siguiente;
+};
+
+static bool modulo_registrado(lat_mv *mv, hash_map *dic) {
+  if (!mv) return false;
+  for (struct lat_modulo_registro *r = mv->modulos_propios; r; r = r->siguiente)
+    if (r->dic == dic) return true;
+  return false;
+}
+
+void latH_registrar_modulo(lat_mv *mv, hash_map *dic) {
+  if (!mv || !dic || modulo_registrado(mv, dic)) return;
+  struct lat_modulo_registro *r = latM_asignar(mv, sizeof(*r));
+  r->dic = dic;
+  r->siguiente = mv->modulos_propios;
+  mv->modulos_propios = r;
+}
+
+void latH_liberar_modulos(lat_mv *mv) {
+  if (!mv) return;
+  while (mv->modulos_propios) {
+    struct lat_modulo_registro *r = mv->modulos_propios;
+    mv->modulos_propios = r->siguiente;
+    /* Desvincular antes de limpiar; no destruir payloads compartidos. */
+    latH_limpiar(mv, r->dic);
+    latM_liberar(mv, r);
+  }
+}
 
 /* FNV-1a hash algorithm constants */
 #define FNV_OFFSET_BASIS 2166136261u
@@ -47,6 +79,10 @@ static unsigned int latH_hash_fnv1a(const char *key) {
 
 /* Resize hash table when load factor is exceeded */
 static void latH_resize(lat_mv *mv, hash_map *m, size_t new_capacity) {
+  if (new_capacity == 0 || new_capacity > SIZE_MAX / sizeof(lista *)) {
+    latC_error(mv, "Capacidad de diccionario fuera de rango");
+    return;
+  }
   lista **new_buckets =
       (lista **)latM_asignar(mv, new_capacity * sizeof(lista *));
   size_t i;
@@ -76,8 +112,10 @@ static void latH_resize(lat_mv *mv, hash_map *m, size_t new_capacity) {
           latL_agregar(mv, new_buckets[new_idx], hv);
         }
       }
-      /* Clean up old bucket list structure (but not the hash_val data) */
-      latL_limpiar(mv, list);
+    }
+    if (list != NULL) {
+      /* Las entradas ya pertenecen a new_buckets; liberar solo nodos y lista. */
+      latL_destruir(mv, list);
     }
   }
 
@@ -107,6 +145,20 @@ LATINO_API hash_map *latH_crear(lat_mv *mv) {
 
 LATINO_API void latH_asignar(lat_mv *mv, hash_map *m, const char *key,
                              void *val) {
+  /* Validar antes de reservar memoria o modificar la tabla. El limite es
+     en bytes UTF-8, incluido el terminador, no en caracteres visibles. */
+  if (key == NULL) {
+    latC_error(mv, "Clave de diccionario nula");
+    return;
+  }
+  size_t key_length = 0;
+  while (key_length < sizeof(((hash_val *)0)->llave) && key[key_length]) {
+    key_length++;
+  }
+  if (key_length == sizeof(((hash_val *)0)->llave)) {
+    latC_error(mv, "Clave de diccionario demasiado larga (maximo 63 bytes)");
+    return;
+  }
   unsigned int h = latH_hash_fnv1a(key);
   size_t idx = h % m->capacity;
 
@@ -133,7 +185,7 @@ LATINO_API void latH_asignar(lat_mv *mv, hash_map *m, const char *key,
 #if DEPURAR_MEM
   printf("latH_asignar.hv: %p\n", hv);
 #endif
-  strncpy(hv->llave, key, (strlen(key) + 1));
+  memcpy(hv->llave, key, key_length + 1);
   lat_objeto *obj = latO_crear(mv);
   setobj2obj(obj, val);
   hv->valor = obj;
@@ -143,20 +195,40 @@ LATINO_API void latH_asignar(lat_mv *mv, hash_map *m, const char *key,
   /* Check load factor and resize if necessary */
   double load_factor = (double)m->longitud / (double)m->capacity;
   if (load_factor > HASH_LOAD_FACTOR) {
+    if (m->capacity > SIZE_MAX / 2) {
+      latC_error(mv, "Capacidad de diccionario fuera de rango");
+      return;
+    }
     latH_resize(mv, m, m->capacity * 2);
   }
 }
 
 LATINO_API void latH_limpiar(lat_mv *mv, hash_map *dic) {
-  size_t i;
-  for (i = 0; i < dic->capacity; i++) {
-    dic->buckets[i] = NULL;
+  if (dic == NULL) return;
+  if (modulo_registrado(mv, dic)) return;
+  for (size_t i = 0; i < dic->capacity; i++) {
+    lista *bucket = dic->buckets[i];
+    if (bucket == NULL) continue;
+    LIST_FOREACH(bucket, primero, siguiente, cur) {
+      hash_val *entrada = (hash_val *)cur->valor;
+      if (entrada == NULL) continue;
+      /* latH_asignar reserva un envoltorio propio por entrada. Su contenido
+         puede compartir cadenas, listas o funciones con otros contextos:
+         NO llamar a latO_destruir sobre ese contenido. Con GC habilitado,
+         el envoltorio permanece a cargo del registro del recolector. */
+#if !HABILITAR_GC
+      latM_liberar(mv, entrada->valor);
+#endif
+      latM_liberar(mv, entrada);
+    }
+    latL_destruir(mv, bucket);
   }
   latM_liberar(mv, dic->buckets);
   latM_liberar(mv, dic);
 }
 
 LATINO_API void latH_destruir(lat_mv *mv, hash_map *dic) {
+  if (dic == NULL || modulo_registrado(mv, dic)) return;
   size_t i;
   for (i = 0; i < dic->capacity; i++) {
     lista *list = dic->buckets[i];
